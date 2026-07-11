@@ -41,35 +41,41 @@ Hooks.once("ready", () => {
  * @param {HTMLElement|JQuery} element
  */
 function injectSheetButton(app, element) {
-  const actor = app?.actor ?? app?.document ?? null;
-  if (actor?.type !== "character") return;
+  try {
+    const actor = app?.actor ?? app?.document ?? null;
+    if (actor?.type !== "character") return;
 
-  const root = element instanceof HTMLElement ? element : element?.[0];
-  if (!root || root.querySelector(".acks-influence-btn")) return;
+    const root = element instanceof HTMLElement ? element : element?.[0];
+    if (!root || root.querySelector(".acks-influence-btn")) return;
 
-  const anchor = root.querySelector(".sheet-header .health-box") ?? root.querySelector(".sheet-header");
-  if (!anchor) return;
+    const anchor = root.querySelector(".sheet-header .health-box") ?? root.querySelector(".sheet-header");
+    if (!anchor) return;
 
-  const wrap = document.createElement("div");
-  wrap.className = "form-icon-btn";
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "plain icon fa-regular fa-comments acks-influence-btn";
-  btn.dataset.tooltip = game.i18n.localize("ACKS-INFLUENCE.button.tooltip");
-  btn.addEventListener("click", (ev) => {
-    ev.preventDefault();
-    ev.stopPropagation();
-    openInfluenceApp(actor);
-  });
-  wrap.appendChild(btn);
+    const wrap = document.createElement("div");
+    wrap.className = "form-icon-btn";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "plain icon fa-regular fa-comments acks-influence-btn";
+    btn.dataset.tooltip = game.i18n.localize("ACKS-INFLUENCE.button.tooltip");
+    btn.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      openInfluenceApp(actor);
+    });
+    wrap.appendChild(btn);
 
-  if (anchor.classList.contains("health-box")) anchor.insertAdjacentElement("afterend", wrap);
-  else anchor.appendChild(wrap);
+    if (anchor.classList.contains("health-box")) anchor.insertAdjacentElement("afterend", wrap);
+    else anchor.appendChild(wrap);
+  } catch (err) {
+    console.error(`${MODULE_ID} | failed to inject sheet button`, err);
+  }
 }
 
-// v13 ApplicationV2 fires render hooks for the whole class inheritance chain, so
-// the core class name (unmangled) is the robust anchor. The system-specific name
-// is registered too in case the build preserves it; injectSheetButton dedupes.
+// v13/v14 ApplicationV2 fires render hooks for the whole class inheritance chain.
+// We anchor on the base-class hooks (which fire regardless of the system sheet's
+// possibly-minified class name) plus the system-specific name. injectSheetButton
+// filters to character sheets and dedupes, so multiple firings are harmless.
+Hooks.on("renderApplicationV2", injectSheetButton);
 Hooks.on("renderActorSheetV2", injectSheetButton);
 Hooks.on("renderACKSCharacterSheetV2", injectSheetButton);
 
