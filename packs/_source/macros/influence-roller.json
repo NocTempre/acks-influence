@@ -4,7 +4,7 @@
   "type": "script",
   "img": "icons/svg/chat.svg",
   "scope": "global",
-  "command": "// Open the ACKS Influence roller for the selected/assigned actor.\nconst actor = canvas?.tokens?.controlled?.[0]?.actor ?? game.user?.character ?? null;\nconst mod = game.modules.get(\"acks-influence\");\nif (mod?.api?.open) mod.api.open(actor);\nelse ui.notifications.warn(\"The ACKS Influence & Reactions module is not active.\");",
+  "command": "// Open the ACKS Influence roller for the selected/assigned actor.\nconst actor = canvas?.tokens?.controlled?.[0]?.actor ?? game.user?.character ?? null;\nconst api = game.modules.get(\"acks-influence\")?.api ?? globalThis.acksInfluence;\nif (api?.open) api.open(actor);\nelse ui.notifications.error(\"ACKS Influence & Reactions module is not active/enabled.\");",
   "folder": null,
   "flags": {},
   "ownership": {
@@ -13,8 +13,8 @@
   "sort": 0,
   "_stats": {
     "systemId": "acks",
-    "createdTime": 1783747277834,
-    "modifiedTime": 1783747277834
+    "createdTime": 1783750666867,
+    "modifiedTime": 1783750666867
   },
   "_key": "!macros!acksInflMacro001"
 }

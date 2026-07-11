@@ -5,6 +5,7 @@
 
     <div class="influence-party" data-side="influencer"
          data-tooltip="{{localize 'ACKS-INFLUENCE.party.dropHint'}}">
+      <span class="influence-party-role">{{localize 'ACKS-INFLUENCE.party.characterRole'}}</span>
       <img class="influence-portrait" src="{{parties.influencer.img}}" alt="{{parties.influencer.name}}"/>
       <span class="influence-party-name">{{parties.influencer.name}}</span>
     </div>
@@ -27,6 +28,7 @@
 
     <div class="influence-party" data-side="target"
          data-tooltip="{{localize 'ACKS-INFLUENCE.party.dropHint'}}">
+      <span class="influence-party-role">{{localize 'ACKS-INFLUENCE.party.targetRole'}}</span>
       <img class="influence-portrait {{#unless hasTarget}}no-target{{/unless}}"
            src="{{parties.target.img}}" alt="{{parties.target.name}}"/>
       <span class="influence-party-name">{{parties.target.name}}</span>

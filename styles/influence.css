@@ -49,11 +49,18 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.influence-dialog .influence-party-role {
+  font-size: 0.7em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
 .influence-dialog .influence-party[data-side] {
   cursor: copy;
-  border: 1px dashed transparent;
+  border: 1px dashed var(--color-border-dark, rgba(122, 121, 113, 0.5));
   border-radius: 6px;
-  padding: 2px;
+  padding: 2px 4px;
 }
 .influence-dialog .influence-party.drop-hover {
   border-color: #c9a227;

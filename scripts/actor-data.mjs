@@ -7,11 +7,14 @@ import { HENCHMAN_MONTHLY_WAGE, INFLUENCE_MODIFIERS } from "./constants.mjs";
 
 const GENERIC_IMG = "icons/svg/mystery-man.svg";
 
-/** Classify a free-text alignment string into law / chaos / neutral. */
+/**
+ * Classify a free-text alignment by its (capitalized) first letter: L, N, or C.
+ * Anything else is treated as Neutral.
+ */
 export function classifyAlignment(value) {
-  const a = String(value ?? "").toLowerCase();
-  if (a.includes("law")) return "law";
-  if (a.includes("chaos") || a.includes("chaotic")) return "chaos";
+  const c = String(value ?? "").trim().charAt(0).toUpperCase();
+  if (c === "L") return "law";
+  if (c === "C") return "chaos";
   return "neutral";
 }
 
@@ -20,13 +23,17 @@ function abilityMod(actor, key) {
   return Number.isFinite(mod) ? mod : 0;
 }
 
-/** Diplomacy alignment modifier from the two parties' alignments (book rule). */
+/**
+ * Diplomacy alignment modifier: +1 when the two alignments match (same L/N/C),
+ * -1 when they are opposed (Law vs Chaos), 0 otherwise (a Neutral mixed with a
+ * non-matching alignment). Always overridable in the form.
+ */
 function alignmentModifier(charActor, targetActor) {
   if (!charActor || !targetActor) return 0;
   const c = classifyAlignment(charActor.system?.details?.alignment);
   const t = classifyAlignment(targetActor.system?.details?.alignment);
-  if (c === "law" && (t === "law" || t === "neutral")) return 1;
-  if ((c === "law" && t === "chaos") || (c === "chaos" && (t === "law" || t === "neutral"))) return -1;
+  if (c === t) return 1;
+  if ((c === "law" && t === "chaos") || (c === "chaos" && t === "law")) return -1;
   return 0;
 }
 

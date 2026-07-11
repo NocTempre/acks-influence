@@ -53,6 +53,9 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
 
     this.#actor = options.actor ?? null;
     this.#targetActor = options.targetActor ?? getTargetActor();
+    // Don't auto-fill the target with the influencer themselves (e.g. a
+    // self-targeted token) — keep the two sides distinct until set explicitly.
+    if (this.#targetActor && this.#targetActor === this.#actor) this.#targetActor = null;
 
     this.#profs = getProficiencies(this.#actor);
     this.#defaults = computeDefaults(this.#actor, this.#targetActor);

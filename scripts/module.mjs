@@ -8,16 +8,22 @@ function openInfluenceApp(actor = null) {
 }
 
 Hooks.once("init", () => {
-  // Preload templates so first render and chat cards are instant.
-  foundry.applications.handlebars.loadTemplates([
-    `modules/${MODULE_ID}/templates/influence.hbs`,
-    `modules/${MODULE_ID}/templates/influence-result.hbs`,
-  ]);
-
-  // Public API for macros / other modules.
+  // Public API for macros / other modules. Set this FIRST so nothing below can
+  // prevent it from being assigned.
+  const api = { open: openInfluenceApp, InfluenceApp };
   const module = game.modules.get(MODULE_ID);
-  if (module) {
-    module.api = { open: openInfluenceApp, InfluenceApp };
+  if (module) module.api = api;
+  // Also expose globally as a resilient fallback for macros.
+  globalThis.acksInfluence = api;
+
+  // Preload templates so first render and chat cards are instant (best-effort).
+  try {
+    foundry.applications.handlebars.loadTemplates([
+      `modules/${MODULE_ID}/templates/influence.hbs`,
+      `modules/${MODULE_ID}/templates/influence-result.hbs`,
+    ]);
+  } catch (err) {
+    console.warn(`${MODULE_ID} | template preload skipped`, err);
   }
 });
 

@@ -67,9 +67,9 @@ function proficiencyDoc(p) {
 
 const MACRO_COMMAND = `// Open the ACKS Influence roller for the selected/assigned actor.
 const actor = canvas?.tokens?.controlled?.[0]?.actor ?? game.user?.character ?? null;
-const mod = game.modules.get("acks-influence");
-if (mod?.api?.open) mod.api.open(actor);
-else ui.notifications.warn("The ACKS Influence & Reactions module is not active.");`;
+const api = game.modules.get("acks-influence")?.api ?? globalThis.acksInfluence;
+if (api?.open) api.open(actor);
+else ui.notifications.error("ACKS Influence & Reactions module is not active/enabled.");`;
 
 const MACROS = [
   {
