@@ -37,8 +37,18 @@ chat, and reads actor data through public paths only.
 - **Rich chat card.** Shows the roll, the **list of active modifiers**, the
   starting → ending attitude, the attitude shift and time cost, and a **Mystic
   Aura "bewitched"** note when a total of 12+ triggers the kicker.
+- **Screen-faithful layout.** Modifiers are laid out row-for-row in the order of
+  the Judges Journal GM screen, grouped by Both / Either / Character / Target.
+- **Drag to set the parties.** Drag any actor or token onto the left portrait to
+  set the influencer, or the right portrait to set the target; auto-populated
+  values (CHA, Will, alignment, proficiencies) refresh to the new actors.
+- **Bribes move gold.** The bribe row has a fee (gp) that auto-populates from the
+  target's HD via the Henchman Monthly Wage table — scaled by the bribe bonus and
+  Bribery proficiency — overridable and resettable. On a roll with a bribe, the
+  fee is transferred from the influencer's Gold to the target.
 - **Launch points:** an Influence button in the character-sheet header, the
-  `/influence` (or `/inf`) chat command, and a module API:
+  `/influence` (or `/inf`) chat command, a **macro** in the module's *Influence
+  Macros* compendium, and a module API:
   `game.modules.get("acks-influence").api.open(actor)`.
 
 ## Installation
@@ -88,7 +98,11 @@ onto a character to verify auto-detection and the situational toggles wire up
 correctly. Names match the ACKS system items, so detection behaves identically
 with the system's own compendium.
 
-To regenerate the pack after editing `tools/build-packs.mjs`:
+The module also ships an **Influence Macros** compendium with an *Influence
+Roller* macro that opens the tool for the selected token (or your assigned
+character) from anywhere — drag it to your hotbar.
+
+To regenerate the packs after editing `tools/build-packs.mjs`:
 
 ```
 npm install      # dev-only: pulls classic-level

@@ -49,6 +49,16 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.influence-dialog .influence-party[data-side] {
+  cursor: copy;
+  border: 1px dashed transparent;
+  border-radius: 6px;
+  padding: 2px;
+}
+.influence-dialog .influence-party.drop-hover {
+  border-color: #c9a227;
+  background: rgba(201, 162, 39, 0.12);
+}
 .influence-dialog .influence-ladder {
   flex: 1 1 auto;
 }
@@ -140,6 +150,15 @@
   font-weight: bold;
   color: var(--color-text-emphatic, #c9a227);
 }
+.influence-dialog .influence-gold {
+  max-width: 6rem;
+}
+.influence-dialog .influence-gp-suffix {
+  min-width: 2.2rem;
+  text-align: right;
+  font-weight: bold;
+  color: #d4af37;
+}
 
 /* Summary */
 .influence-dialog .influence-summary .influence-final {
@@ -196,6 +215,14 @@
 }
 .acks-influence.chat-card .influence-chat-bewitched i {
   color: #7a5cff;
+}
+.acks-influence.chat-card .influence-chat-bribe {
+  display: flex;
+  gap: 0.35rem;
+  align-items: baseline;
+}
+.acks-influence.chat-card .influence-chat-bribe i {
+  color: #d4af37;
 }
 .acks-influence.chat-card .influence-chat-mods summary {
   cursor: pointer;

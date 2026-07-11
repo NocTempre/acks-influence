@@ -25,6 +25,13 @@
     {{/if}}
   {{/if}}
 
+  {{#if bribePaid}}
+    <div class="influence-chat-bribe">
+      <i class="fa-solid fa-coins"></i>
+      <span><strong>Bribe:</strong> {{bribePaid.fee}} gp{{#if bribePaid.from}} from {{bribePaid.from}}{{/if}}{{#if bribePaid.to}} to {{bribePaid.to}}{{/if}}</span>
+    </div>
+  {{/if}}
+
   {{#if bewitched}}
     <div class="influence-chat-bewitched">
       <i class="fa-solid fa-wand-magic-sparkles"></i>

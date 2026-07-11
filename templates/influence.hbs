@@ -3,7 +3,8 @@
   {{!-- Parties + attitude tracker --}}
   <div class="influence-tracker">
 
-    <div class="influence-party">
+    <div class="influence-party" data-side="influencer"
+         data-tooltip="{{localize 'ACKS-INFLUENCE.party.dropHint'}}">
       <img class="influence-portrait" src="{{parties.influencer.img}}" alt="{{parties.influencer.name}}"/>
       <span class="influence-party-name">{{parties.influencer.name}}</span>
     </div>
@@ -24,7 +25,8 @@
       </div>
     </div>
 
-    <div class="influence-party">
+    <div class="influence-party" data-side="target"
+         data-tooltip="{{localize 'ACKS-INFLUENCE.party.dropHint'}}">
       <img class="influence-portrait {{#unless hasTarget}}no-target{{/unless}}"
            src="{{parties.target.img}}" alt="{{parties.target.name}}"/>
       <span class="influence-party-name">{{parties.target.name}}</span>
@@ -113,9 +115,13 @@
                 </select>
               {{else}}
                 <input type="number" name="mod.{{this.key}}" id="{{@root.partId}}-mod-{{this.key}}"
-                       value="{{this.value}}" data-dtype="Number"/>
+                       value="{{this.value}}" data-dtype="Number" class="{{#if this.isGold}}influence-gold{{/if}}"/>
               {{/if}}
-              <span class="influence-contribution">{{numberFormat this.contribution sign=true}}</span>
+              {{#if this.isGold}}
+                <span class="influence-gp-suffix">gp</span>
+              {{else}}
+                <span class="influence-contribution">{{numberFormat this.contribution sign=true}}</span>
+              {{/if}}
             </div>
           </div>
         {{/each}}

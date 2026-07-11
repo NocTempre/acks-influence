@@ -1,4 +1,4 @@
-/* global foundry, game, ChatMessage, CONST, Roll */
+/* global foundry, game, ChatMessage, CONST, Roll, fromUuid, ui */
 import {
   INFLUENCE_ATTITUDE_LABELS,
   INFLUENCE_BAND_LABELS,
@@ -12,7 +12,15 @@ import {
   INFLUENCE_TONE_CHOICES,
   MODULE_ID,
 } from "./constants.mjs";
-import { autoKeysByTone, computeDefaults, getProficiencies, getTargetActor, resolveParties } from "./actor-data.mjs";
+import {
+  autoKeysByTone,
+  computeDefaults,
+  getActorHD,
+  getProficiencies,
+  getTargetActor,
+  monthlyWageForHD,
+  resolveParties,
+} from "./actor-data.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -56,6 +64,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       attempt: 1,
       currentAttitude: 2, // Neutral
       gmAdjustment: 0, // generic GM catch-all bucket
+      bribeFeeOverridden: false, // true once the GM edits the bribe fee by hand
     };
 
     this.#recalculate();
@@ -103,9 +112,39 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
         return Number(value) || 0;
       case "factor":
         return mod.factor * (Number(value) || 0);
+      case "gold": // a gp amount (e.g. the bribe fee) — never modifies the roll
       default:
         return 0;
     }
+  }
+
+  /* -------------------------------------------- */
+  /*  Bribe fee                                   */
+  /* -------------------------------------------- */
+
+  /**
+   * Auto-computed bribe fee (gp) from the target's HD and the chosen bribe bonus:
+   * +1/+2/+3 = a day / week / month of pay (a week / month / year without the
+   * Bribery proficiency), where "a month" is the henchman wage for the target's HD.
+   */
+  #computeBribeFee() {
+    const diplo = this.#modifiers[INFLUENCE_TONE.DIPLOMACY];
+    const level = Number(diplo.bribe) || 0;
+    if (level <= 0) return 0;
+    const monthly = monthlyWageForHD(getActorHD(this.#targetActor));
+    const day = Math.round(monthly / 30);
+    const week = Math.round(monthly / 4);
+    const year = monthly * 12;
+    const units = this.#profs.bribery
+      ? { 1: day, 2: week, 3: monthly }
+      : { 1: week, 2: monthly, 3: year };
+    return units[level] ?? 0;
+  }
+
+  /** Refresh the auto bribe fee unless the GM has overridden it. */
+  #syncBribeFee() {
+    if (this.#system.bribeFeeOverridden) return;
+    this.#modifiers[INFLUENCE_TONE.DIPLOMACY].bribeFee = this.#computeBribeFee();
   }
 
   #relationshipModifier() {
@@ -124,6 +163,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   }
 
   #recalculate() {
+    this.#syncBribeFee();
     this.#subtotal = this.#computeSubtotal();
     this.#finalModifier = this.#subtotal + (Number(this.#system.gmAdjustment) || 0);
   }
@@ -182,12 +222,14 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
         mods: group.mods.map((mod) => {
           const value = values[mod.key];
           const isAuto = autoKeys.has(mod.key);
+          const isGold = mod.type === "gold";
           return {
             key: mod.key,
             label: mod.label,
             isCheck: mod.type === "check",
             isSelect: mod.type === "select",
             isNumber: mod.type === "signed" || mod.type === "factor",
+            isGold,
             value,
             checked: mod.type === "check" ? Boolean(value) : false,
             options:
@@ -196,7 +238,9 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
                 : null,
             contribution: this.#contribution(mod, value),
             isAuto,
-            isOverridden: isAuto && String(value) !== String(defaults[mod.key]),
+            isOverridden: isGold
+              ? this.#system.bribeFeeOverridden
+              : isAuto && String(value) !== String(defaults[mod.key]),
           };
         }),
       }));
@@ -261,6 +305,12 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       gmOverride = Number(data.gmAdjustment) || 0;
     }
 
+    // A hand-edited bribe fee (vs. the rendered auto value) latches an override.
+    const renderedBribeFee = Number(this.#modifiers[INFLUENCE_TONE.DIPLOMACY].bribeFee) || 0;
+    if (data.mod?.bribeFee !== undefined && Number(data.mod.bribeFee) !== renderedBribeFee) {
+      this.#system.bribeFeeOverridden = true;
+    }
+
     // Persist the currently-displayed tone's modifier values before switching tone.
     const previousTone = this.#system.tone;
     if (data.mod) {
@@ -307,8 +357,62 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     const tone = this.#system.tone;
     this.#modifiers[tone] = foundry.utils.deepClone(this.#defaults[tone]);
     this.#system.gmAdjustment = 0; // clear the GM bucket / total override
+    this.#system.bribeFeeOverridden = false; // re-detect the bribe fee
     this.#recalculate();
     this.render();
+  }
+
+  /* -------------------------------------------- */
+  /*  Drag & drop of actors/tokens onto a side    */
+  /* -------------------------------------------- */
+
+  /** @override */
+  _onRender(context, options) {
+    super._onRender?.(context, options);
+    for (const el of this.element.querySelectorAll(".influence-party[data-side]")) {
+      el.addEventListener("dragover", (ev) => {
+        ev.preventDefault();
+        el.classList.add("drop-hover");
+      });
+      el.addEventListener("dragleave", () => el.classList.remove("drop-hover"));
+      el.addEventListener("drop", (ev) => this.#onDropActor(ev, el.dataset.side));
+    }
+  }
+
+  async #onDropActor(event, side) {
+    event.preventDefault();
+    event.currentTarget?.classList?.remove("drop-hover");
+    let data;
+    try {
+      data = JSON.parse(event.dataTransfer.getData("text/plain"));
+    } catch {
+      return;
+    }
+    let actor = null;
+    if (data?.type === "Actor") actor = (await fromUuid(data.uuid)) ?? game.actors.get(data.id);
+    else if (data?.type === "Token") actor = (await fromUuid(data.uuid))?.actor ?? null;
+    if (!actor) return;
+
+    if (side === "target") this.#targetActor = actor;
+    else this.#actor = actor;
+    this.#refreshFromActors();
+    this.render();
+  }
+
+  /** Re-apply auto-populated values for the current influencer/target actors. */
+  #refreshFromActors() {
+    this.#profs = getProficiencies(this.#actor);
+    const newDefaults = computeDefaults(this.#actor, this.#targetActor);
+    for (const tone of Object.keys(this.#modifiers)) {
+      for (const group of INFLUENCE_MODIFIERS[tone]) {
+        for (const mod of group.mods) {
+          if (mod.auto && mod.auto !== "bribeFee") this.#modifiers[tone][mod.key] = newDefaults[tone][mod.key];
+        }
+      }
+    }
+    this.#defaults = newDefaults;
+    this.#system.bribeFeeOverridden = false; // re-detect fee for the new target
+    this.#recalculate();
   }
 
   /**
@@ -349,6 +453,53 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     }
   }
 
+  /* -------------------------------------------- */
+  /*  Bribe gold movement                         */
+  /* -------------------------------------------- */
+
+  async #maybePayBribe() {
+    if (this.#system.tone !== INFLUENCE_TONE.DIPLOMACY) return null;
+    const diplo = this.#modifiers[INFLUENCE_TONE.DIPLOMACY];
+    const level = Number(diplo.bribe) || 0;
+    const fee = Number(diplo.bribeFee) || 0;
+    if (level <= 0 || fee <= 0) return null;
+    return this.#moveBribeGold(fee);
+  }
+
+  async #moveBribeGold(fee) {
+    const from = this.#actor;
+    const to = this.#targetActor;
+    let deducted = false;
+    let credited = false;
+    try {
+      if (from?.isOwner) deducted = await this.#adjustGold(from, -fee);
+      if (to && to !== from && to.isOwner) credited = await this.#adjustGold(to, fee);
+    } catch (err) {
+      console.error(`${MODULE_ID} | bribe gold move failed`, err);
+    }
+    if (from && !deducted) {
+      ui.notifications?.warn(game.i18n.format("ACKS-INFLUENCE.bribe.noGold", { name: from.name }));
+    }
+    return { fee, from: deducted ? from?.name ?? null : null, to: credited ? to?.name ?? null : null };
+  }
+
+  /** Adjust an actor's Gold money item by `delta` gp (creating it on credit). */
+  async #adjustGold(actor, delta) {
+    const gold = actor.items.find((i) => i.type === "money" && /gold/i.test(i.name));
+    if (!gold) {
+      if (delta > 0) {
+        await actor.createEmbeddedDocuments("Item", [
+          { name: "Gold", type: "money", system: { quantity: delta } },
+        ]);
+        return true;
+      }
+      return false;
+    }
+    const current = Number(gold.system?.quantity) || 0;
+    await gold.update({ "system.quantity": Math.max(0, current + delta) });
+    return true;
+  }
+
   async #rollInfluence() {
     this.#recalculate();
 
@@ -377,8 +528,12 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     );
     const timeStep = INFLUENCE_TIME_STEPS.find((step) => step.value === this.#system.attempt);
 
+    // If a bribe was offered with a fee, move the gold now.
+    const bribePaid = await this.#maybePayBribe();
+
     const result = {
       toneLabel,
+      bribePaid,
       influencerName: this.#actor?.name ?? game.i18n.localize("ACKS-INFLUENCE.party.influencer"),
       targetName: this.#targetActor?.name ?? game.i18n.localize("ACKS-INFLUENCE.party.target"),
       isContinuing,

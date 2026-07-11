@@ -32,5 +32,8 @@
   "ACKS-INFLUENCE.auto.badge": "Auto-populated — you can override this value.",
 
   "ACKS-INFLUENCE.party.influencer": "Influencer",
-  "ACKS-INFLUENCE.party.target": "Target"
+  "ACKS-INFLUENCE.party.target": "Target",
+  "ACKS-INFLUENCE.party.dropHint": "Drag an actor or token here to set this side.",
+
+  "ACKS-INFLUENCE.bribe.noGold": "{name} has no Gold to pay the bribe."
 }

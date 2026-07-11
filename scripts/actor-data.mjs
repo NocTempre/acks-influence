@@ -3,7 +3,7 @@
  * Reads auto-populatable values from the influencing actor and the targeted
  * token's actor, using only public ACKS data paths (no system internals).
  */
-import { INFLUENCE_MODIFIERS } from "./constants.mjs";
+import { HENCHMAN_MONTHLY_WAGE, INFLUENCE_MODIFIERS } from "./constants.mjs";
 
 const GENERIC_IMG = "icons/svg/mystery-man.svg";
 
@@ -37,6 +37,7 @@ const PROFICIENCY_MATCHERS = Object.freeze({
   seduction: /^seduction$/i,
   mysticAura: /^mystic\s*aura$/i,
   performanceArt: /^(performance|art)\b/i,
+  bribery: /^bribery/i,
   // Situational proficiencies (offered only when present).
   beastFriendship: /^beast\s*friendship/i,
   animalHusbandry: /^animal\s*husbandry/i,
@@ -59,6 +60,26 @@ export function getProficiencies(actor) {
     }
   }
   return found;
+}
+
+/**
+ * The actor's HD (monsters) or class level (characters), used for the bribe fee.
+ * Parses monster `system.hp.hd` strings like "3d8", "1/2", "2+1".
+ */
+export function getActorHD(actor) {
+  if (!actor) return 0;
+  if (actor.type === "character") return Number(actor.system?.details?.level) || 0;
+  const hd = String(actor.system?.hp?.hd ?? "").trim();
+  const frac = hd.match(/^(\d+)\s*\/\s*(\d+)/);
+  if (frac) return Number(frac[1]) / Number(frac[2]);
+  const m = hd.match(/(\d+)/);
+  return m ? Number(m[1]) : 0;
+}
+
+/** Henchman monthly wage (gp) for a given HD/level, clamped to the table. */
+export function monthlyWageForHD(hd) {
+  const level = Math.max(0, Math.min(HENCHMAN_MONTHLY_WAGE.length - 1, Math.floor(Number(hd) || 0)));
+  return HENCHMAN_MONTHLY_WAGE[level];
 }
 
 /** The first currently-targeted token's actor, if any. */
