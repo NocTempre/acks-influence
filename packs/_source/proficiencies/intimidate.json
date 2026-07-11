@@ -1,0 +1,31 @@
+{
+  "_id": "acksInflIntimdte",
+  "name": "Intimidate",
+  "type": "ability",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "proficiencytype": "general",
+    "favorite": false,
+    "pattern": "white",
+    "requirements": "",
+    "roll": "",
+    "rollType": "result",
+    "rollTarget": 0,
+    "blindroll": false,
+    "description": "<p>The character knows how to bully others. He receives a +1 bonus on reaction rolls when threatening violence or dire consequences. The targets must be less than 5 HD, or the character and his allies must outnumber or grossly outrank the targets. Stacks with Mystic Aura, but not Diplomacy or Seduction.</p>",
+    "save": "",
+    "_schemaVersion": 3
+  },
+  "effects": [],
+  "flags": {},
+  "ownership": {
+    "default": 0
+  },
+  "sort": 0,
+  "_stats": {
+    "systemId": "acks",
+    "createdTime": 1783744176248,
+    "modifiedTime": 1783744176248
+  },
+  "_key": "!items!acksInflIntimdte"
+}

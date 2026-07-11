@@ -1,0 +1,49 @@
+<section class="acks-influence chat-card">
+
+  <header class="influence-chat-header">
+    <h3>{{toneLabel}}</h3>
+    <div class="influence-chat-parties">{{influencerName}} &rarr; {{targetName}}</div>
+  </header>
+
+  <div class="influence-chat-roll">
+    <span class="influence-chat-total">{{total}}</span>
+    <span class="influence-chat-formula">{{rollFormula}}</span>
+    <span class="influence-chat-dice">(dice {{diceResult}}, mod {{numberFormat modifier sign=true}})</span>
+  </div>
+
+  <div class="influence-chat-band"><strong>Reaction:</strong> {{bandLabel}}</div>
+
+  <div class="influence-chat-attitude">
+    <strong>Attitude:</strong>
+    {{startAttitude}} &rarr; <span class="influence-chat-new">{{resultAttitude}}</span>
+  </div>
+
+  {{#if isContinuing}}
+    <div class="influence-chat-shift">{{shiftDescription}}</div>
+    {{#if timeLabel}}
+      <div class="influence-chat-time"><strong>Time:</strong> {{timeLabel}}</div>
+    {{/if}}
+  {{/if}}
+
+  {{#if bewitched}}
+    <div class="influence-chat-bewitched">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      <span><strong>Mystic Aura:</strong> total is 12+ — the subject acts <strong>bewitched</strong>
+      while in the character's presence.</span>
+    </div>
+  {{/if}}
+
+  {{#if activeModifiers.length}}
+    <details class="influence-chat-mods" open>
+      <summary>Active modifiers ({{activeModifiers.length}})</summary>
+      <ul>
+        {{#each activeModifiers}}
+          <li><span class="mod-val">{{numberFormat this.value sign=true}}</span> {{this.label}}</li>
+        {{/each}}
+      </ul>
+    </details>
+  {{else}}
+    <div class="influence-chat-mods-none">No modifiers applied.</div>
+  {{/if}}
+
+</section>

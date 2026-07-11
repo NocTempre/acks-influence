@@ -1,0 +1,36 @@
+{
+  "ACKS-INFLUENCE.app.title": "Influence",
+  "ACKS-INFLUENCE.button.tooltip": "Roll Influence",
+
+  "ACKS-INFLUENCE.tone.diplomacy": "Diplomacy",
+  "ACKS-INFLUENCE.tone.intimidation": "Intimidation",
+  "ACKS-INFLUENCE.tone.seduction": "Seduction",
+
+  "ACKS-INFLUENCE.mode.initial": "Initial reaction",
+  "ACKS-INFLUENCE.mode.continuing": "Attempt to influence",
+
+  "ACKS-INFLUENCE.section.interaction": "Interaction",
+
+  "ACKS-INFLUENCE.field.tone": "Tone",
+  "ACKS-INFLUENCE.field.mode": "Roll type",
+  "ACKS-INFLUENCE.field.currentAttitude": "Current attitude",
+  "ACKS-INFLUENCE.field.attempt": "Attempt (time cost)",
+  "ACKS-INFLUENCE.field.subtotal": "Modifier subtotal",
+  "ACKS-INFLUENCE.field.gmAdjustment": "GM adjustment",
+  "ACKS-INFLUENCE.field.gmAdjustmentHint": "Generic catch-all bucket added to the total (e.g. Bargaining, Command, or any situational bonus not listed).",
+  "ACKS-INFLUENCE.field.finalModifier": "Final Modifier",
+  "ACKS-INFLUENCE.field.finalModifierHint": "The total applied to the roll. You can type over it to override; the difference is stored as a GM adjustment. Use Reset to defaults to clear it.",
+  "ACKS-INFLUENCE.field.timeCost": "Time cost",
+
+  "ACKS-INFLUENCE.tracker.relationship": "Relationship modifier",
+
+  "ACKS-INFLUENCE.action.roll": "Roll 2d6",
+  "ACKS-INFLUENCE.action.reset": "Reset to defaults",
+  "ACKS-INFLUENCE.action.resetHint": "Re-detect Charisma, Will, alignment and proficiencies from the character and current target, discarding manual overrides for this tone.",
+
+  "ACKS-INFLUENCE.auto.legend": "Auto-populated from character/target",
+  "ACKS-INFLUENCE.auto.badge": "Auto-populated — you can override this value.",
+
+  "ACKS-INFLUENCE.party.influencer": "Influencer",
+  "ACKS-INFLUENCE.party.target": "Target"
+}

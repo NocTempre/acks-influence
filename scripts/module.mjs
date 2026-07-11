@@ -1,0 +1,83 @@
+/* global Hooks, game, foundry, canvas */
+import InfluenceApp from "./influence-app.mjs";
+import { MODULE_ID } from "./constants.mjs";
+
+/** Open the influence roller for a given actor (or standalone if none). */
+function openInfluenceApp(actor = null) {
+  return new InfluenceApp({ actor }).render(true);
+}
+
+Hooks.once("init", () => {
+  // Preload templates so first render and chat cards are instant.
+  foundry.applications.handlebars.loadTemplates([
+    `modules/${MODULE_ID}/templates/influence.hbs`,
+    `modules/${MODULE_ID}/templates/influence-result.hbs`,
+  ]);
+
+  // Public API for macros / other modules.
+  const module = game.modules.get(MODULE_ID);
+  if (module) {
+    module.api = { open: openInfluenceApp, InfluenceApp };
+  }
+});
+
+Hooks.once("ready", () => {
+  if (game.system?.id !== "acks") {
+    console.warn(`${MODULE_ID} | Active system is not "acks"; the character-sheet button may not appear.`);
+  }
+});
+
+/**
+ * Inject an "Influence" button into the ACKS character sheet header, styled to
+ * match the system's existing header icon buttons. Fails gracefully if the
+ * header structure changes.
+ * @param {foundry.applications.api.ApplicationV2} app
+ * @param {HTMLElement|JQuery} element
+ */
+function injectSheetButton(app, element) {
+  const actor = app?.actor ?? app?.document ?? null;
+  if (actor?.type !== "character") return;
+
+  const root = element instanceof HTMLElement ? element : element?.[0];
+  if (!root || root.querySelector(".acks-influence-btn")) return;
+
+  const anchor = root.querySelector(".sheet-header .health-box") ?? root.querySelector(".sheet-header");
+  if (!anchor) return;
+
+  const wrap = document.createElement("div");
+  wrap.className = "form-icon-btn";
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "plain icon fa-regular fa-comments acks-influence-btn";
+  btn.dataset.tooltip = game.i18n.localize("ACKS-INFLUENCE.button.tooltip");
+  btn.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    openInfluenceApp(actor);
+  });
+  wrap.appendChild(btn);
+
+  if (anchor.classList.contains("health-box")) anchor.insertAdjacentElement("afterend", wrap);
+  else anchor.appendChild(wrap);
+}
+
+// v13 ApplicationV2 fires render hooks for the whole class inheritance chain, so
+// the core class name (unmangled) is the robust anchor. The system-specific name
+// is registered too in case the build preserves it; injectSheetButton dedupes.
+Hooks.on("renderActorSheetV2", injectSheetButton);
+Hooks.on("renderACKSCharacterSheetV2", injectSheetButton);
+
+/**
+ * Support the `/influence` chat command. Returning false prevents the message
+ * from being created as normal chat.
+ */
+Hooks.on("chatMessage", (_chatLog, message) => {
+  const command = message.trim().toLowerCase();
+  if (command !== "/influence" && command !== "/inf") return true;
+
+  // Prefer a controlled token's actor, then the user's assigned character.
+  const controlled = canvas?.tokens?.controlled?.[0]?.actor ?? null;
+  const actor = controlled ?? game.user?.character ?? null;
+  openInfluenceApp(actor);
+  return false;
+});

@@ -1,0 +1,31 @@
+{
+  "_id": "acksInflSeductn0",
+  "name": "Seduction",
+  "type": "ability",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "proficiencytype": "general",
+    "favorite": false,
+    "pattern": "white",
+    "requirements": "",
+    "roll": "",
+    "rollType": "result",
+    "rollTarget": 0,
+    "blindroll": false,
+    "description": "<p>The character is naturally alluring or a practiced seducer. He receives a +1 bonus on reaction rolls when interacting with others potentially attracted to him. Stacks with Mystic Aura, but not Diplomacy or Intimidation.</p>",
+    "save": "",
+    "_schemaVersion": 3
+  },
+  "effects": [],
+  "flags": {},
+  "ownership": {
+    "default": 0
+  },
+  "sort": 0,
+  "_stats": {
+    "systemId": "acks",
+    "createdTime": 1783744176248,
+    "modifiedTime": 1783744176248
+  },
+  "_key": "!items!acksInflSeductn0"
+}

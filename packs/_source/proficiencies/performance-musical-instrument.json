@@ -1,0 +1,31 @@
+{
+  "_id": "acksInflPerformM",
+  "name": "Performance: Musical Instrument",
+  "type": "ability",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "proficiencytype": "general",
+    "favorite": false,
+    "pattern": "white",
+    "requirements": "",
+    "roll": "",
+    "rollType": "result",
+    "rollTarget": 0,
+    "blindroll": false,
+    "description": "<p>The character is a skilled performer. A demonstrated Performance or Art proficiency grants a +1 bonus when using Seduction with Mystic Aura or Seduction proficiency.</p>",
+    "save": "",
+    "_schemaVersion": 3
+  },
+  "effects": [],
+  "flags": {},
+  "ownership": {
+    "default": 0
+  },
+  "sort": 0,
+  "_stats": {
+    "systemId": "acks",
+    "createdTime": 1783744176248,
+    "modifiedTime": 1783744176248
+  },
+  "_key": "!items!acksInflPerformM"
+}

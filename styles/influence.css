@@ -1,0 +1,228 @@
+/* ACKS II — Influence & Reactions module styles */
+
+.influence-dialog .influence-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.influence-dialog fieldset {
+  border-radius: 4px;
+  padding: 0.4rem;
+}
+.influence-dialog fieldset legend {
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+/* Parties + attitude tracker */
+.influence-dialog .influence-tracker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.influence-dialog .influence-party {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 0 0 88px;
+}
+.influence-dialog .influence-portrait {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border: 2px solid var(--color-border-dark, #7a7971);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.15);
+}
+.influence-dialog .influence-portrait.no-target {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+}
+.influence-dialog .influence-party-name {
+  font-weight: bold;
+  text-align: center;
+  max-width: 88px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.influence-dialog .influence-ladder {
+  flex: 1 1 auto;
+}
+.influence-dialog .influence-ladder-rungs {
+  display: flex;
+  gap: 2px;
+}
+.influence-dialog .influence-rung {
+  flex: 1 1 0;
+  padding: 0.35rem 0.15rem;
+  border: 1px solid var(--color-border-dark, #7a7971);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.08);
+  color: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+  line-height: 1.1;
+}
+.influence-dialog .influence-rung:hover {
+  border-color: #c9a227;
+}
+.influence-dialog .influence-rung.active {
+  background: #c9a227;
+  color: #1b1b1b;
+  font-weight: bold;
+  box-shadow: 0 0 6px rgba(201, 162, 39, 0.7);
+}
+.influence-dialog .influence-ladder-hint {
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* Toolbar (reset + legend) */
+.influence-dialog .influence-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.influence-dialog .influence-reset {
+  flex: 0 0 auto;
+  width: auto;
+}
+.influence-dialog .influence-auto-legend {
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+.influence-dialog .influence-auto-badge {
+  margin-left: 0.25rem;
+  color: #7a5cff;
+  opacity: 0.85;
+  font-size: 0.85em;
+}
+
+/* Modifier groups */
+.influence-dialog .influence-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 0.25rem;
+}
+.influence-dialog .influence-group {
+  min-width: 0;
+}
+.influence-dialog .influence-mod {
+  align-items: center;
+  gap: 0.35rem;
+}
+.influence-dialog .influence-mod.overridden {
+  background: rgba(122, 92, 255, 0.08);
+  border-radius: 3px;
+}
+.influence-dialog .influence-mod label {
+  font-size: 0.95em;
+}
+.influence-dialog .influence-mod-field {
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  flex: 0 0 auto;
+}
+.influence-dialog .influence-mod-field input[type="number"],
+.influence-dialog .influence-mod-field select {
+  max-width: 8rem;
+  min-width: 3rem;
+}
+.influence-dialog .influence-contribution {
+  min-width: 2.2rem;
+  text-align: right;
+  font-weight: bold;
+  color: var(--color-text-emphatic, #c9a227);
+}
+
+/* Summary */
+.influence-dialog .influence-summary .influence-final {
+  font-size: 1.2rem;
+  font-weight: bold;
+  max-width: 5rem;
+}
+.influence-dialog .influence-time-note {
+  margin-top: 4px;
+}
+
+/* Chat card */
+.acks-influence.chat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.35rem 0.15rem;
+}
+.acks-influence.chat-card .influence-chat-header h3 {
+  margin: 0;
+  border: none;
+}
+.acks-influence.chat-card .influence-chat-parties {
+  font-size: 0.9em;
+  opacity: 0.85;
+}
+.acks-influence.chat-card .influence-chat-roll {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.acks-influence.chat-card .influence-chat-total {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+.acks-influence.chat-card .influence-chat-formula,
+.acks-influence.chat-card .influence-chat-dice {
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+.acks-influence.chat-card .influence-chat-new {
+  font-weight: bold;
+  color: #c9a227;
+}
+.acks-influence.chat-card .influence-chat-bewitched {
+  display: flex;
+  gap: 0.35rem;
+  align-items: baseline;
+  padding: 0.3rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(122, 92, 255, 0.12);
+  border: 1px solid rgba(122, 92, 255, 0.4);
+}
+.acks-influence.chat-card .influence-chat-bewitched i {
+  color: #7a5cff;
+}
+.acks-influence.chat-card .influence-chat-mods summary {
+  cursor: pointer;
+  font-size: 0.9em;
+  opacity: 0.85;
+}
+.acks-influence.chat-card .influence-chat-mods ul {
+  margin: 0.25rem 0 0;
+  padding-left: 0.5rem;
+  list-style: none;
+}
+.acks-influence.chat-card .influence-chat-mods li {
+  font-size: 0.9em;
+  line-height: 1.35;
+}
+.acks-influence.chat-card .influence-chat-mods .mod-val {
+  display: inline-block;
+  min-width: 2.1rem;
+  font-weight: bold;
+  color: #c9a227;
+}
+.acks-influence.chat-card .influence-chat-mods-none {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+/* Summary row */
+.influence-dialog .influence-summary .influence-subtotal:disabled {
+  opacity: 0.8;
+}

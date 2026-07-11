@@ -1,0 +1,54 @@
+{
+  "id": "acks-influence",
+  "title": "ACKS II — Influence & Reactions",
+  "description": "Adds a reaction/influence roller for the three ACKS II influence tones (Diplomacy, Intimidation, Seduction). Augments the ACKS system without modifying it: a character-sheet button, an /influence chat command, and a tone-aware 2d6 roller with an attitude tracker, time-to-influence, and auto-populated (and overridable) modifiers.",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13.351"
+  },
+  "authors": [
+    {
+      "name": "NocTempre"
+    }
+  ],
+  "esmodules": ["scripts/module.mjs"],
+  "styles": ["styles/influence.css"],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "packs": [
+    {
+      "name": "proficiencies",
+      "label": "Influence Proficiencies (Test)",
+      "path": "packs/proficiencies",
+      "type": "Item",
+      "system": "acks",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    }
+  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "acks",
+        "type": "system",
+        "compatibility": {
+          "minimum": "13"
+        }
+      }
+    ]
+  },
+  "url": "https://github.com/NocTempre/acks-influence",
+  "flags": {
+    "acks-influence": {
+      "influenceApp": true
+    }
+  }
+}

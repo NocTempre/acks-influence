@@ -1,0 +1,6 @@
+# Dev tooling only — the module itself needs none of this at runtime.
+node_modules/
+package-lock.json
+
+# NOTE: do NOT ignore *.log — the compiled LevelDB pack in packs/proficiencies/
+# stores its data in .log files and must be committed/shipped.
