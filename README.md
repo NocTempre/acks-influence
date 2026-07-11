@@ -41,7 +41,34 @@ chat, and reads actor data through public paths only.
   `/influence` (or `/inf`) chat command, and a module API:
   `game.modules.get("acks-influence").api.open(actor)`.
 
-## Installation (development)
+## Installation
+
+### From GitHub (manifest URL)
+
+In Foundry: **Add-on Modules → Install Module**, and paste this manifest URL:
+
+```
+https://github.com/NocTempre/acks-influence/releases/latest/download/module.json
+```
+
+This resolves to the assets of the newest GitHub **release**, so a release must
+exist first (see below). Foundry uses the same URL to detect and install updates.
+
+### Cutting a release
+
+Releases are produced automatically by [`.github/workflows/release.yml`](.github/workflows/release.yml)
+when you push a version tag whose number matches `module.json`:
+
+```
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The workflow rebuilds the compendium, packages `module.zip` (module code +
+templates + styles + lang + the compiled pack + docs, excluding dev tooling),
+and attaches `module.json` and `module.zip` to the release.
+
+### Local development
 
 Copy or symlink this folder into your Foundry data `Data/modules/` directory as
 `acks-influence`, then enable it in a world running the ACKS system.
