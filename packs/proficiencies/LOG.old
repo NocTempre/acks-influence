@@ -1,5 +1,5 @@
-2026/07/12-12:47:24.474 ef48 Delete type=3 #1
-2026/07/12-12:47:24.506 f574 Level-0 table #5: started
-2026/07/12-12:47:24.514 f574 Level-0 table #5: 6008 bytes OK
-2026/07/12-12:47:24.516 f574 Delete type=0 #3
-2026/07/12-12:47:24.517 f574 Manual compaction at level-0 from '!items!acksInflAncPacts' @ 72057594037927935 : 1 .. '!items.effects!acksInflPresence.acksInflEffPresc' @ 0 : 0; will stop at (end)
+2026/07/12-13:28:24.761 10698 Delete type=3 #1
+2026/07/12-13:28:24.787 cd34 Level-0 table #5: started
+2026/07/12-13:28:24.791 cd34 Level-0 table #5: 5854 bytes OK
+2026/07/12-13:28:24.792 cd34 Delete type=0 #3
+2026/07/12-13:28:24.793 cd34 Manual compaction at level-0 from '!items!acksInflAncPacts' @ 72057594037927935 : 1 .. '!items.effects!acksInflGlamAura.acksInflEffGlmAu' @ 0 : 0; will stop at (end)

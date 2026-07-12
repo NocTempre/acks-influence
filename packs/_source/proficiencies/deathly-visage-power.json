@@ -13,7 +13,7 @@
     "rollType": "result",
     "rollTarget": 0,
     "blindroll": false,
-    "description": "<p>The character suffers a -2 on reaction rolls versus non-Chaotic beings and enjoys +2 to reaction rolls with Chaotic beings. (Enable this effect when facing Chaotic beings; use the GM adjustment for the -2 versus non-Chaotic.)</p>",
+    "description": "<p>The character suffers a -2 on reaction rolls versus non-Chaotic beings and enjoys +2 to reaction rolls with Chaotic beings. The sign follows the target's alignment automatically.</p>",
     "save": "",
     "_schemaVersion": 3
   },
@@ -21,7 +21,7 @@
     {
       "_id": "acksInflEffDthVs",
       "_key": "!items.effects!acksInflDthVisag.acksInflEffDthVs",
-      "name": "Deathly Visage — vs Chaotic (reaction)",
+      "name": "Deathly Visage (reaction)",
       "type": "base",
       "img": "icons/svg/aura.svg",
       "system": {},
@@ -53,13 +53,14 @@
         "acks-influence": {
           "situational": true,
           "tone": "all",
-          "label": "Deathly Visage — vs Chaotic beings (+2)"
+          "label": "Deathly Visage (±2 by target alignment)",
+          "alignmentSign": "chaos"
         }
       },
       "_stats": {
         "systemId": "acks",
-        "createdTime": 1783874844350,
-        "modifiedTime": 1783874844350
+        "createdTime": 1783877304694,
+        "modifiedTime": 1783877304694
       }
     }
   ],
@@ -70,7 +71,7 @@
   "sort": 0,
   "_stats": {
     "systemId": "acks",
-    "createdTime": 1783874844350,
-    "modifiedTime": 1783874844350
+    "createdTime": 1783877304694,
+    "modifiedTime": 1783877304694
   }
 }

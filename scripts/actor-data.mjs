@@ -115,16 +115,23 @@ export function resolveParties(actor, targetActor) {
   return { influencer, target };
 }
 
+/** The four hardcoded core proficiencies a power may stand in for (`actsAs`). */
+const CORE_PROFS = ["diplomacy", "intimidation", "seduction", "mysticAura"];
+
 /**
  * Compute the raw context values used to resolve every `auto` modifier source.
+ * A power that `actsAs` a core proficiency makes that proficiency count as present.
  */
 function buildContext(actor, targetActor) {
+  const profs = { ...getProficiencies(actor) };
+  const actsAs = getActsAsPowers(actor);
+  for (const k of CORE_PROFS) if (actsAs[k]) profs[k] = true;
   return {
     cha: actor ? abilityMod(actor, "cha") : 0,
     targetWill: targetActor ? abilityMod(targetActor, "wis") : 0,
     alignment: alignmentModifier(actor, targetActor),
     levelGap: levelGapModifier(actor, targetActor),
-    profs: getProficiencies(actor),
+    profs,
   };
 }
 
@@ -195,7 +202,8 @@ export function getEffectReactionMods(actor) {
     const f = effect.flags?.[MODULE_ID] ?? {};
     let ci = 0;
     for (const change of effect.changes ?? []) {
-      if (change.key === REACTION_CHANGE_KEY) {
+      // Effects that stand in for a core proficiency are handled by getActsAsPowers.
+      if (change.key === REACTION_CHANGE_KEY && !f.actsAs) {
         const value = Number(change.value) || 0;
         if (value) {
           // `tone` may be "all", a single tone, an array, or a comma-separated list.
@@ -209,6 +217,8 @@ export function getEffectReactionMods(actor) {
             value,
             situational: f.situational !== false,
             tones: tones.length ? tones : ["all"],
+            bewitched: f.bewitched === true,
+            alignmentSign: f.alignmentSign ? String(f.alignmentSign).toLowerCase() : null,
           });
         }
       }
@@ -217,6 +227,26 @@ export function getEffectReactionMods(actor) {
     idx++;
   }
   return out;
+}
+
+/**
+ * Powers whose effect declares `flags.acks-influence.actsAs: <coreProf>` — a
+ * proficiency granted as a class power (non-stacking). Returns a map of core
+ * proficiency key → display label, used to fill in / relabel that prof's box.
+ * @returns {Record<string, string>}
+ */
+export function getActsAsPowers(actor) {
+  const map = {};
+  if (!actor) return map;
+  const effects = actor.appliedEffects ?? actor.effects ?? [];
+  for (const effect of effects) {
+    if (effect.disabled) continue;
+    const f = effect.flags?.[MODULE_ID];
+    if (!f?.actsAs) continue;
+    const key = String(f.actsAs);
+    if (!map[key]) map[key] = f.label || effect.name || key;
+  }
+  return map;
 }
 
 /** The set of modifier keys (per tone) that are auto-populated, for UI badges. */

@@ -1,5 +1,5 @@
-2026/07/12-12:47:24.549 dd28 Delete type=3 #1
-2026/07/12-12:47:24.561 f574 Level-0 table #5: started
-2026/07/12-12:47:24.565 f574 Level-0 table #5: 772 bytes OK
-2026/07/12-12:47:24.570 f574 Delete type=0 #3
-2026/07/12-12:47:24.571 f574 Manual compaction at level-0 from '!macros!acksInflMacro001' @ 72057594037927935 : 1 .. '!macros!acksInflMacro001' @ 0 : 0; will stop at (end)
+2026/07/12-13:28:24.820 c510 Delete type=3 #1
+2026/07/12-13:28:24.824 cd34 Level-0 table #5: started
+2026/07/12-13:28:24.828 cd34 Level-0 table #5: 772 bytes OK
+2026/07/12-13:28:24.829 cd34 Delete type=0 #3
+2026/07/12-13:28:24.830 cd34 Manual compaction at level-0 from '!macros!acksInflMacro001' @ 72057594037927935 : 1 .. '!macros!acksInflMacro001' @ 0 : 0; will stop at (end)

@@ -13,7 +13,7 @@
     "rollType": "result",
     "rollTarget": 0,
     "blindroll": false,
-    "description": "<p>While active, the character's magical glamour grants a +1 bonus to all reaction rolls and ignores reaction penalties from permanent wounds or side effects. Does not stack with Mystic Aura.</p>",
+    "description": "<p>While active, the character's magical glamour grants a +1 bonus to all reaction rolls and ignores reaction penalties from permanent wounds. Does not stack with Mystic Aura — under the hood it IS Mystic Aura as a power.</p>",
     "save": "",
     "_schemaVersion": 3
   },
@@ -21,7 +21,7 @@
     {
       "_id": "acksInflEffBdzGl",
       "_key": "!items.effects!acksInflBedazzle.acksInflEffBdzGl",
-      "name": "Bedazzling Glamour (reaction)",
+      "name": "Bedazzling Glamour (Mystic Aura)",
       "type": "base",
       "img": "icons/svg/aura.svg",
       "system": {},
@@ -53,13 +53,14 @@
         "acks-influence": {
           "situational": false,
           "tone": "all",
-          "label": "Bedazzling Glamour (+1)"
+          "label": "Bedazzling Glamour",
+          "actsAs": "mysticAura"
         }
       },
       "_stats": {
         "systemId": "acks",
-        "createdTime": 1783874844350,
-        "modifiedTime": 1783874844350
+        "createdTime": 1783877304694,
+        "modifiedTime": 1783877304694
       }
     }
   ],
@@ -70,7 +71,7 @@
   "sort": 0,
   "_stats": {
     "systemId": "acks",
-    "createdTime": 1783874844350,
-    "modifiedTime": 1783874844350
+    "createdTime": 1783877304694,
+    "modifiedTime": 1783877304694
   }
 }

@@ -12,8 +12,10 @@ import {
 } from "./constants.mjs";
 import {
   autoKeysByTone,
+  classifyAlignment,
   computeDefaults,
   getActorHD,
+  getActsAsPowers,
   getEffectReactionMods,
   getProficiencies,
   getTargetActor,
@@ -113,6 +115,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
    */
   #buildModConfig() {
     const effectMods = getEffectReactionMods(this.#actor);
+    const targetAlign = classifyAlignment(this.#targetActor?.system?.details?.alignment);
     const config = {};
     for (const tone of Object.values(INFLUENCE_TONE)) {
       const groups = INFLUENCE_MODIFIERS[tone].map((g) => ({ group: g.group, mods: g.mods }));
@@ -120,14 +123,21 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       if (forTone.length) {
         groups.push({
           group: "ACKS-INFLUENCE.group.powers",
-          mods: forTone.map((m) => ({
-            key: m.id,
-            type: "check",
-            label: m.label,
-            value: m.value,
-            default: !m.situational,
-            fromEffect: true,
-          })),
+          mods: forTone.map((m) => {
+            // Alignment-signed effects flip sign by the target's alignment.
+            const value = m.alignmentSign
+              ? (targetAlign === m.alignmentSign ? 1 : -1) * Math.abs(m.value)
+              : m.value;
+            return {
+              key: m.id,
+              type: "check",
+              label: m.label,
+              value,
+              default: !m.situational,
+              fromEffect: true,
+              bewitched: m.bewitched === true,
+            };
+          }),
         });
       }
       config[tone] = groups;
@@ -226,9 +236,19 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     return list;
   }
 
-  /** Is Mystic Aura an active contributor for the current tone? */
-  #mysticAuraActive() {
-    return Boolean(this.#modifiers[this.#system.tone]?.mysticAura);
+  /**
+   * Whether a "bewitched at 12+" source is active: the Mystic Aura box (which a
+   * power may fill), or any contributing effect flagged `bewitched`.
+   */
+  #bewitchedActive() {
+    const values = this.#modifiers[this.#system.tone];
+    if (values?.mysticAura) return true;
+    for (const group of this.#modConfig[this.#system.tone]) {
+      for (const mod of group.mods) {
+        if (mod.bewitched && this.#contribution(mod, values[mod.key]) !== 0) return true;
+      }
+    }
+    return false;
   }
 
   /* -------------------------------------------- */
@@ -251,6 +271,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     const defaults = this.#defaults[tone];
     const autoKeys = this.#autoKeys[tone];
     const profs = getProficiencies(this.#actor);
+    const actsAs = getActsAsPowers(this.#actor);
     const L = (s) => game.i18n.localize(s);
     return this.#modConfig[tone].map((group) => ({
       group: L(group.group),
@@ -258,18 +279,23 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
         const value = values[mod.key];
         const isAuto = autoKeys.has(mod.key);
         const isGold = mod.type === "gold";
+        // A power that acts as a core prof (and the base prof is absent) relabels
+        // that prof's checkbox with the power's name and borrows its mechanic.
+        const profKey = mod.auto?.startsWith("prof:") ? mod.auto.slice(5) : null;
+        const isActsAs = Boolean(profKey && actsAs[profKey] && !profs[profKey]);
+        const label = isActsAs ? actsAs[profKey] : L(mod.label);
         // A value computed from a proficiency the character has (e.g. Bribery
         // scaling the bribe fee) is flagged so it gets the proficiency badge.
         const isProfModified = Boolean(mod.profModifier && profs[mod.profModifier]);
         return {
           key: mod.key,
           // Effect-granted labels are literal text; localize() passes them through.
-          label: L(mod.label),
+          label,
           isCheck: mod.type === "check",
           isSelect: mod.type === "select",
           isNumber: mod.type === "signed" || mod.type === "factor",
           isGold,
-          isEffect: Boolean(mod.fromEffect) || isProfModified,
+          isEffect: Boolean(mod.fromEffect) || isProfModified || isActsAs,
           value,
           checked: mod.type === "check" ? Boolean(value) : false,
           options:
@@ -543,7 +569,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
 
     // Capture the active modifiers before the roll (state is unchanged by rolling).
     const activeModifiers = this.#activeModifiers();
-    const mysticAuraActive = this.#mysticAuraActive();
+    const bewitchedActive = this.#bewitchedActive();
 
     const modifier = this.#finalModifier;
     const roll = new Roll(`2d6 + (${modifier})`);
@@ -585,8 +611,8 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       startAttitude: game.i18n.localize(labels[startIndex]),
       resultAttitude: game.i18n.localize(labels[newIndex]),
       shiftDescription: isContinuing ? this.#shiftDescription(band) : null,
-      // Mystic Aura kicker: a +1 that brings the total to 12+ bewitches the subject.
-      bewitched: mysticAuraActive && total >= 12,
+      // Mystic Aura / aura-power kicker: a total of 12+ bewitches the subject.
+      bewitched: bewitchedActive && total >= 12,
       attempt: this.#system.attempt,
       timeLabel: isContinuing && timeStep ? game.i18n.localize(timeStep.label) : null,
     };

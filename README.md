@@ -137,10 +137,24 @@ Then, on the effect's flags (`flags.acks-influence`), you may set:
   `diplomacy,intimidation`). Default `all`. The bonus is only offered — and only
   appears in the roller — for its matching tone(s).
 - `label` (string, optional) — display label; defaults to the effect's name.
+- `bewitched` (boolean) — if the roll's **total reaches 12+** while this effect is
+  active, the chat card notes the subject is **bewitched/charmed** (like Mystic
+  Aura). E.g. Command of Voice, Glamorous Aura.
+- `alignmentSign` (`law` | `chaos` | `neutral`) — the bonus is **+value when the
+  target's alignment matches**, **−value otherwise**. E.g. Deathly Visage (+2 vs
+  Chaotic, −2 vs non-Chaotic).
+- `actsAs` (`diplomacy` | `intimidation` | `seduction` | `mysticAura`) — the power
+  **is** that core proficiency under the hood (non-stacking). If the character
+  lacks the base proficiency, the power **replaces that proficiency's checkbox
+  name** in the roller and borrows its hardcoded mechanic (including the Mystic
+  Aura bewitched kicker). If they already have the base proficiency, the power is
+  redundant and doesn't double up. E.g. Glamorous Aura, Bedazzling Glamour.
 
-The roller lists all such effects under a **Proficiencies & Powers** group
-(badged 🖐). The module's test compendium ships four examples: Beast Friendship,
-Animal Husbandry, Folkways, and a non-situational *Steely Presence* class power.
+The roller lists non-`actsAs` effects under a **Proficiencies & Powers** group
+(badged 🖐). The test compendium ships examples: Beast Friendship, Animal
+Husbandry, Folkways (situational, tone-scoped), plus class powers — Command of
+Voice, Bedazzling Glamour, Glamorous Aura, Ancient Pacts, and Deathly Visage —
+demonstrating `bewitched`, `alignmentSign`, and `actsAs`.
 
 > Note: bonuses are read from **effects on the owned item/actor**, so a system or
 > homebrew proficiency only contributes if it carries such an effect — the

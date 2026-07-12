@@ -13,7 +13,7 @@
     "rollType": "result",
     "rollTarget": 0,
     "blindroll": false,
-    "description": "<p>The character projects an aura that awes, bedazzles, and seduces. He gains a +1 bonus to reaction rolls to impress, intimidate, and seduce; if this brings the total to 12 or more, the subjects act as if bewitched.</p>",
+    "description": "<p>The character projects an aura that awes, bedazzles, and seduces. A Mystic Aura variant that does not stack with it: +1 to impress/intimidate/seduce, and if the total reaches 12 or more the subjects act as if bewitched.</p>",
     "save": "",
     "_schemaVersion": 3
   },
@@ -21,7 +21,7 @@
     {
       "_id": "acksInflEffGlmAu",
       "_key": "!items.effects!acksInflGlamAura.acksInflEffGlmAu",
-      "name": "Glamorous Aura (reaction)",
+      "name": "Glamorous Aura (Mystic Aura)",
       "type": "base",
       "img": "icons/svg/aura.svg",
       "system": {},
@@ -53,13 +53,15 @@
         "acks-influence": {
           "situational": false,
           "tone": "all",
-          "label": "Glamorous Aura (+1)"
+          "label": "Glamorous Aura",
+          "bewitched": true,
+          "actsAs": "mysticAura"
         }
       },
       "_stats": {
         "systemId": "acks",
-        "createdTime": 1783874844350,
-        "modifiedTime": 1783874844350
+        "createdTime": 1783877304694,
+        "modifiedTime": 1783877304694
       }
     }
   ],
@@ -70,7 +72,7 @@
   "sort": 0,
   "_stats": {
     "systemId": "acks",
-    "createdTime": 1783874844350,
-    "modifiedTime": 1783874844350
+    "createdTime": 1783877304694,
+    "modifiedTime": 1783877304694
   }
 }
