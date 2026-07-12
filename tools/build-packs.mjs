@@ -81,6 +81,38 @@ const PROFICIENCIES = [
     description: "Example class power: the character's commanding presence always aids intimidation. Demonstrates a non-situational, tone-specific reaction effect that the influence roller applies automatically.",
     effect: { id: "acksInflEffPresc", name: "Steely Presence (reaction)", value: 1, situational: false, tone: "intimidation", label: "Steely Presence (+1 intimidation)" },
   },
+
+  // --- Class powers that modify reaction rolls (JJ Powers) ---
+  {
+    id: "acksInflCmdVoice",
+    name: "Command of Voice (Power)",
+    description: "The character gains a +1 bonus to reaction rolls with creatures he speaks to. If this bonus brings the total to 12 or more, they act as if charmed while in his presence.",
+    effect: { id: "acksInflEffCmdVc", name: "Command of Voice (reaction)", value: 1, situational: false, tone: "all", label: "Command of Voice (+1)" },
+  },
+  {
+    id: "acksInflBedazzle",
+    name: "Bedazzling Glamour (Power)",
+    description: "While active, the character's magical glamour grants a +1 bonus to all reaction rolls and ignores reaction penalties from permanent wounds or side effects. Does not stack with Mystic Aura.",
+    effect: { id: "acksInflEffBdzGl", name: "Bedazzling Glamour (reaction)", value: 1, situational: false, tone: "all", label: "Bedazzling Glamour (+1)" },
+  },
+  {
+    id: "acksInflGlamAura",
+    name: "Glamorous Aura (Power)",
+    description: "The character projects an aura that awes, bedazzles, and seduces. He gains a +1 bonus to reaction rolls to impress, intimidate, and seduce; if this brings the total to 12 or more, the subjects act as if bewitched.",
+    effect: { id: "acksInflEffGlmAu", name: "Glamorous Aura (reaction)", value: 1, situational: false, tone: "all", label: "Glamorous Aura (+1)" },
+  },
+  {
+    id: "acksInflAncPacts",
+    name: "Ancient Pacts (Power)",
+    description: "The character gains a +1 bonus to reaction rolls when encountering intelligent Chaotic monsters.",
+    effect: { id: "acksInflEffAncPc", name: "Ancient Pacts (reaction)", value: 1, situational: true, tone: "all", label: "Ancient Pacts — vs intelligent Chaotic monsters (+1)" },
+  },
+  {
+    id: "acksInflDthVisag",
+    name: "Deathly Visage (Power)",
+    description: "The character suffers a -2 on reaction rolls versus non-Chaotic beings and enjoys +2 to reaction rolls with Chaotic beings. (Enable this effect when facing Chaotic beings; use the GM adjustment for the -2 versus non-Chaotic.)",
+    effect: { id: "acksInflEffDthVs", name: "Deathly Visage — vs Chaotic (reaction)", value: 2, situational: true, tone: "all", label: "Deathly Visage — vs Chaotic beings (+2)" },
+  },
 ];
 
 function proficiencyDoc(p) {
@@ -127,7 +159,7 @@ const MACROS = [
     _key: "!macros!acksInflMacro001",
     name: "Influence Roller",
     type: "script",
-    img: "icons/svg/chat.svg",
+    img: "icons/skills/social/diplomacy-handshake-yellow.webp",
     scope: "global",
     command: MACRO_COMMAND,
     folder: null,

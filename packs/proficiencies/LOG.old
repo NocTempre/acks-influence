@@ -1,5 +1,5 @@
-2026/07/11-23:43:56.383 ac44 Delete type=3 #1
-2026/07/11-23:43:56.405 6e20 Level-0 table #5: started
-2026/07/11-23:43:56.408 6e20 Level-0 table #5: 4349 bytes OK
-2026/07/11-23:43:56.410 6e20 Delete type=0 #3
-2026/07/11-23:43:56.411 6e20 Manual compaction at level-0 from '!items!acksInflAnimHusb' @ 72057594037927935 : 1 .. '!items.effects!acksInflPresence.acksInflEffPresc' @ 0 : 0; will stop at (end)
+2026/07/12-12:47:24.474 ef48 Delete type=3 #1
+2026/07/12-12:47:24.506 f574 Level-0 table #5: started
+2026/07/12-12:47:24.514 f574 Level-0 table #5: 6008 bytes OK
+2026/07/12-12:47:24.516 f574 Delete type=0 #3
+2026/07/12-12:47:24.517 f574 Manual compaction at level-0 from '!items!acksInflAncPacts' @ 72057594037927935 : 1 .. '!items.effects!acksInflPresence.acksInflEffPresc' @ 0 : 0; will stop at (end)

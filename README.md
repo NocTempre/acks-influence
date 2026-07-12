@@ -20,12 +20,14 @@ chat, and reads actor data through public paths only.
   rungs and carries a **time cost**). After any roll the tracker advances and the
   attempt steps forward, so the initial reaction rolls naturally into the 1st
   attempt.
-- **Auto-population with overrides.** Charisma, target Will, alignment match, and
-  the relevant proficiencies (Diplomacy, Intimidate, Seduction, Mystic Aura,
-  Performance/Art) are detected from the character and the currently-targeted
-  token. Every value is editable, and a **Reset to defaults** button re-detects
-  them (picking up a newly-selected target). Auto fields are badged ✨; overridden
-  ones are highlighted.
+- **Auto-population with overrides.** Charisma, target Will, alignment match, the
+  **level/HD gap** (class level for characters, HD for monsters — ±1 at a 3+
+  difference), and the relevant proficiencies (Diplomacy, Intimidate, Seduction,
+  Mystic Aura, Performance/Art) are detected from the character and the
+  currently-targeted token. Every value is editable, and a **Reset to defaults**
+  button re-detects them. Auto fields are badged ✨; a value driven by a
+  proficiency (e.g. the bribe fee under Bribery) is badged 🖐; overrides are
+  highlighted.
 - **Effect-driven modifiers (extensible).** Only the four core proficiencies
   (Diplomacy, Intimidation, Seduction, Mystic Aura) are hardcoded. Every other
   reaction bonus — Beast Friendship, Animal Husbandry, Folkways, and any custom

@@ -1,7 +1,7 @@
 {
-  "_id": "acksInflFolkways",
-  "_key": "!items!acksInflFolkways",
-  "name": "Folkways",
+  "_id": "acksInflAncPacts",
+  "_key": "!items!acksInflAncPacts",
+  "name": "Ancient Pacts (Power)",
   "type": "ability",
   "img": "icons/svg/book.svg",
   "system": {
@@ -13,15 +13,15 @@
     "rollType": "result",
     "rollTarget": 0,
     "blindroll": false,
-    "description": "<p>The character knows the customs of a particular urban settlement. He gains a +1 bonus to reaction rolls with 0th-level characters he encounters in his settlement. (Revised Rules proficiency, provided here for testing.)</p>",
+    "description": "<p>The character gains a +1 bonus to reaction rolls when encountering intelligent Chaotic monsters.</p>",
     "save": "",
     "_schemaVersion": 3
   },
   "effects": [
     {
-      "_id": "acksInflEffFolkw",
-      "_key": "!items.effects!acksInflFolkways.acksInflEffFolkw",
-      "name": "Folkways (reaction)",
+      "_id": "acksInflEffAncPc",
+      "_key": "!items.effects!acksInflAncPacts.acksInflEffAncPc",
+      "name": "Ancient Pacts (reaction)",
       "type": "base",
       "img": "icons/svg/aura.svg",
       "system": {},
@@ -52,8 +52,8 @@
       "flags": {
         "acks-influence": {
           "situational": true,
-          "tone": "diplomacy",
-          "label": "Folkways — 0th-level target in home settlement (+1)"
+          "tone": "all",
+          "label": "Ancient Pacts — vs intelligent Chaotic monsters (+1)"
         }
       },
       "_stats": {

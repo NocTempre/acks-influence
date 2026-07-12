@@ -1,7 +1,7 @@
 {
-  "_id": "acksInflFolkways",
-  "_key": "!items!acksInflFolkways",
-  "name": "Folkways",
+  "_id": "acksInflCmdVoice",
+  "_key": "!items!acksInflCmdVoice",
+  "name": "Command of Voice (Power)",
   "type": "ability",
   "img": "icons/svg/book.svg",
   "system": {
@@ -13,15 +13,15 @@
     "rollType": "result",
     "rollTarget": 0,
     "blindroll": false,
-    "description": "<p>The character knows the customs of a particular urban settlement. He gains a +1 bonus to reaction rolls with 0th-level characters he encounters in his settlement. (Revised Rules proficiency, provided here for testing.)</p>",
+    "description": "<p>The character gains a +1 bonus to reaction rolls with creatures he speaks to. If this bonus brings the total to 12 or more, they act as if charmed while in his presence.</p>",
     "save": "",
     "_schemaVersion": 3
   },
   "effects": [
     {
-      "_id": "acksInflEffFolkw",
-      "_key": "!items.effects!acksInflFolkways.acksInflEffFolkw",
-      "name": "Folkways (reaction)",
+      "_id": "acksInflEffCmdVc",
+      "_key": "!items.effects!acksInflCmdVoice.acksInflEffCmdVc",
+      "name": "Command of Voice (reaction)",
       "type": "base",
       "img": "icons/svg/aura.svg",
       "system": {},
@@ -51,9 +51,9 @@
       "sort": 0,
       "flags": {
         "acks-influence": {
-          "situational": true,
-          "tone": "diplomacy",
-          "label": "Folkways — 0th-level target in home settlement (+1)"
+          "situational": false,
+          "tone": "all",
+          "label": "Command of Voice (+1)"
         }
       },
       "_stats": {

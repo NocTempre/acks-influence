@@ -247,7 +247,7 @@ export const INFLUENCE_MODIFIERS = Object.freeze({
         },
         { key: "advantage", type: "signed", label: "ACKS-INFLUENCE.mod.intimidation.advantage" },
         { key: "authority", type: "signed", label: "ACKS-INFLUENCE.mod.intimidation.authority" },
-        { key: "levelGap", type: "signed", label: "ACKS-INFLUENCE.mod.intimidation.levelGap" },
+        { key: "levelGap", type: "signed", label: "ACKS-INFLUENCE.mod.intimidation.levelGap", auto: "levelGap" },
       ],
     },
     {
@@ -284,6 +284,7 @@ export const INFLUENCE_MODIFIERS = Object.freeze({
           key: "levelGap",
           type: "select",
           label: "ACKS-INFLUENCE.mod.seduction.levelGap",
+          auto: "levelGap",
           options: [
             { label: "ACKS-INFLUENCE.opt.dash", value: 0 },
             { label: "ACKS-INFLUENCE.opt.charHigher", value: 1 },

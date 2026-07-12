@@ -123,8 +123,21 @@ function buildContext(actor, targetActor) {
     cha: actor ? abilityMod(actor, "cha") : 0,
     targetWill: targetActor ? abilityMod(targetActor, "wis") : 0,
     alignment: alignmentModifier(actor, targetActor),
+    levelGap: levelGapModifier(actor, targetActor),
     profs: getProficiencies(actor),
   };
+}
+
+/**
+ * Level/HD gap modifier: +1 when the character is 3+ levels/HD above the target,
+ * -1 when 3+ below, else 0. Uses class level for characters, HD for monsters.
+ */
+function levelGapModifier(charActor, targetActor) {
+  if (!charActor || !targetActor) return 0;
+  const diff = getActorHD(charActor) - getActorHD(targetActor);
+  if (diff >= 3) return 1;
+  if (diff <= -3) return -1;
+  return 0;
 }
 
 /** Resolve a single `auto` source string to its value. */
@@ -132,6 +145,7 @@ function resolveAutoValue(source, ctx) {
   if (source === "cha") return ctx.cha;
   if (source === "targetWill") return ctx.targetWill;
   if (source === "alignment") return ctx.alignment;
+  if (source === "levelGap") return ctx.levelGap;
   if (source.startsWith("prof:")) return Boolean(ctx.profs[source.slice(5)]);
   return undefined;
 }

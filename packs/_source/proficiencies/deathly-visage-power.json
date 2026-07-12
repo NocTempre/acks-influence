@@ -1,7 +1,7 @@
 {
-  "_id": "acksInflFolkways",
-  "_key": "!items!acksInflFolkways",
-  "name": "Folkways",
+  "_id": "acksInflDthVisag",
+  "_key": "!items!acksInflDthVisag",
+  "name": "Deathly Visage (Power)",
   "type": "ability",
   "img": "icons/svg/book.svg",
   "system": {
@@ -13,15 +13,15 @@
     "rollType": "result",
     "rollTarget": 0,
     "blindroll": false,
-    "description": "<p>The character knows the customs of a particular urban settlement. He gains a +1 bonus to reaction rolls with 0th-level characters he encounters in his settlement. (Revised Rules proficiency, provided here for testing.)</p>",
+    "description": "<p>The character suffers a -2 on reaction rolls versus non-Chaotic beings and enjoys +2 to reaction rolls with Chaotic beings. (Enable this effect when facing Chaotic beings; use the GM adjustment for the -2 versus non-Chaotic.)</p>",
     "save": "",
     "_schemaVersion": 3
   },
   "effects": [
     {
-      "_id": "acksInflEffFolkw",
-      "_key": "!items.effects!acksInflFolkways.acksInflEffFolkw",
-      "name": "Folkways (reaction)",
+      "_id": "acksInflEffDthVs",
+      "_key": "!items.effects!acksInflDthVisag.acksInflEffDthVs",
+      "name": "Deathly Visage — vs Chaotic (reaction)",
       "type": "base",
       "img": "icons/svg/aura.svg",
       "system": {},
@@ -29,7 +29,7 @@
         {
           "key": "flags.acks-influence.reaction",
           "mode": 2,
-          "value": "1",
+          "value": "2",
           "priority": 20
         }
       ],
@@ -52,8 +52,8 @@
       "flags": {
         "acks-influence": {
           "situational": true,
-          "tone": "diplomacy",
-          "label": "Folkways — 0th-level target in home settlement (+1)"
+          "tone": "all",
+          "label": "Deathly Visage — vs Chaotic beings (+2)"
         }
       },
       "_stats": {
