@@ -14,11 +14,12 @@ chat, and reads actor data through public paths only.
 - **Attitude tracker.** Portraits of the influencer and target flank a clickable
   5-rung attitude ladder (Hostile → Friendly, relabeled Intimidated/Overawed for
   intimidation). The current attitude supplies the relationship modifier.
-- **Two roll types.**
-  - *Initial reaction* — the 2d6 result sets the attitude directly.
-  - *Attempt to influence* — the result shifts the current attitude 1–2 rungs,
-    the tracker advances, and the attempt counter (with its **time cost**) steps
-    forward.
+- **Attempt levels.** A single *Attempt* selector drives everything: level 0 is
+  the **initial reaction** (instant — the 2d6 result sets the attitude directly);
+  levels 1–5 are **attempts to influence** (each shifts the current attitude 1–2
+  rungs and carries a **time cost**). After any roll the tracker advances and the
+  attempt steps forward, so the initial reaction rolls naturally into the 1st
+  attempt.
 - **Auto-population with overrides.** Charisma, target Will, alignment match, and
   the relevant proficiencies (Diplomacy, Intimidate, Seduction, Mystic Aura,
   Performance/Art) are detected from the character and the currently-targeted

@@ -1,5 +1,6 @@
 {
   "_id": "acksInflAnimHusb",
+  "_key": "!items!acksInflAnimHusb",
   "name": "Animal Husbandry",
   "type": "ability",
   "img": "icons/svg/book.svg",
@@ -16,7 +17,52 @@
     "save": "",
     "_schemaVersion": 3
   },
-  "effects": [],
+  "effects": [
+    {
+      "_id": "acksInflEffAnimH",
+      "_key": "!items.effects!acksInflAnimHusb.acksInflEffAnimH",
+      "name": "Animal Husbandry (reaction)",
+      "type": "base",
+      "img": "icons/svg/aura.svg",
+      "system": {},
+      "changes": [
+        {
+          "key": "flags.acks-influence.reaction",
+          "mode": 2,
+          "value": "1",
+          "priority": 20
+        }
+      ],
+      "disabled": false,
+      "transfer": true,
+      "duration": {
+        "startTime": null,
+        "seconds": null,
+        "combat": null,
+        "rounds": null,
+        "turns": null,
+        "startRound": null,
+        "startTurn": null
+      },
+      "description": "",
+      "origin": null,
+      "tint": "#ffffff",
+      "statuses": [],
+      "sort": 0,
+      "flags": {
+        "acks-influence": {
+          "situational": true,
+          "tone": "all",
+          "label": "Animal Husbandry — tame, uncontrolled animal (+1)"
+        }
+      },
+      "_stats": {
+        "systemId": "acks",
+        "createdTime": 1783826904907,
+        "modifiedTime": 1783826904907
+      }
+    }
+  ],
   "flags": {},
   "ownership": {
     "default": 0
@@ -24,8 +70,7 @@
   "sort": 0,
   "_stats": {
     "systemId": "acks",
-    "createdTime": 1783822918803,
-    "modifiedTime": 1783822918803
-  },
-  "_key": "!items!acksInflAnimHusb"
+    "createdTime": 1783826904907,
+    "modifiedTime": 1783826904907
+  }
 }

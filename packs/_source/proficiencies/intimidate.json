@@ -1,5 +1,6 @@
 {
   "_id": "acksInflIntimdte",
+  "_key": "!items!acksInflIntimdte",
   "name": "Intimidate",
   "type": "ability",
   "img": "icons/svg/book.svg",
@@ -24,8 +25,7 @@
   "sort": 0,
   "_stats": {
     "systemId": "acks",
-    "createdTime": 1783822918802,
-    "modifiedTime": 1783822918802
-  },
-  "_key": "!items!acksInflIntimdte"
+    "createdTime": 1783826904907,
+    "modifiedTime": 1783826904907
+  }
 }

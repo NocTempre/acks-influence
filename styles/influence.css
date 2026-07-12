@@ -4,6 +4,9 @@
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  /* Snap to content by default; scroll only when the window is manually shrunk. */
+  max-height: 100%;
+  overflow-y: auto;
 }
 
 .influence-dialog fieldset {
@@ -136,8 +139,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
   gap: 0.1rem 0.6rem;
-  max-height: 250px;
-  overflow-y: auto;
 }
 .influence-dialog .influence-group {
   min-width: 0;

@@ -8,14 +8,17 @@ import { HENCHMAN_MONTHLY_WAGE, INFLUENCE_MODIFIERS, MODULE_ID, REACTION_CHANGE_
 const GENERIC_IMG = "icons/svg/mystery-man.svg";
 
 /**
- * Classify a free-text alignment by its (capitalized) first letter: L, N, or C.
- * Anything else is treated as Neutral.
+ * Alignment enum. Classify a free-text alignment by its (capitalized) first
+ * letter: L → law, C → chaos, N → neutral; anything else (blank/unknown) → other.
  */
+export const ALIGNMENT = Object.freeze({ LAW: "law", CHAOS: "chaos", NEUTRAL: "neutral", OTHER: "other" });
+
 export function classifyAlignment(value) {
   const c = String(value ?? "").trim().charAt(0).toUpperCase();
-  if (c === "L") return "law";
-  if (c === "C") return "chaos";
-  return "neutral";
+  if (c === "L") return ALIGNMENT.LAW;
+  if (c === "C") return ALIGNMENT.CHAOS;
+  if (c === "N") return ALIGNMENT.NEUTRAL;
+  return ALIGNMENT.OTHER;
 }
 
 function abilityMod(actor, key) {
@@ -32,8 +35,10 @@ function alignmentModifier(charActor, targetActor) {
   if (!charActor || !targetActor) return 0;
   const c = classifyAlignment(charActor.system?.details?.alignment);
   const t = classifyAlignment(targetActor.system?.details?.alignment);
+  // Unknown/undefined alignment can't establish a match or mismatch.
+  if (c === ALIGNMENT.OTHER || t === ALIGNMENT.OTHER) return 0;
   if (c === t) return 1;
-  if ((c === "law" && t === "chaos") || (c === "chaos" && t === "law")) return -1;
+  if ((c === ALIGNMENT.LAW && t === ALIGNMENT.CHAOS) || (c === ALIGNMENT.CHAOS && t === ALIGNMENT.LAW)) return -1;
   return 0;
 }
 

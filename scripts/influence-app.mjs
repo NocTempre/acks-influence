@@ -3,8 +3,6 @@ import {
   INFLUENCE_ATTITUDE_LABELS,
   INFLUENCE_BAND_LABELS,
   INFLUENCE_BANDS,
-  INFLUENCE_MODE,
-  INFLUENCE_MODE_CHOICES,
   INFLUENCE_MODIFIERS,
   INFLUENCE_RELATIONSHIP_MOD,
   INFLUENCE_TIME_STEPS,
@@ -64,8 +62,8 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
 
     this.#system = {
       tone: INFLUENCE_TONE.DIPLOMACY,
-      mode: INFLUENCE_MODE.INITIAL,
-      attempt: 1,
+      // attempt 0 = initial reaction (sets attitude, 0 time); 1+ = influence attempts.
+      attempt: 0,
       currentAttitude: 2, // Neutral
       gmAdjustment: 0, // generic GM catch-all bucket
       bribeFeeOverridden: false, // true once the GM edits the bribe fee by hand
@@ -291,10 +289,9 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     this.#recalculate();
 
     context.system = this.#system;
-    context.isContinuing = this.#system.mode === INFLUENCE_MODE.CONTINUING;
+    context.isContinuing = this.#system.attempt > 0;
 
     context.toneChoices = INFLUENCE_TONE_CHOICES;
-    context.modeChoices = INFLUENCE_MODE_CHOICES;
     context.timeChoices = INFLUENCE_TIME_STEPS;
 
     context.parties = resolveParties(this.#actor, this.#targetActor);
@@ -352,7 +349,6 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     }
 
     if (data.tone) this.#system.tone = data.tone;
-    if (data.mode) this.#system.mode = data.mode;
     if (data.attempt !== undefined) this.#system.attempt = Number(data.attempt);
     if (data.currentAttitude !== undefined) this.#system.currentAttitude = Number(data.currentAttitude);
 
@@ -555,7 +551,8 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
 
     const tone = this.#system.tone;
     const labels = INFLUENCE_ATTITUDE_LABELS[tone];
-    const isContinuing = this.#system.mode === INFLUENCE_MODE.CONTINUING;
+    // Attempt 0 is the initial reaction (sets the attitude); 1+ shifts it.
+    const isContinuing = this.#system.attempt > 0;
 
     const startIndex = this.#system.currentAttitude;
     const newIndex = isContinuing ? this.#applyShift(startIndex, band) : band.initialIndex;
@@ -604,12 +601,11 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     };
     ChatMessage.create(chatData);
 
-    // In continuing mode, advance the tracker and step the timer.
-    if (isContinuing) {
-      this.#system.currentAttitude = newIndex;
-      this.#system.attempt = Math.min(INFLUENCE_TIME_STEPS.length, this.#system.attempt + 1);
-      this.#recalculate();
-      this.render();
-    }
+    // Advance the tracker to the new attitude and step to the next attempt level
+    // (the initial reaction rolls into the 1st attempt to influence).
+    this.#system.currentAttitude = newIndex;
+    this.#system.attempt = Math.min(INFLUENCE_TIME_STEPS.length - 1, this.#system.attempt + 1);
+    this.#recalculate();
+    this.render();
   }
 }

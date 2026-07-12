@@ -1,3 +1,5 @@
-2026/07/11-22:22:14.934 d958 Recovering log #6
-2026/07/11-22:22:14.951 d958 Delete type=0 #6
-2026/07/11-22:22:14.951 d958 Delete type=3 #4
+2026/07/11-23:28:24.956 d344 Delete type=3 #1
+2026/07/11-23:28:24.978 888c Level-0 table #5: started
+2026/07/11-23:28:24.982 888c Level-0 table #5: 4299 bytes OK
+2026/07/11-23:28:24.983 888c Delete type=0 #3
+2026/07/11-23:28:24.984 888c Manual compaction at level-0 from '!items!acksInflAnimHusb' @ 72057594037927935 : 1 .. '!items.effects!acksInflPresence.acksInflEffPresc' @ 0 : 0; will stop at (end)

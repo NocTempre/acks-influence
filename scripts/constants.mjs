@@ -33,17 +33,6 @@ export const INFLUENCE_TONE_CHOICES = Object.freeze([
   { value: INFLUENCE_TONE.SEDUCTION, label: "ACKS-INFLUENCE.tone.seduction" },
 ]);
 
-/** The two ways the tool can be used. */
-export const INFLUENCE_MODE = Object.freeze({
-  INITIAL: "initial",
-  CONTINUING: "continuing",
-});
-
-export const INFLUENCE_MODE_CHOICES = Object.freeze([
-  { value: INFLUENCE_MODE.INITIAL, label: "ACKS-INFLUENCE.mode.initial" },
-  { value: INFLUENCE_MODE.CONTINUING, label: "ACKS-INFLUENCE.mode.continuing" },
-]);
-
 /**
  * The attitude ladder, most negative (index 0) to most positive (index 4).
  * Labels (localization keys) differ by tone for the two upper rungs.
@@ -115,10 +104,12 @@ export const INFLUENCE_BAND_LABELS = Object.freeze({
 });
 
 /**
- * Time cost of the Nth attempt to influence (Judges Journal GM screen).
- * Labels are localization keys.
+ * Attempt levels & their time cost. Level 0 is the initial reaction (instant,
+ * which sets the attitude directly); levels 1-5 are attempts to influence that
+ * shift the current attitude, from the Judges Journal GM screen.
  */
 export const INFLUENCE_TIME_STEPS = Object.freeze([
+  { value: 0, label: "ACKS-INFLUENCE.time.0" },
   { value: 1, label: "ACKS-INFLUENCE.time.1" },
   { value: 2, label: "ACKS-INFLUENCE.time.2" },
   { value: 3, label: "ACKS-INFLUENCE.time.3" },

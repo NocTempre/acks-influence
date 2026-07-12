@@ -51,24 +51,13 @@
       </div>
 
       <div class="form-group flex-1">
-        <label class="flex-1" for="{{@root.partId}}-mode">{{localize 'ACKS-INFLUENCE.field.mode'}}</label>
+        <label class="flex-1" for="{{@root.partId}}-attempt">{{localize 'ACKS-INFLUENCE.field.attempt'}}</label>
         <div class="form-fields flex-1">
-          <select name="mode" id="{{@root.partId}}-mode" data-dtype="String">
-            {{selectOptions modeChoices valueAttr="value" labelAttr="label" selected=system.mode localize=true}}
+          <select name="attempt" id="{{@root.partId}}-attempt" data-dtype="Number">
+            {{selectOptions timeChoices valueAttr="value" labelAttr="label" selected=system.attempt localize=true}}
           </select>
         </div>
       </div>
-
-      {{#if isContinuing}}
-        <div class="form-group flex-1">
-          <label class="flex-1" for="{{@root.partId}}-attempt">{{localize 'ACKS-INFLUENCE.field.attempt'}}</label>
-          <div class="form-fields flex-1">
-            <select name="attempt" id="{{@root.partId}}-attempt" data-dtype="Number">
-              {{selectOptions timeChoices valueAttr="value" labelAttr="label" selected=system.attempt localize=true}}
-            </select>
-          </div>
-        </div>
-      {{/if}}
     </div>
   </fieldset>
 

@@ -8,6 +8,7 @@
     "build:packs": "node tools/build-packs.mjs"
   },
   "devDependencies": {
+    "@foundryvtt/foundryvtt-cli": "^1.0.0",
     "classic-level": "^3.0.0"
   }
 }

@@ -6,13 +6,9 @@
   "ACKS-INFLUENCE.tone.intimidation": "Intimidation",
   "ACKS-INFLUENCE.tone.seduction": "Seduction",
 
-  "ACKS-INFLUENCE.mode.initial": "Initial reaction",
-  "ACKS-INFLUENCE.mode.continuing": "Attempt to influence",
-
   "ACKS-INFLUENCE.section.interaction": "Interaction",
 
   "ACKS-INFLUENCE.field.tone": "Tone",
-  "ACKS-INFLUENCE.field.mode": "Roll type",
   "ACKS-INFLUENCE.field.attempt": "Attempt (time cost)",
   "ACKS-INFLUENCE.field.finalModifier": "Final Modifier",
   "ACKS-INFLUENCE.field.finalModifierHint": "The total applied to the roll. Type over it to override; the difference is stored as a GM adjustment. Use Reset to defaults to clear it.",
@@ -66,6 +62,7 @@
   "ACKS-INFLUENCE.band.seduction.911": "Indifferent, but secretly interested",
   "ACKS-INFLUENCE.band.seduction.12": "Friendly, helpful",
 
+  "ACKS-INFLUENCE.time.0": "Initial reaction (instant)",
   "ACKS-INFLUENCE.time.1": "1st attempt — 1 round (1 minute)",
   "ACKS-INFLUENCE.time.2": "2nd attempt — 1 turn (10 minutes)",
   "ACKS-INFLUENCE.time.3": "3rd attempt — 6 turns (1 hour)",
