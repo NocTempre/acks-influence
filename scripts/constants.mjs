@@ -198,6 +198,11 @@ export const INFLUENCE_MODIFIERS = Object.freeze({
         { key: "diplomacyProf", type: "check", label: "ACKS-INFLUENCE.mod.diplomacy.prof", value: 1, auto: "prof:diplomacy" },
         { key: "mysticAura", type: "check", label: "ACKS-INFLUENCE.mod.mysticAura", value: 1, auto: "prof:mysticAura" },
         { key: "brandishing", type: "check", label: "ACKS-INFLUENCE.mod.diplomacy.brandishing", value: -1 },
+      ],
+    },
+    {
+      group: "ACKS-INFLUENCE.group.target",
+      mods: [
         { key: "targetWill", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mod.targetWill", auto: "targetWill" },
         { key: "believesHarmed", type: "check", label: "ACKS-INFLUENCE.mod.diplomacy.believesHarmed", value: -1 },
         { key: "evidenceHarmed", type: "check", label: "ACKS-INFLUENCE.mod.diplomacy.evidenceHarmed", value: -2 },
@@ -306,12 +311,12 @@ export const INFLUENCE_MODIFIERS = Object.freeze({
         { key: "seductionProf", type: "check", label: "ACKS-INFLUENCE.mod.seduction.prof", value: 1, auto: "prof:seduction" },
         { key: "mysticAura", type: "check", label: "ACKS-INFLUENCE.mod.mysticAura", value: 1, auto: "prof:mysticAura" },
         { key: "performanceArt", type: "check", label: "ACKS-INFLUENCE.mod.seduction.performanceArt", value: 1, auto: "prof:performanceArt" },
-        { key: "targetWill", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mod.targetWill", auto: "targetWill" },
       ],
     },
     {
       group: "ACKS-INFLUENCE.group.target",
       mods: [
+        { key: "targetWill", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mod.targetWill", auto: "targetWill" },
         { key: "tookAdvantageFriends", type: "check", label: "ACKS-INFLUENCE.mod.seduction.tookAdvantageFriends", value: -1 },
         { key: "tookAdvantageTarget", type: "check", label: "ACKS-INFLUENCE.mod.seduction.tookAdvantageTarget", value: -2 },
         { key: "personalRisk", type: "signed", label: "ACKS-INFLUENCE.mod.seduction.personalRisk" },

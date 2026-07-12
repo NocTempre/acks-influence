@@ -29,12 +29,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.1rem;
-  flex: 0 0 66px;
+  gap: 0.05rem;
+  flex: 0 0 58px;
 }
 .influence-dialog .influence-portrait {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   object-fit: cover;
   border: 2px solid var(--color-border-dark, #7a7971);
   border-radius: 6px;
@@ -131,55 +131,53 @@
   font-size: 0.85em;
 }
 
-/* Modifier groups */
+/* Modifier groups — control on the left, label fills the rest. */
 .influence-dialog .influence-groups {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
-  gap: 0.15rem 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.1rem 0.6rem;
+  max-height: 250px;
+  overflow-y: auto;
 }
 .influence-dialog .influence-group {
   min-width: 0;
 }
 .influence-dialog .influence-mod {
+  display: flex;
   align-items: center;
   gap: 0.35rem;
   margin: 0;
-  font-size: 0.85em;
+  font-size: 0.75em;
+  line-height: 1.15;
 }
 .influence-dialog .influence-mod.overridden {
   background: rgba(122, 92, 255, 0.08);
   border-radius: 3px;
 }
-.influence-dialog .influence-mod label {
-  font-size: inherit;
-  line-height: 1.15;
-}
 .influence-dialog .influence-mod-field {
+  display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 0.3rem;
-  flex: 0 0 auto;
+  gap: 0.15rem;
+  flex: 0 0 4.5rem;
+  width: 4.5rem;
 }
-.influence-dialog .influence-mod-field input[type="number"],
 .influence-dialog .influence-mod-field select {
-  max-width: 7rem;
-  min-width: 2.5rem;
+  width: 100%;
+  min-width: 0;
+}
+.influence-dialog .influence-mod-field input[type="number"] {
+  width: 2.6rem;
+  min-width: 0;
+  text-align: center;
 }
 .influence-dialog .influence-mod-field input[type="checkbox"] {
-  margin: 0;
+  margin: 0 auto 0 0;
 }
-.influence-dialog .influence-contribution {
-  min-width: 1.9rem;
-  text-align: right;
-  font-weight: bold;
-  color: var(--color-text-emphatic, #c9a227);
-}
-.influence-dialog .influence-gold {
-  max-width: 5rem;
+.influence-dialog .influence-mod-label {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 .influence-dialog .influence-gp-suffix {
-  min-width: 1.9rem;
-  text-align: right;
   font-weight: bold;
   color: #d4af37;
 }

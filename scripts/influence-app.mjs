@@ -78,7 +78,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     classes: ["acks-influence", "influence-dialog"],
     sheetConfig: false,
     window: { resizable: true, title: "ACKS-INFLUENCE.app.title" },
-    position: { width: 740, height: "auto" },
+    position: { width: 560, height: "auto" },
     tag: "form",
     form: {
       submitOnChange: true,
