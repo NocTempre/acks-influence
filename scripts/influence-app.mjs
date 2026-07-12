@@ -237,6 +237,15 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   }
 
   /**
+   * True when the current (non-GM) user cannot observe the target's sheet, so
+   * the target's derived values and the roll total must be hidden from them.
+   */
+  #targetHidden() {
+    if (!this.#targetActor || game.user?.isGM) return false;
+    return !this.#targetActor.testUserPermission?.(game.user, "OBSERVER");
+  }
+
+  /**
    * Whether a "bewitched at 12+" source is active: the Mystic Aura box (which a
    * power may fill), or any contributing effect flagged `bewitched`.
    */
@@ -272,6 +281,10 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     const autoKeys = this.#autoKeys[tone];
     const profs = getProficiencies(this.#actor);
     const actsAs = getActsAsPowers(this.#actor);
+    const hidden = this.#targetHidden();
+    // Fields that expose the target's stats — masked when the target is hidden.
+    const TARGET_AUTO = new Set(["targetWill", "alignment", "levelGap", "age"]);
+    const TARGET_KEYS = new Set(["targetMorale", "bribeFee"]);
     const L = (s) => game.i18n.localize(s);
     return this.#modConfig[tone].map((group) => ({
       group: L(group.group),
@@ -296,6 +309,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
           isNumber: mod.type === "signed" || mod.type === "factor",
           isGold,
           isEffect: Boolean(mod.fromEffect) || isProfModified || isActsAs,
+          masked: hidden && (TARGET_AUTO.has(mod.auto) || TARGET_KEYS.has(mod.key)),
           value,
           checked: mod.type === "check" ? Boolean(value) : false,
           options:
@@ -331,6 +345,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     context.groups = this.#buildGroups();
     context.relationshipModifier = this.#relationshipModifier();
     context.finalModifier = this.#finalModifier;
+    context.targetHidden = this.#targetHidden();
 
     const timeStep = INFLUENCE_TIME_STEPS.find((step) => step.value === this.#system.attempt);
     context.timeLabel = timeStep ? game.i18n.localize(timeStep.label) : "";
@@ -617,20 +632,35 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       timeLabel: isContinuing && timeStep ? game.i18n.localize(timeStep.label) : null,
     };
 
-    const chatContent = await foundry.applications.handlebars.renderTemplate(
-      `modules/${MODULE_ID}/templates/influence-result.hbs`,
-      result,
-    );
+    const speaker = ChatMessage.getSpeaker({ actor: this.#actor });
+    const template = `modules/${MODULE_ID}/templates/influence-result.hbs`;
+    const hidden = this.#targetHidden();
 
-    const chatData = {
-      user: game.user.id,
-      speaker: ChatMessage.getSpeaker({ actor: this.#actor }),
-      content: chatContent,
-      style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-      rolls: [roll],
-      flags: { [MODULE_ID]: { influence: true, rollResult: result } },
-    };
-    ChatMessage.create(chatData);
+    if (hidden) {
+      // Full details to GMs only; a public message reveals just the attitude.
+      const full = await foundry.applications.handlebars.renderTemplate(template, result);
+      ChatMessage.create({
+        user: game.user.id,
+        speaker,
+        content: full,
+        style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+        rolls: [roll],
+        whisper: ChatMessage.getWhisperRecipients("GM").map((u) => u.id),
+        flags: { [MODULE_ID]: { influence: true, rollResult: result } },
+      });
+      const reveal = await foundry.applications.handlebars.renderTemplate(template, { ...result, attitudeOnly: true });
+      ChatMessage.create({ user: game.user.id, speaker, content: reveal, style: CONST.CHAT_MESSAGE_STYLES.OTHER });
+    } else {
+      const content = await foundry.applications.handlebars.renderTemplate(template, result);
+      ChatMessage.create({
+        user: game.user.id,
+        speaker,
+        content,
+        style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+        rolls: [roll],
+        flags: { [MODULE_ID]: { influence: true, rollResult: result } },
+      });
+    }
 
     // Advance the tracker to the new attitude and step to the next attempt level
     // (the initial reaction rolls into the 1st attempt to influence).

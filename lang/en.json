@@ -32,6 +32,9 @@
 
   "ACKS-INFLUENCE.bribe.noGold": "{name} has no Gold to pay the bribe.",
 
+  "ACKS-INFLUENCE.hidden.field": "Hidden — you can't see this target's sheet.",
+  "ACKS-INFLUENCE.hidden.total": "Hidden — the total and result are whispered to the GM; you'll see only the resulting attitude.",
+
   "ACKS-INFLUENCE.group.both": "Both",
   "ACKS-INFLUENCE.group.either": "Either",
   "ACKS-INFLUENCE.group.character": "Character",

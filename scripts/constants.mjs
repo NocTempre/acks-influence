@@ -291,10 +291,9 @@ export const INFLUENCE_MODIFIERS = Object.freeze({
             { label: "ACKS-INFLUENCE.opt.charLower", value: -1 },
           ],
         },
-        // TODO: consider auto-filling the age-category gap magnitude from both
-        // actors' ages. The sign depends on the target's mate preference
-        // (youthful vs. mature), which is a GM judgment call, so it's manual for now.
-        { key: "age", type: "signed", label: "ACKS-INFLUENCE.mod.seduction.age" },
+        // Auto-filled from the Character Aging table (race inferred from class);
+        // assumes youthful-mate preference — the GM flips the sign for mature.
+        { key: "age", type: "signed", label: "ACKS-INFLUENCE.mod.seduction.age", auto: "age" },
         { key: "appeal", type: "signed", label: "ACKS-INFLUENCE.mod.seduction.appeal" },
       ],
     },

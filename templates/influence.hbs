@@ -79,7 +79,11 @@
         {{#each this.mods}}
           <div class="influence-mod {{#if this.isOverridden}}overridden{{/if}}">
             <div class="influence-mod-field">
-              {{#if this.isCheck}}
+              {{#if this.masked}}
+                <span class="influence-masked" data-tooltip="{{localize 'ACKS-INFLUENCE.hidden.field'}}">
+                  <i class="fa-solid fa-lock"></i>
+                </span>
+              {{else if this.isCheck}}
                 <input type="checkbox" name="mod.{{this.key}}" id="{{@root.partId}}-mod-{{this.key}}"
                        {{checked this.checked}}/>
               {{else if this.isSelect}}
@@ -91,7 +95,7 @@
                 <input type="number" name="mod.{{this.key}}" id="{{@root.partId}}-mod-{{this.key}}"
                        value="{{this.value}}" data-dtype="Number" class="{{#if this.isGold}}influence-gold{{/if}}"/>
               {{/if}}
-              {{#if this.isGold}}<span class="influence-gp-suffix">gp</span>{{/if}}
+              {{#if this.isGold}}{{#unless this.masked}}<span class="influence-gp-suffix">gp</span>{{/unless}}{{/if}}
             </div>
             <label class="influence-mod-label" for="{{@root.partId}}-mod-{{this.key}}">
               {{this.label}}
@@ -117,8 +121,14 @@
       <span class="influence-time-note">{{localize 'ACKS-INFLUENCE.field.timeCost'}}: <strong>{{timeLabel}}</strong></span>
     {{/if}}
     <label class="influence-total-label" for="{{@root.partId}}-total">{{localize 'ACKS-INFLUENCE.field.finalModifier'}}</label>
-    <input type="number" name="finalTotal" id="{{@root.partId}}-total" value="{{finalModifier}}" data-dtype="Number"
-           class="influence-final" data-tooltip="{{localize 'ACKS-INFLUENCE.field.finalModifierHint'}}"/>
+    {{#if targetHidden}}
+      <span class="influence-final influence-masked" data-tooltip="{{localize 'ACKS-INFLUENCE.hidden.total'}}">
+        <i class="fa-solid fa-lock"></i>
+      </span>
+    {{else}}
+      <input type="number" name="finalTotal" id="{{@root.partId}}-total" value="{{finalModifier}}" data-dtype="Number"
+             class="influence-final" data-tooltip="{{localize 'ACKS-INFLUENCE.field.finalModifierHint'}}"/>
+    {{/if}}
     <button type="button" data-action="roll" class="influence-roll-btn">
       <i class="fa-solid fa-dice"></i> {{localize 'ACKS-INFLUENCE.action.roll'}}
     </button>

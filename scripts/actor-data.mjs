@@ -131,6 +131,7 @@ function buildContext(actor, targetActor) {
     targetWill: targetActor ? abilityMod(targetActor, "wis") : 0,
     alignment: alignmentModifier(actor, targetActor),
     levelGap: levelGapModifier(actor, targetActor),
+    age: ageModifier(actor, targetActor),
     profs,
   };
 }
@@ -147,12 +148,61 @@ function levelGapModifier(charActor, targetActor) {
   return 0;
 }
 
+/* -------------------------------------------- */
+/*  Age (Character Aging table, RR)             */
+/* -------------------------------------------- */
+
+// Lower bound (in years) of each age category: Youth, Adult, Middle-Aged, Old, Ancient.
+const AGE_TABLE = Object.freeze({
+  beastman: [12, 16, 31, 46, 61],
+  dwarf: [15, 26, 51, 76, 116],
+  elf: [15, 51], // Youth, Adult only
+  human: [13, 18, 36, 56, 76],
+  nobiran: [13, 18], // Youth, Adult only
+  zaharan: [13, 18, 36, 56, 76],
+});
+
+/** Infer race from the class name (ACKS has no race field); defaults to human. */
+function inferRace(actor) {
+  const cls = String(actor?.system?.details?.class ?? "").toLowerCase();
+  if (/dwarv|dwarf/.test(cls)) return "dwarf";
+  if (/elv|elf/.test(cls)) return "elf";
+  if (/nobiran/.test(cls)) return "nobiran";
+  if (/zahar/.test(cls)) return "zaharan";
+  if (/beastman|bugbear|gnoll|kobold|orc/.test(cls)) return "beastman";
+  return "human";
+}
+
+/** The age-category index (0 = Youth … 4 = Ancient) for an actor. */
+export function ageCategoryIndex(actor) {
+  const bounds = AGE_TABLE[inferRace(actor)] ?? AGE_TABLE.human;
+  const age = Number(actor?.system?.details?.age);
+  if (!Number.isFinite(age)) return 1; // assume Adult when unknown
+  let idx = 0;
+  for (let i = 0; i < bounds.length; i++) if (age >= bounds[i]) idx = i;
+  return idx;
+}
+
+/**
+ * Age modifier for Seduction (±1 per age category). Defaults to the common case
+ * that targets prefer youthful mates, so a younger character is +per category.
+ * The GM flips the sign when the target prefers mature mates.
+ */
+function ageModifier(charActor, targetActor) {
+  if (!charActor || !targetActor) return 0;
+  // Age categories only apply within the Youth–Old range; clamp Ancient to Old.
+  const c = Math.min(3, ageCategoryIndex(charActor));
+  const t = Math.min(3, ageCategoryIndex(targetActor));
+  return t - c; // + when the character is the younger category
+}
+
 /** Resolve a single `auto` source string to its value. */
 function resolveAutoValue(source, ctx) {
   if (source === "cha") return ctx.cha;
   if (source === "targetWill") return ctx.targetWill;
   if (source === "alignment") return ctx.alignment;
   if (source === "levelGap") return ctx.levelGap;
+  if (source === "age") return ctx.age;
   if (source.startsWith("prof:")) return Boolean(ctx.profs[source.slice(5)]);
   return undefined;
 }

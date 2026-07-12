@@ -5,6 +5,13 @@
     <div class="influence-chat-parties">{{influencerName}} &rarr; {{targetName}}</div>
   </header>
 
+  {{#if attitudeOnly}}
+    <div class="influence-chat-attitude">
+      <strong>{{#if isContinuing}}{{localize 'ACKS-INFLUENCE.chat.attitude'}}{{else}}{{localize 'ACKS-INFLUENCE.chat.initialAttitude'}}{{/if}}:</strong>
+      <span class="influence-chat-new">{{resultAttitude}}</span>
+    </div>
+  {{else}}
+
   <div class="influence-chat-roll">
     <span class="influence-chat-total">{{total}}</span>
     <span class="influence-chat-formula">{{rollFormula}}</span>
@@ -51,5 +58,7 @@
   {{else}}
     <div class="influence-chat-mods-none">{{localize 'ACKS-INFLUENCE.chat.noModifiers'}}</div>
   {{/if}}
+
+  {{/if}}{{! /attitudeOnly }}
 
 </section>
