@@ -184,12 +184,17 @@ export function getEffectReactionMods(actor) {
       if (change.key === REACTION_CHANGE_KEY) {
         const value = Number(change.value) || 0;
         if (value) {
+          // `tone` may be "all", a single tone, an array, or a comma-separated list.
+          const raw = f.tone ?? "all";
+          const tones = (Array.isArray(raw) ? raw : String(raw).split(","))
+            .map((t) => String(t).trim().toLowerCase())
+            .filter(Boolean);
           out.push({
             id: `eff:${effect.id ?? idx}:${ci}`,
             label: f.label || effect.name || "Effect",
             value,
             situational: f.situational !== false,
-            tone: String(f.tone ?? "all").toLowerCase(),
+            tones: tones.length ? tones : ["all"],
           });
         }
       }

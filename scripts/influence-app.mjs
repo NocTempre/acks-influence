@@ -116,7 +116,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     const config = {};
     for (const tone of Object.values(INFLUENCE_TONE)) {
       const groups = INFLUENCE_MODIFIERS[tone].map((g) => ({ group: g.group, mods: g.mods }));
-      const forTone = effectMods.filter((m) => m.tone === "all" || m.tone === tone);
+      const forTone = effectMods.filter((m) => m.tones.includes("all") || m.tones.includes(tone));
       if (forTone.length) {
         groups.push({
           group: "ACKS-INFLUENCE.group.powers",
@@ -250,6 +250,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     const values = this.#modifiers[tone];
     const defaults = this.#defaults[tone];
     const autoKeys = this.#autoKeys[tone];
+    const profs = getProficiencies(this.#actor);
     const L = (s) => game.i18n.localize(s);
     return this.#modConfig[tone].map((group) => ({
       group: L(group.group),
@@ -257,6 +258,9 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
         const value = values[mod.key];
         const isAuto = autoKeys.has(mod.key);
         const isGold = mod.type === "gold";
+        // A value computed from a proficiency the character has (e.g. Bribery
+        // scaling the bribe fee) is flagged so it gets the proficiency badge.
+        const isProfModified = Boolean(mod.profModifier && profs[mod.profModifier]);
         return {
           key: mod.key,
           // Effect-granted labels are literal text; localize() passes them through.
@@ -265,7 +269,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
           isSelect: mod.type === "select",
           isNumber: mod.type === "signed" || mod.type === "factor",
           isGold,
-          isEffect: Boolean(mod.fromEffect),
+          isEffect: Boolean(mod.fromEffect) || isProfModified,
           value,
           checked: mod.type === "check" ? Boolean(value) : false,
           options:
@@ -273,7 +277,8 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
               ? mod.options.map((opt) => ({ value: opt.value, label: L(opt.label), selected: Number(opt.value) === Number(value) }))
               : null,
           contribution: this.#contribution(mod, value),
-          isAuto,
+          // Show the proficiency badge in place of the generic auto badge.
+          isAuto: isAuto && !isProfModified,
           isOverridden: isGold
             ? this.#system.bribeFeeOverridden
             : isAuto && String(value) !== String(defaults[mod.key]),

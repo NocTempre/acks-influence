@@ -1,5 +1,5 @@
-2026/07/11-23:28:25.012 e42c Delete type=3 #1
-2026/07/11-23:28:25.017 888c Level-0 table #5: started
-2026/07/11-23:28:25.020 888c Level-0 table #5: 728 bytes OK
-2026/07/11-23:28:25.023 888c Delete type=0 #3
-2026/07/11-23:28:25.023 888c Manual compaction at level-0 from '!macros!acksInflMacro001' @ 72057594037927935 : 1 .. '!macros!acksInflMacro001' @ 0 : 0; will stop at (end)
+2026/07/11-23:43:56.437 cfd8 Delete type=3 #1
+2026/07/11-23:43:56.443 6e20 Level-0 table #5: started
+2026/07/11-23:43:56.447 6e20 Level-0 table #5: 728 bytes OK
+2026/07/11-23:43:56.448 6e20 Delete type=0 #3
+2026/07/11-23:43:56.449 6e20 Manual compaction at level-0 from '!macros!acksInflMacro001' @ 72057594037927935 : 1 .. '!macros!acksInflMacro001' @ 0 : 0; will stop at (end)

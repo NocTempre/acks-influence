@@ -180,7 +180,7 @@ export const INFLUENCE_MODIFIERS = Object.freeze({
             { label: "ACKS-INFLUENCE.opt.plus3", value: 3 },
           ],
         },
-        { key: "bribeFee", type: "gold", label: "ACKS-INFLUENCE.mod.diplomacy.bribeFee", auto: "bribeFee" },
+        { key: "bribeFee", type: "gold", label: "ACKS-INFLUENCE.mod.diplomacy.bribeFee", auto: "bribeFee", profModifier: "bribery" },
       ],
     },
     {

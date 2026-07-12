@@ -130,8 +130,10 @@ Then, on the effect's flags (`flags.acks-influence`), you may set:
 - `situational` (boolean, default `true`) — `true` shows it as an unticked
   checkbox the GM enables when it applies (e.g. Beast Friendship, only vs
   animals); `false` applies it automatically (e.g. an always-on class power).
-- `tone` (`all` | `diplomacy` | `intimidation` | `seduction`, default `all`) —
-  restrict the bonus to one tone.
+- `tone` — restrict the bonus to a context. One of `all`, `diplomacy`,
+  `intimidation`, `seduction`, or a comma-separated list (e.g.
+  `diplomacy,intimidation`). Default `all`. The bonus is only offered — and only
+  appears in the roller — for its matching tone(s).
 - `label` (string, optional) — display label; defaults to the effect's name.
 
 The roller lists all such effects under a **Proficiencies & Powers** group
