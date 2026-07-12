@@ -3,16 +3,19 @@
 .influence-dialog .influence-body {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .influence-dialog fieldset {
   border-radius: 4px;
-  padding: 0.4rem;
+  padding: 0.3rem 0.4rem;
+  margin: 0;
 }
 .influence-dialog fieldset legend {
   font-weight: bold;
   letter-spacing: 0.5px;
+  font-size: 0.85em;
+  padding: 0 0.3rem;
 }
 
 /* Parties + attitude tracker */
@@ -20,18 +23,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.6rem;
 }
 .influence-dialog .influence-party {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  flex: 0 0 88px;
+  gap: 0.1rem;
+  flex: 0 0 66px;
 }
 .influence-dialog .influence-portrait {
-  width: 72px;
-  height: 72px;
+  width: 52px;
+  height: 52px;
   object-fit: cover;
   border: 2px solid var(--color-border-dark, #7a7971);
   border-radius: 6px;
@@ -44,7 +47,8 @@
 .influence-dialog .influence-party-name {
   font-weight: bold;
   text-align: center;
-  max-width: 88px;
+  font-size: 0.85em;
+  max-width: 66px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -75,14 +79,14 @@
 }
 .influence-dialog .influence-rung {
   flex: 1 1 0;
-  padding: 0.35rem 0.15rem;
+  padding: 0.25rem 0.15rem;
   border: 1px solid var(--color-border-dark, #7a7971);
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.08);
   color: inherit;
-  font-size: 0.85em;
+  font-size: 0.78em;
   cursor: pointer;
-  line-height: 1.1;
+  line-height: 1.05;
 }
 .influence-dialog .influence-rung:hover {
   border-color: #c9a227;
@@ -95,7 +99,8 @@
 }
 .influence-dialog .influence-ladder-hint {
   text-align: center;
-  margin-top: 4px;
+  margin-top: 2px;
+  font-size: 0.85em;
 }
 
 /* Toolbar (reset + legend) */
@@ -119,12 +124,18 @@
   opacity: 0.85;
   font-size: 0.85em;
 }
+.influence-dialog .influence-effect-badge {
+  margin-left: 0.25rem;
+  color: #3aa675;
+  opacity: 0.9;
+  font-size: 0.85em;
+}
 
 /* Modifier groups */
 .influence-dialog .influence-groups {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
-  gap: 0.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 0.15rem 0.5rem;
 }
 .influence-dialog .influence-group {
   min-width: 0;
@@ -132,49 +143,73 @@
 .influence-dialog .influence-mod {
   align-items: center;
   gap: 0.35rem;
+  margin: 0;
+  font-size: 0.85em;
 }
 .influence-dialog .influence-mod.overridden {
   background: rgba(122, 92, 255, 0.08);
   border-radius: 3px;
 }
 .influence-dialog .influence-mod label {
-  font-size: 0.95em;
+  font-size: inherit;
+  line-height: 1.15;
 }
 .influence-dialog .influence-mod-field {
   align-items: center;
   justify-content: flex-end;
-  gap: 0.35rem;
+  gap: 0.3rem;
   flex: 0 0 auto;
 }
 .influence-dialog .influence-mod-field input[type="number"],
 .influence-dialog .influence-mod-field select {
-  max-width: 8rem;
-  min-width: 3rem;
+  max-width: 7rem;
+  min-width: 2.5rem;
+}
+.influence-dialog .influence-mod-field input[type="checkbox"] {
+  margin: 0;
 }
 .influence-dialog .influence-contribution {
-  min-width: 2.2rem;
+  min-width: 1.9rem;
   text-align: right;
   font-weight: bold;
   color: var(--color-text-emphatic, #c9a227);
 }
 .influence-dialog .influence-gold {
-  max-width: 6rem;
+  max-width: 5rem;
 }
 .influence-dialog .influence-gp-suffix {
-  min-width: 2.2rem;
+  min-width: 1.9rem;
   text-align: right;
   font-weight: bold;
   color: #d4af37;
 }
 
-/* Summary */
-.influence-dialog .influence-summary .influence-final {
-  font-size: 1.2rem;
-  font-weight: bold;
-  max-width: 5rem;
+/* Roll bar (merged final modifier + roll) */
+.influence-dialog .influence-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
 }
-.influence-dialog .influence-time-note {
-  margin-top: 4px;
+.influence-dialog .influence-footer .influence-time-note {
+  margin-right: auto;
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+.influence-dialog .influence-footer .influence-total-label {
+  font-weight: bold;
+  flex: 0 0 auto;
+}
+.influence-dialog .influence-footer .influence-final {
+  font-size: 1.15rem;
+  font-weight: bold;
+  max-width: 4.5rem;
+  flex: 0 0 auto;
+  text-align: center;
+}
+.influence-dialog .influence-footer .influence-roll-btn {
+  flex: 0 0 auto;
+  width: auto;
 }
 
 /* Chat card */

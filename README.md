@@ -25,11 +25,12 @@ chat, and reads actor data through public paths only.
   token. Every value is editable, and a **Reset to defaults** button re-detects
   them (picking up a newly-selected target). Auto fields are badged ✨; overridden
   ones are highlighted.
-- **Situational proficiency modifiers.** Beast Friendship (+2 vs normal animals),
-  Animal Husbandry (+1 vs tame animals), and Folkways (+1 vs 0th-level townsfolk)
-  appear **only when the character actually has that proficiency**, default
-  unticked — the GM checks the box when it applies. They never clutter the sheet
-  of a character who lacks them.
+- **Effect-driven modifiers (extensible).** Only the four core proficiencies
+  (Diplomacy, Intimidation, Seduction, Mystic Aura) are hardcoded. Every other
+  reaction bonus — Beast Friendship, Animal Husbandry, Folkways, and any custom
+  proficiency or class power — is contributed by an **Active Effect** on the
+  item, so new content works without touching the module. See
+  [Reaction-granting effects](#reaction-granting-effects).
 - **GM adjustment / overridable total.** A generic catch-all bucket for anything
   not modeled (Bargaining, Command, ad-hoc rulings). The **Final Modifier** cell
   is itself editable — type over it and the difference is banked as a GM
@@ -111,6 +112,34 @@ npm run build:packs
 
 The compiled LevelDB under `packs/proficiencies/` is committed and shipped;
 `node_modules/` and `package.json` are dev-only and not loaded by Foundry.
+
+## Reaction-granting effects
+
+Any proficiency, class power, item, or actor can feed the influence roller with a
+**passive Active Effect**. Add an effect with a single change:
+
+| Field | Value |
+|---|---|
+| Attribute Key | `flags.acks-influence.reaction` |
+| Change Mode | Add |
+| Effect Value | the modifier, e.g. `2` or `-1` |
+
+Then, on the effect's flags (`flags.acks-influence`), you may set:
+
+- `situational` (boolean, default `true`) — `true` shows it as an unticked
+  checkbox the GM enables when it applies (e.g. Beast Friendship, only vs
+  animals); `false` applies it automatically (e.g. an always-on class power).
+- `tone` (`all` | `diplomacy` | `intimidation` | `seduction`, default `all`) —
+  restrict the bonus to one tone.
+- `label` (string, optional) — display label; defaults to the effect's name.
+
+The roller lists all such effects under a **Proficiencies & Powers** group
+(badged 🖐). The module's test compendium ships four examples: Beast Friendship,
+Animal Husbandry, Folkways, and a non-situational *Steely Presence* class power.
+
+> Note: bonuses are read from **effects on the owned item/actor**, so a system or
+> homebrew proficiency only contributes if it carries such an effect — the
+> module's compendium copies do; add the effect to your own items to extend it.
 
 ## Rules reference
 

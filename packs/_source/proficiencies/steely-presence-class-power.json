@@ -1,6 +1,6 @@
 {
-  "_id": "acksInflFolkways",
-  "name": "Folkways",
+  "_id": "acksInflPresence",
+  "name": "Steely Presence (Class Power)",
   "type": "ability",
   "img": "icons/svg/book.svg",
   "system": {
@@ -12,14 +12,14 @@
     "rollType": "result",
     "rollTarget": 0,
     "blindroll": false,
-    "description": "<p>The character knows the customs of a particular urban settlement. He gains a +1 bonus to reaction rolls with 0th-level characters he encounters in his settlement. (Revised Rules proficiency, provided here for testing.)</p>",
+    "description": "<p>Example class power: the character's commanding presence always aids intimidation. Demonstrates a non-situational, tone-specific reaction effect that the influence roller applies automatically.</p>",
     "save": "",
     "_schemaVersion": 3
   },
   "effects": [
     {
-      "_id": "acksInflEffFolkw",
-      "name": "Folkways (reaction)",
+      "_id": "acksInflEffPresc",
+      "name": "Steely Presence (reaction)",
       "img": "icons/svg/aura.svg",
       "changes": [
         {
@@ -43,9 +43,9 @@
       "statuses": [],
       "flags": {
         "acks-influence": {
-          "situational": true,
-          "tone": "all",
-          "label": "Folkways — 0th-level target in home settlement (+1)"
+          "situational": false,
+          "tone": "intimidation",
+          "label": "Steely Presence (+1 intimidation)"
         }
       }
     }
@@ -60,5 +60,5 @@
     "createdTime": 1783818797952,
     "modifiedTime": 1783818797952
   },
-  "_key": "!items!acksInflFolkways"
+  "_key": "!items!acksInflPresence"
 }

@@ -16,6 +16,7 @@ import {
   autoKeysByTone,
   computeDefaults,
   getActorHD,
+  getEffectReactionMods,
   getProficiencies,
   getTargetActor,
   monthlyWageForHD,
@@ -41,8 +42,8 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   /** Detected per-tone default values, used by "reset to defaults". */
   #defaults = null;
   #autoKeys = autoKeysByTone();
-  /** Reaction-relevant proficiencies the actor possesses (gates situational mods). */
-  #profs = {};
+  /** Actor-specific modifier config: static groups + an effect-granted group. */
+  #modConfig = null;
   /** Sum of relationship + tone modifiers (before the GM adjustment bucket). */
   #subtotal = 0;
   /** Effective modifier applied to the roll (#subtotal + GM adjustment). */
@@ -57,8 +58,8 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     // self-targeted token) — keep the two sides distinct until set explicitly.
     if (this.#targetActor && this.#targetActor === this.#actor) this.#targetActor = null;
 
-    this.#profs = getProficiencies(this.#actor);
-    this.#defaults = computeDefaults(this.#actor, this.#targetActor);
+    this.#modConfig = this.#buildModConfig();
+    this.#defaults = computeDefaults(this.#actor, this.#targetActor, this.#modConfig);
     this.#modifiers = foundry.utils.deepClone(this.#defaults);
 
     this.#system = {
@@ -103,6 +104,40 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   }
 
   /* -------------------------------------------- */
+  /*  Modifier configuration                      */
+  /* -------------------------------------------- */
+
+  /**
+   * The per-tone modifier config for the current actor: the static screen layout
+   * plus a "Proficiencies & Powers" group synthesised from the actor's active
+   * effects (see getEffectReactionMods). Effect-granted modifiers render as
+   * checkboxes — default on when non-situational, off when the GM must confirm.
+   */
+  #buildModConfig() {
+    const effectMods = getEffectReactionMods(this.#actor);
+    const config = {};
+    for (const tone of Object.values(INFLUENCE_TONE)) {
+      const groups = INFLUENCE_MODIFIERS[tone].map((g) => ({ group: g.group, mods: g.mods }));
+      const forTone = effectMods.filter((m) => m.tone === "all" || m.tone === tone);
+      if (forTone.length) {
+        groups.push({
+          group: "ACKS-INFLUENCE.group.powers",
+          mods: forTone.map((m) => ({
+            key: m.id,
+            type: "check",
+            label: m.label,
+            value: m.value,
+            default: !m.situational,
+            fromEffect: true,
+          })),
+        });
+      }
+      config[tone] = groups;
+    }
+    return config;
+  }
+
+  /* -------------------------------------------- */
   /*  Modifier maths                              */
   /* -------------------------------------------- */
 
@@ -138,9 +173,8 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     const day = Math.round(monthly / 30);
     const week = Math.round(monthly / 4);
     const year = monthly * 12;
-    const units = this.#profs.bribery
-      ? { 1: day, 2: week, 3: monthly }
-      : { 1: week, 2: monthly, 3: year };
+    const hasBribery = getProficiencies(this.#actor).bribery;
+    const units = hasBribery ? { 1: day, 2: week, 3: monthly } : { 1: week, 2: monthly, 3: year };
     return units[level] ?? 0;
   }
 
@@ -157,7 +191,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   #computeSubtotal() {
     const values = this.#modifiers[this.#system.tone];
     let total = this.#relationshipModifier();
-    for (const group of INFLUENCE_MODIFIERS[this.#system.tone]) {
+    for (const group of this.#modConfig[this.#system.tone]) {
       for (const mod of group.mods) {
         total += this.#contribution(mod, values[mod.key]);
       }
@@ -176,18 +210,21 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     const list = [];
     const rel = this.#relationshipModifier();
     if (rel !== 0) {
-      const attitude = INFLUENCE_ATTITUDE_LABELS[this.#system.tone][this.#system.currentAttitude];
-      list.push({ label: `Current attitude (${attitude})`, value: rel });
+      const attitude = game.i18n.localize(
+        INFLUENCE_ATTITUDE_LABELS[this.#system.tone][this.#system.currentAttitude],
+      );
+      list.push({ label: game.i18n.format("ACKS-INFLUENCE.summary.relationship", { attitude }), value: rel });
     }
     const values = this.#modifiers[this.#system.tone];
-    for (const group of INFLUENCE_MODIFIERS[this.#system.tone]) {
+    for (const group of this.#modConfig[this.#system.tone]) {
       for (const mod of group.mods) {
         const contribution = this.#contribution(mod, values[mod.key]);
-        if (contribution !== 0) list.push({ label: mod.label, value: contribution });
+        // Effect-granted labels are literal; static labels are localization keys.
+        if (contribution !== 0) list.push({ label: game.i18n.localize(mod.label), value: contribution });
       }
     }
     const gm = Number(this.#system.gmAdjustment) || 0;
-    if (gm !== 0) list.push({ label: "GM adjustment", value: gm });
+    if (gm !== 0) list.push({ label: game.i18n.localize("ACKS-INFLUENCE.summary.gmAdjustment"), value: gm });
     return list;
   }
 
@@ -204,7 +241,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     const labels = INFLUENCE_ATTITUDE_LABELS[this.#system.tone];
     return labels.map((label, index) => ({
       index,
-      label,
+      label: game.i18n.localize(label),
       modifier: INFLUENCE_RELATIONSHIP_MOD[index],
       isActive: index === this.#system.currentAttitude,
     }));
@@ -215,38 +252,36 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     const values = this.#modifiers[tone];
     const defaults = this.#defaults[tone];
     const autoKeys = this.#autoKeys[tone];
-    // A situational modifier is only offered if the actor has the proficiency.
-    const visibleMods = (mods) => mods.filter((mod) => !mod.requiresProf || this.#profs[mod.requiresProf]);
-    return INFLUENCE_MODIFIERS[tone]
-      .map((group) => ({ group: group.group, mods: visibleMods(group.mods) }))
-      .filter((group) => group.mods.length > 0)
-      .map((group) => ({
-        group: group.group,
-        mods: group.mods.map((mod) => {
-          const value = values[mod.key];
-          const isAuto = autoKeys.has(mod.key);
-          const isGold = mod.type === "gold";
-          return {
-            key: mod.key,
-            label: mod.label,
-            isCheck: mod.type === "check",
-            isSelect: mod.type === "select",
-            isNumber: mod.type === "signed" || mod.type === "factor",
-            isGold,
-            value,
-            checked: mod.type === "check" ? Boolean(value) : false,
-            options:
-              mod.type === "select"
-                ? mod.options.map((opt) => ({ ...opt, selected: Number(opt.value) === Number(value) }))
-                : null,
-            contribution: this.#contribution(mod, value),
-            isAuto,
-            isOverridden: isGold
-              ? this.#system.bribeFeeOverridden
-              : isAuto && String(value) !== String(defaults[mod.key]),
-          };
-        }),
-      }));
+    const L = (s) => game.i18n.localize(s);
+    return this.#modConfig[tone].map((group) => ({
+      group: L(group.group),
+      mods: group.mods.map((mod) => {
+        const value = values[mod.key];
+        const isAuto = autoKeys.has(mod.key);
+        const isGold = mod.type === "gold";
+        return {
+          key: mod.key,
+          // Effect-granted labels are literal text; localize() passes them through.
+          label: L(mod.label),
+          isCheck: mod.type === "check",
+          isSelect: mod.type === "select",
+          isNumber: mod.type === "signed" || mod.type === "factor",
+          isGold,
+          isEffect: Boolean(mod.fromEffect),
+          value,
+          checked: mod.type === "check" ? Boolean(value) : false,
+          options:
+            mod.type === "select"
+              ? mod.options.map((opt) => ({ value: opt.value, label: L(opt.label), selected: Number(opt.value) === Number(value) }))
+              : null,
+          contribution: this.#contribution(mod, value),
+          isAuto,
+          isOverridden: isGold
+            ? this.#system.bribeFeeOverridden
+            : isAuto && String(value) !== String(defaults[mod.key]),
+        };
+      }),
+    }));
   }
 
   /** @override */
@@ -261,22 +296,16 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     context.toneChoices = INFLUENCE_TONE_CHOICES;
     context.modeChoices = INFLUENCE_MODE_CHOICES;
     context.timeChoices = INFLUENCE_TIME_STEPS;
-    context.attitudeChoices = INFLUENCE_ATTITUDE_LABELS[this.#system.tone].map((label, index) => ({
-      value: index,
-      label,
-    }));
 
     context.parties = resolveParties(this.#actor, this.#targetActor);
     context.hasTarget = Boolean(this.#targetActor);
     context.ladder = this.#attitudeLadder();
     context.groups = this.#buildGroups();
     context.relationshipModifier = this.#relationshipModifier();
-    context.subtotal = this.#subtotal;
-    context.gmAdjustment = Number(this.#system.gmAdjustment) || 0;
     context.finalModifier = this.#finalModifier;
 
     const timeStep = INFLUENCE_TIME_STEPS.find((step) => step.value === this.#system.attempt);
-    context.timeLabel = timeStep ? timeStep.label : "";
+    context.timeLabel = timeStep ? game.i18n.localize(timeStep.label) : "";
 
     return context;
   }
@@ -355,8 +384,8 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   static #onResetDefaults() {
     // Re-read the current target so a newly-selected token is picked up.
     this.#targetActor = getTargetActor() ?? this.#targetActor;
-    this.#profs = getProficiencies(this.#actor);
-    this.#defaults = computeDefaults(this.#actor, this.#targetActor);
+    this.#modConfig = this.#buildModConfig();
+    this.#defaults = computeDefaults(this.#actor, this.#targetActor, this.#modConfig);
     const tone = this.#system.tone;
     this.#modifiers[tone] = foundry.utils.deepClone(this.#defaults[tone]);
     this.#system.gmAdjustment = 0; // clear the GM bucket / total override
@@ -402,16 +431,21 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     this.render();
   }
 
-  /** Re-apply auto-populated values for the current influencer/target actors. */
+  /** Rebuild config + re-apply auto/effect values for the current actors, keeping manual edits. */
   #refreshFromActors() {
-    this.#profs = getProficiencies(this.#actor);
-    const newDefaults = computeDefaults(this.#actor, this.#targetActor);
-    for (const tone of Object.keys(this.#modifiers)) {
-      for (const group of INFLUENCE_MODIFIERS[tone]) {
+    this.#modConfig = this.#buildModConfig();
+    const newDefaults = computeDefaults(this.#actor, this.#targetActor, this.#modConfig);
+    for (const tone of Object.keys(newDefaults)) {
+      const merged = { ...this.#modifiers[tone] };
+      for (const group of this.#modConfig[tone]) {
         for (const mod of group.mods) {
-          if (mod.auto && mod.auto !== "bribeFee") this.#modifiers[tone][mod.key] = newDefaults[tone][mod.key];
+          // Refresh auto-detected and effect-granted values; add any new keys.
+          if ((mod.auto && mod.auto !== "bribeFee") || mod.fromEffect || !(mod.key in merged)) {
+            merged[mod.key] = newDefaults[tone][mod.key];
+          }
         }
       }
+      this.#modifiers[tone] = merged;
     }
     this.#defaults = newDefaults;
     this.#system.bribeFeeOverridden = false; // re-detect fee for the new target
@@ -439,18 +473,18 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   }
 
   #shiftDescription(band) {
-    const topLabel = INFLUENCE_ATTITUDE_LABELS[this.#system.tone][ATTITUDE_COUNT - 1];
+    const label = game.i18n.localize(INFLUENCE_ATTITUDE_LABELS[this.#system.tone][ATTITUDE_COUNT - 1]);
     switch (band.key) {
       case "2-":
-        return "Shift 2 attitudes toward Hostile";
+        return game.i18n.localize("ACKS-INFLUENCE.shift.hostile2");
       case "3-5":
-        return "Shift 1 attitude toward Hostile";
+        return game.i18n.localize("ACKS-INFLUENCE.shift.hostile1");
       case "6-8":
-        return "Shift 1 attitude toward Neutral";
+        return game.i18n.localize("ACKS-INFLUENCE.shift.neutral1");
       case "9-11":
-        return `Shift 1 attitude toward ${topLabel}`;
+        return game.i18n.format("ACKS-INFLUENCE.shift.top1", { label });
       case "12+":
-        return `Shift 2 attitudes toward ${topLabel}`;
+        return game.i18n.format("ACKS-INFLUENCE.shift.top2", { label });
       default:
         return "";
     }
@@ -545,14 +579,14 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       modifier,
       total,
       activeModifiers,
-      bandLabel: INFLUENCE_BAND_LABELS[tone][band.key],
-      startAttitude: labels[startIndex],
-      resultAttitude: labels[newIndex],
+      bandLabel: game.i18n.localize(INFLUENCE_BAND_LABELS[tone][band.key]),
+      startAttitude: game.i18n.localize(labels[startIndex]),
+      resultAttitude: game.i18n.localize(labels[newIndex]),
       shiftDescription: isContinuing ? this.#shiftDescription(band) : null,
       // Mystic Aura kicker: a +1 that brings the total to 12+ bewitches the subject.
       bewitched: mysticAuraActive && total >= 12,
       attempt: this.#system.attempt,
-      timeLabel: isContinuing && timeStep ? timeStep.label : null,
+      timeLabel: isContinuing && timeStep ? game.i18n.localize(timeStep.label) : null,
     };
 
     const chatContent = await foundry.applications.handlebars.renderTemplate(

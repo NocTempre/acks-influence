@@ -8,41 +8,40 @@
   <div class="influence-chat-roll">
     <span class="influence-chat-total">{{total}}</span>
     <span class="influence-chat-formula">{{rollFormula}}</span>
-    <span class="influence-chat-dice">(dice {{diceResult}}, mod {{numberFormat modifier sign=true}})</span>
+    <span class="influence-chat-dice">{{localize 'ACKS-INFLUENCE.chat.diceMod' dice=diceResult mod=(numberFormat modifier sign=true)}}</span>
   </div>
 
-  <div class="influence-chat-band"><strong>Reaction:</strong> {{bandLabel}}</div>
+  <div class="influence-chat-band"><strong>{{localize 'ACKS-INFLUENCE.chat.reaction'}}:</strong> {{bandLabel}}</div>
 
   <div class="influence-chat-attitude">
-    <strong>Attitude:</strong>
+    <strong>{{#if isContinuing}}{{localize 'ACKS-INFLUENCE.chat.attitude'}}{{else}}{{localize 'ACKS-INFLUENCE.chat.initialAttitude'}}{{/if}}:</strong>
     {{startAttitude}} &rarr; <span class="influence-chat-new">{{resultAttitude}}</span>
   </div>
 
   {{#if isContinuing}}
     <div class="influence-chat-shift">{{shiftDescription}}</div>
     {{#if timeLabel}}
-      <div class="influence-chat-time"><strong>Time:</strong> {{timeLabel}}</div>
+      <div class="influence-chat-time"><strong>{{localize 'ACKS-INFLUENCE.chat.time'}}:</strong> {{timeLabel}}</div>
     {{/if}}
   {{/if}}
 
   {{#if bribePaid}}
     <div class="influence-chat-bribe">
       <i class="fa-solid fa-coins"></i>
-      <span><strong>Bribe:</strong> {{bribePaid.fee}} gp{{#if bribePaid.from}} from {{bribePaid.from}}{{/if}}{{#if bribePaid.to}} to {{bribePaid.to}}{{/if}}</span>
+      <span><strong>{{localize 'ACKS-INFLUENCE.chat.bribe'}}:</strong> {{bribePaid.fee}} gp{{#if bribePaid.from}} from {{bribePaid.from}}{{/if}}{{#if bribePaid.to}} to {{bribePaid.to}}{{/if}}</span>
     </div>
   {{/if}}
 
   {{#if bewitched}}
     <div class="influence-chat-bewitched">
       <i class="fa-solid fa-wand-magic-sparkles"></i>
-      <span><strong>Mystic Aura:</strong> total is 12+ — the subject acts <strong>bewitched</strong>
-      while in the character's presence.</span>
+      <span><strong>{{localize 'ACKS-INFLUENCE.chat.bewitchedLabel'}}:</strong> {{localize 'ACKS-INFLUENCE.chat.bewitched'}}</span>
     </div>
   {{/if}}
 
   {{#if activeModifiers.length}}
     <details class="influence-chat-mods" open>
-      <summary>Active modifiers ({{activeModifiers.length}})</summary>
+      <summary>{{localize 'ACKS-INFLUENCE.chat.activeModifiers' count=activeModifiers.length}}</summary>
       <ul>
         {{#each activeModifiers}}
           <li><span class="mod-val">{{numberFormat this.value sign=true}}</span> {{this.label}}</li>
@@ -50,7 +49,7 @@
       </ul>
     </details>
   {{else}}
-    <div class="influence-chat-mods-none">No modifiers applied.</div>
+    <div class="influence-chat-mods-none">{{localize 'ACKS-INFLUENCE.chat.noModifiers'}}</div>
   {{/if}}
 
 </section>

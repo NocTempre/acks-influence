@@ -3,7 +3,7 @@
  * Reads auto-populatable values from the influencing actor and the targeted
  * token's actor, using only public ACKS data paths (no system internals).
  */
-import { HENCHMAN_MONTHLY_WAGE, INFLUENCE_MODIFIERS } from "./constants.mjs";
+import { HENCHMAN_MONTHLY_WAGE, INFLUENCE_MODIFIERS, MODULE_ID, REACTION_CHANGE_KEY } from "./constants.mjs";
 
 const GENERIC_IMG = "icons/svg/mystery-man.svg";
 
@@ -133,13 +133,17 @@ function resolveAutoValue(source, ctx) {
 
 /**
  * Build the per-tone default modifier values. Auto fields get detected values;
- * every other field gets its neutral default (false for checks, 0 otherwise).
+ * effect-granted fields use their declared default; everything else gets its
+ * neutral default (false for checks, 0 otherwise).
+ * @param {Actor|null} actor
+ * @param {Actor|null} targetActor
+ * @param {Record<string, Array>} modConfig  per-tone groups (static + effects)
  * @returns {{[tone:string]: {[key:string]: (number|boolean)}}}
  */
-export function computeDefaults(actor, targetActor) {
+export function computeDefaults(actor, targetActor, modConfig = INFLUENCE_MODIFIERS) {
   const ctx = buildContext(actor, targetActor);
   const defaults = {};
-  for (const [tone, groups] of Object.entries(INFLUENCE_MODIFIERS)) {
+  for (const [tone, groups] of Object.entries(modConfig)) {
     defaults[tone] = {};
     for (const group of groups) {
       for (const mod of group.mods) {
@@ -147,12 +151,48 @@ export function computeDefaults(actor, targetActor) {
         if (mod.auto) {
           const resolved = resolveAutoValue(mod.auto, ctx);
           if (resolved !== undefined) value = resolved;
+        } else if (Object.hasOwn(mod, "default")) {
+          value = mod.default;
         }
         defaults[tone][mod.key] = value;
       }
     }
   }
   return defaults;
+}
+
+/**
+ * Scan an actor's active effects for reaction-roll modifiers (see
+ * REACTION_CHANGE_KEY). Returns a flat list; the app groups them per tone.
+ * @returns {Array<{id:string,label:string,value:number,situational:boolean,tone:string}>}
+ */
+export function getEffectReactionMods(actor) {
+  if (!actor) return [];
+  const out = [];
+  const effects = actor.appliedEffects ?? actor.effects ?? [];
+  let idx = 0;
+  for (const effect of effects) {
+    if (effect.disabled) continue;
+    const f = effect.flags?.[MODULE_ID] ?? {};
+    let ci = 0;
+    for (const change of effect.changes ?? []) {
+      if (change.key === REACTION_CHANGE_KEY) {
+        const value = Number(change.value) || 0;
+        if (value) {
+          out.push({
+            id: `eff:${effect.id ?? idx}:${ci}`,
+            label: f.label || effect.name || "Effect",
+            value,
+            situational: f.situational !== false,
+            tone: String(f.tone ?? "all").toLowerCase(),
+          });
+        }
+      }
+      ci++;
+    }
+    idx++;
+  }
+  return out;
 }
 
 /** The set of modifier keys (per tone) that are auto-populated, for UI badges. */

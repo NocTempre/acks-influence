@@ -3,10 +3,22 @@
  * Sourced from the player rules (pp. 84-87) and the Judges Journal GM screen.
  * The modifier layout mirrors the GM screen: rows in screen order, grouped by
  * the Both / Either / Character / Target keys, with "±" rows as selects.
- * See docs/ACKS-Reactions-Reference.md for the full reference.
+ *
+ * All user-facing labels are localization keys resolved via game.i18n; see
+ * lang/en.json. See docs/ACKS-Reactions-Reference.md for the rules reference.
  */
 
 export const MODULE_ID = "acks-influence";
+
+/**
+ * Active Effect convention: an effect on any item/actor with a change keyed
+ * `flags.acks-influence.reaction` contributes a reaction-roll modifier equal to
+ * the change value. Effect flags under `flags.acks-influence` tune it:
+ *   - situational {boolean} default true  → shown as a GM-toggled checkbox
+ *   - tone {"all"|"diplomacy"|"intimidation"|"seduction"} default "all"
+ *   - label {string} optional display label (else the effect's name)
+ */
+export const REACTION_CHANGE_KEY = `flags.${MODULE_ID}.reaction`;
 
 /** The three tones a spokesperson can adopt when attempting to influence. */
 export const INFLUENCE_TONE = Object.freeze({
@@ -34,12 +46,30 @@ export const INFLUENCE_MODE_CHOICES = Object.freeze([
 
 /**
  * The attitude ladder, most negative (index 0) to most positive (index 4).
- * Labels differ by tone for the two upper rungs.
+ * Labels (localization keys) differ by tone for the two upper rungs.
  */
 export const INFLUENCE_ATTITUDE_LABELS = Object.freeze({
-  [INFLUENCE_TONE.DIPLOMACY]: ["Hostile", "Unfriendly", "Neutral", "Indifferent", "Friendly"],
-  [INFLUENCE_TONE.INTIMIDATION]: ["Hostile", "Unfriendly", "Neutral", "Intimidated", "Overawed"],
-  [INFLUENCE_TONE.SEDUCTION]: ["Hostile", "Unfriendly", "Neutral", "Indifferent", "Friendly"],
+  [INFLUENCE_TONE.DIPLOMACY]: [
+    "ACKS-INFLUENCE.attitude.hostile",
+    "ACKS-INFLUENCE.attitude.unfriendly",
+    "ACKS-INFLUENCE.attitude.neutral",
+    "ACKS-INFLUENCE.attitude.indifferent",
+    "ACKS-INFLUENCE.attitude.friendly",
+  ],
+  [INFLUENCE_TONE.INTIMIDATION]: [
+    "ACKS-INFLUENCE.attitude.hostile",
+    "ACKS-INFLUENCE.attitude.unfriendly",
+    "ACKS-INFLUENCE.attitude.neutral",
+    "ACKS-INFLUENCE.attitude.intimidated",
+    "ACKS-INFLUENCE.attitude.overawed",
+  ],
+  [INFLUENCE_TONE.SEDUCTION]: [
+    "ACKS-INFLUENCE.attitude.hostile",
+    "ACKS-INFLUENCE.attitude.unfriendly",
+    "ACKS-INFLUENCE.attitude.neutral",
+    "ACKS-INFLUENCE.attitude.indifferent",
+    "ACKS-INFLUENCE.attitude.friendly",
+  ],
 });
 
 /** Roll modifier contributed by the target's current attitude. */
@@ -59,41 +89,41 @@ export const INFLUENCE_BANDS = Object.freeze([
   { key: "12+", min: 12, max: Infinity, initialIndex: 4, shift: 2, towardNeutral: false },
 ]);
 
-/** Per-tone descriptive text for each reaction band. */
+/** Per-tone descriptive text (localization keys) for each reaction band. */
 export const INFLUENCE_BAND_LABELS = Object.freeze({
   [INFLUENCE_TONE.DIPLOMACY]: {
-    "2-": "Hostile, attacks",
-    "3-5": "Unfriendly, may attack",
-    "6-8": "Neutral, uncertain",
-    "9-11": "Indifferent, uninterested",
-    "12+": "Friendly, helpful",
+    "2-": "ACKS-INFLUENCE.band.diplomacy.2",
+    "3-5": "ACKS-INFLUENCE.band.diplomacy.35",
+    "6-8": "ACKS-INFLUENCE.band.diplomacy.68",
+    "9-11": "ACKS-INFLUENCE.band.diplomacy.911",
+    "12+": "ACKS-INFLUENCE.band.diplomacy.12",
   },
   [INFLUENCE_TONE.INTIMIDATION]: {
-    "2-": "Hostile, attacks",
-    "3-5": "Unfriendly, may attack",
-    "6-8": "Neutral, uncertain",
-    "9-11": "Intimidated, escapes if possible",
-    "12+": "Overawed, helpful",
+    "2-": "ACKS-INFLUENCE.band.intimidation.2",
+    "3-5": "ACKS-INFLUENCE.band.intimidation.35",
+    "6-8": "ACKS-INFLUENCE.band.intimidation.68",
+    "9-11": "ACKS-INFLUENCE.band.intimidation.911",
+    "12+": "ACKS-INFLUENCE.band.intimidation.12",
   },
   [INFLUENCE_TONE.SEDUCTION]: {
-    "2-": "Hostile, attacks or calls for aid",
-    "3-5": "Unfriendly, insults or rejects",
-    "6-8": "Neutral, remains open",
-    "9-11": "Indifferent, but secretly interested",
-    "12+": "Friendly, helpful",
+    "2-": "ACKS-INFLUENCE.band.seduction.2",
+    "3-5": "ACKS-INFLUENCE.band.seduction.35",
+    "6-8": "ACKS-INFLUENCE.band.seduction.68",
+    "9-11": "ACKS-INFLUENCE.band.seduction.911",
+    "12+": "ACKS-INFLUENCE.band.seduction.12",
   },
 });
 
 /**
  * Time cost of the Nth attempt to influence (Judges Journal GM screen).
- * The screen lists five steps; longer campaigns escalate at the Judge's discretion.
+ * Labels are localization keys.
  */
 export const INFLUENCE_TIME_STEPS = Object.freeze([
-  { value: 1, label: "1st attempt — 1 round (1 minute)" },
-  { value: 2, label: "2nd attempt — 1 turn (10 minutes)" },
-  { value: 3, label: "3rd attempt — 6 turns (1 hour)" },
-  { value: 4, label: "4th attempt — 8 hours (1 day)" },
-  { value: 5, label: "5th attempt — 5 days (1 week)" },
+  { value: 1, label: "ACKS-INFLUENCE.time.1" },
+  { value: 2, label: "ACKS-INFLUENCE.time.2" },
+  { value: 3, label: "ACKS-INFLUENCE.time.3" },
+  { value: 4, label: "ACKS-INFLUENCE.time.4" },
+  { value: 5, label: "ACKS-INFLUENCE.time.5" },
 ]);
 
 /**
@@ -114,195 +144,178 @@ export const HENCHMAN_MONTHLY_WAGE = Object.freeze([
  *
  * `auto` pre-fills a field from the actor/target. Sources resolved in
  * actor-data.mjs: "cha", "targetWill", "alignment", "prof:<name>", "bribeFee".
- * `requiresProf` shows the field only when the actor has that proficiency.
+ * All `label`/`group`/option `label` values are localization keys.
  */
-
-/**
- * Situational reaction bonuses from proficiencies that depend on *what the
- * target is* (a normal animal, a townsfolk, ...). Shared by all three tones and
- * shown only when the actor has the proficiency. See reference §5.3.
- */
-const SITUATIONAL_PROFICIENCIES = {
-  group: "Situational Proficiencies",
-  mods: [
-    { key: "beastFriendship", type: "check", label: "Beast Friendship — target is a normal animal (+2)", value: 2, requiresProf: "beastFriendship" },
-    { key: "animalTrainer", type: "check", label: "Animal Husbandry — tame, uncontrolled animal (+1)", value: 1, requiresProf: "animalHusbandry" },
-    { key: "folkways", type: "check", label: "Folkways — 0th-level target in home settlement (+1)", value: 1, requiresProf: "folkways" },
-  ],
-};
 
 const LAIR_OPTIONS = [
-  { label: "—", value: 0 },
-  { label: "Character in own lair (+1)", value: 1 },
-  { label: "Trespassing in target's lair (-1)", value: -1 },
+  { label: "ACKS-INFLUENCE.opt.dash", value: 0 },
+  { label: "ACKS-INFLUENCE.opt.lairChar", value: 1 },
+  { label: "ACKS-INFLUENCE.opt.lairTarget", value: -1 },
 ];
 
 export const INFLUENCE_MODIFIERS = Object.freeze({
   [INFLUENCE_TONE.DIPLOMACY]: [
     {
-      group: "Both",
+      group: "ACKS-INFLUENCE.group.both",
       mods: [
         {
           key: "alignment",
           type: "select",
-          label: "Alignment match / mismatch",
+          label: "ACKS-INFLUENCE.mod.diplomacy.alignment",
           auto: "alignment",
           options: [
-            { label: "—", value: 0 },
-            { label: "Match: Lawful vs Lawful/Neutral (+1)", value: 1 },
-            { label: "Mismatch (-1)", value: -1 },
+            { label: "ACKS-INFLUENCE.opt.dash", value: 0 },
+            { label: "ACKS-INFLUENCE.opt.alignMatch", value: 1 },
+            { label: "ACKS-INFLUENCE.opt.alignMismatch", value: -1 },
           ],
         },
-        { key: "lair", type: "select", label: "In own lair", options: LAIR_OPTIONS },
+        { key: "lair", type: "select", label: "ACKS-INFLUENCE.mod.diplomacy.lair", options: LAIR_OPTIONS },
       ],
     },
     {
-      group: "Either",
+      group: "ACKS-INFLUENCE.group.either",
       mods: [
-        { key: "authority", type: "signed", label: "Has authority over the other (±1 or more)" },
-        { key: "favors", type: "signed", label: "Owes favors (±1 per unrequited favor)" },
-        { key: "charisma", type: "signed", label: "CHA modifier", auto: "cha" },
+        { key: "authority", type: "signed", label: "ACKS-INFLUENCE.mod.diplomacy.authority" },
+        { key: "favors", type: "signed", label: "ACKS-INFLUENCE.mod.diplomacy.favors" },
+        { key: "charisma", type: "signed", label: "ACKS-INFLUENCE.mod.charisma", auto: "cha" },
         {
           key: "bribe",
           type: "select",
-          label: "Offering bribe",
+          label: "ACKS-INFLUENCE.mod.diplomacy.bribe",
           options: [
-            { label: "—", value: 0 },
-            { label: "+1", value: 1 },
-            { label: "+2", value: 2 },
-            { label: "+3", value: 3 },
+            { label: "ACKS-INFLUENCE.opt.dash", value: 0 },
+            { label: "ACKS-INFLUENCE.opt.plus1", value: 1 },
+            { label: "ACKS-INFLUENCE.opt.plus2", value: 2 },
+            { label: "ACKS-INFLUENCE.opt.plus3", value: 3 },
           ],
         },
-        { key: "bribeFee", type: "gold", label: "Bribe fee (gp)", auto: "bribeFee" },
+        { key: "bribeFee", type: "gold", label: "ACKS-INFLUENCE.mod.diplomacy.bribeFee", auto: "bribeFee" },
       ],
     },
     {
-      group: "Character",
+      group: "ACKS-INFLUENCE.group.character",
       mods: [
-        { key: "diplomacyProf", type: "check", label: "Diplomacy proficiency (+1)", value: 1, auto: "prof:diplomacy" },
-        { key: "mysticAura", type: "check", label: "Mystic Aura proficiency (+1)", value: 1, auto: "prof:mysticAura" },
-        { key: "brandishing", type: "check", label: "Brandishing a weapon (-1)", value: -1 },
-        { key: "targetWill", type: "factor", factor: -1, label: "Target's WIL modifier (−/＋WIL)", auto: "targetWill" },
-        { key: "believesHarmed", type: "check", label: "Target thinks character harmed friends (-1)", value: -1 },
-        { key: "evidenceHarmed", type: "check", label: "Target knows character harmed friends (-2)", value: -2 },
-        { key: "personallyHarmed", type: "check", label: "Harmed by character (-5)", value: -5 },
+        { key: "diplomacyProf", type: "check", label: "ACKS-INFLUENCE.mod.diplomacy.prof", value: 1, auto: "prof:diplomacy" },
+        { key: "mysticAura", type: "check", label: "ACKS-INFLUENCE.mod.mysticAura", value: 1, auto: "prof:mysticAura" },
+        { key: "brandishing", type: "check", label: "ACKS-INFLUENCE.mod.diplomacy.brandishing", value: -1 },
+        { key: "targetWill", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mod.targetWill", auto: "targetWill" },
+        { key: "believesHarmed", type: "check", label: "ACKS-INFLUENCE.mod.diplomacy.believesHarmed", value: -1 },
+        { key: "evidenceHarmed", type: "check", label: "ACKS-INFLUENCE.mod.diplomacy.evidenceHarmed", value: -2 },
+        { key: "personallyHarmed", type: "check", label: "ACKS-INFLUENCE.mod.diplomacy.personallyHarmed", value: -5 },
       ],
     },
-    SITUATIONAL_PROFICIENCIES,
   ],
   [INFLUENCE_TONE.INTIMIDATION]: [
     {
-      group: "Both",
+      group: "ACKS-INFLUENCE.group.both",
       mods: [
         {
           key: "outnumber",
           type: "select",
-          label: "Outnumbering",
+          label: "ACKS-INFLUENCE.mod.intimidation.outnumber",
           options: [
-            { label: "—", value: 0 },
-            { label: "You outnumber (+1)", value: 1 },
-            { label: "You outnumber 3:2 (+2)", value: 2 },
-            { label: "You outnumber 3:1 (+5)", value: 5 },
-            { label: "Target outnumbers (-1)", value: -1 },
-            { label: "Target outnumbers 3:2 (-2)", value: -2 },
-            { label: "Target outnumbers 3:1 (-5)", value: -5 },
+            { label: "ACKS-INFLUENCE.opt.dash", value: 0 },
+            { label: "ACKS-INFLUENCE.opt.outYou1", value: 1 },
+            { label: "ACKS-INFLUENCE.opt.outYou2", value: 2 },
+            { label: "ACKS-INFLUENCE.opt.outYou3", value: 5 },
+            { label: "ACKS-INFLUENCE.opt.outTgt1", value: -1 },
+            { label: "ACKS-INFLUENCE.opt.outTgt2", value: -2 },
+            { label: "ACKS-INFLUENCE.opt.outTgt3", value: -5 },
           ],
         },
-        { key: "lair", type: "select", label: "In own lair", options: LAIR_OPTIONS },
+        { key: "lair", type: "select", label: "ACKS-INFLUENCE.mod.intimidation.lair", options: LAIR_OPTIONS },
       ],
     },
     {
-      group: "Either",
+      group: "ACKS-INFLUENCE.group.either",
       mods: [
         {
           key: "brandishing",
           type: "select",
-          label: "Weapons",
+          label: "ACKS-INFLUENCE.mod.intimidation.weapons",
           options: [
-            { label: "—", value: 0 },
-            { label: "Character brandishing (+1)", value: 1 },
-            { label: "Target armed (-1)", value: -1 },
+            { label: "ACKS-INFLUENCE.opt.dash", value: 0 },
+            { label: "ACKS-INFLUENCE.opt.weaponChar", value: 1 },
+            { label: "ACKS-INFLUENCE.opt.weaponTarget", value: -1 },
           ],
         },
         {
           key: "magicItems",
           type: "select",
-          label: "Magic items",
+          label: "ACKS-INFLUENCE.mod.intimidation.magic",
           options: [
-            { label: "—", value: 0 },
-            { label: "Character has magic items (+1)", value: 1 },
-            { label: "Target has magic items (-1)", value: -1 },
+            { label: "ACKS-INFLUENCE.opt.dash", value: 0 },
+            { label: "ACKS-INFLUENCE.opt.magicChar", value: 1 },
+            { label: "ACKS-INFLUENCE.opt.magicTarget", value: -1 },
           ],
         },
-        { key: "advantage", type: "signed", label: "Has the other at a disadvantage (±1 or more)" },
-        { key: "authority", type: "signed", label: "Has legal authority over the other (±1 or more)" },
-        { key: "levelGap", type: "signed", label: "3+ HD higher level than the other (±1 or more)" },
+        { key: "advantage", type: "signed", label: "ACKS-INFLUENCE.mod.intimidation.advantage" },
+        { key: "authority", type: "signed", label: "ACKS-INFLUENCE.mod.intimidation.authority" },
+        { key: "levelGap", type: "signed", label: "ACKS-INFLUENCE.mod.intimidation.levelGap" },
       ],
     },
     {
-      group: "Character",
+      group: "ACKS-INFLUENCE.group.character",
       mods: [
-        { key: "charisma", type: "signed", label: "CHA modifier", auto: "cha" },
-        { key: "intimidationProf", type: "check", label: "Intimidation proficiency (+1; target <5 HD or you outnumber/outrank)", value: 1, auto: "prof:intimidation" },
-        { key: "mysticAura", type: "check", label: "Mystic Aura proficiency (+1)", value: 1, auto: "prof:mysticAura" },
+        { key: "charisma", type: "signed", label: "ACKS-INFLUENCE.mod.charisma", auto: "cha" },
+        { key: "intimidationProf", type: "check", label: "ACKS-INFLUENCE.mod.intimidation.prof", value: 1, auto: "prof:intimidation" },
+        { key: "mysticAura", type: "check", label: "ACKS-INFLUENCE.mod.mysticAura", value: 1, auto: "prof:mysticAura" },
       ],
     },
     {
-      group: "Target",
+      group: "ACKS-INFLUENCE.group.target",
       mods: [
-        { key: "targetMorale", type: "factor", factor: -1, label: "Target's Morale score (−/＋Morale)" },
-        { key: "targetWill", type: "factor", factor: -1, label: "Target's WIL modifier (−/＋WIL)", auto: "targetWill" },
-        { key: "sawFriendsHurt", type: "check", label: "Target saw character kill/torture associates (+1)", value: 1 },
-        { key: "lossOfFace", type: "signed", label: "Target fears loss of face if it submits (−1 or more)" },
-        { key: "fearsBoss", type: "signed", label: "Target fears its master more (−5 or more)" },
+        { key: "targetMorale", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mod.intimidation.morale" },
+        { key: "targetWill", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mod.targetWill", auto: "targetWill" },
+        { key: "sawFriendsHurt", type: "check", label: "ACKS-INFLUENCE.mod.intimidation.sawFriendsHurt", value: 1 },
+        { key: "lossOfFace", type: "signed", label: "ACKS-INFLUENCE.mod.intimidation.lossOfFace" },
+        { key: "fearsBoss", type: "signed", label: "ACKS-INFLUENCE.mod.intimidation.fearsBoss" },
       ],
     },
-    SITUATIONAL_PROFICIENCIES,
   ],
   [INFLUENCE_TONE.SEDUCTION]: [
     {
-      group: "Both",
+      group: "ACKS-INFLUENCE.group.both",
       mods: [
-        { key: "alone", type: "check", label: "Alone together (+1)", value: 1 },
-        { key: "friendsPresent", type: "check", label: "In front of the target's friends (-1)", value: -1 },
+        { key: "alone", type: "check", label: "ACKS-INFLUENCE.mod.seduction.alone", value: 1 },
+        { key: "friendsPresent", type: "check", label: "ACKS-INFLUENCE.mod.seduction.friendsPresent", value: -1 },
       ],
     },
     {
-      group: "Either",
+      group: "ACKS-INFLUENCE.group.either",
       mods: [
         {
           key: "levelGap",
           type: "select",
-          label: "3+ levels higher / lower",
+          label: "ACKS-INFLUENCE.mod.seduction.levelGap",
           options: [
-            { label: "—", value: 0 },
-            { label: "Character higher (+1)", value: 1 },
-            { label: "Character lower (-1)", value: -1 },
+            { label: "ACKS-INFLUENCE.opt.dash", value: 0 },
+            { label: "ACKS-INFLUENCE.opt.charHigher", value: 1 },
+            { label: "ACKS-INFLUENCE.opt.charLower", value: -1 },
           ],
         },
-        { key: "age", type: "signed", label: "Attractive/unattractive age vs. target's preference (±1 per category)" },
-        { key: "appeal", type: "signed", label: "Appealing/unappealing behavior or appearance (±1 or more)" },
+        { key: "age", type: "signed", label: "ACKS-INFLUENCE.mod.seduction.age" },
+        { key: "appeal", type: "signed", label: "ACKS-INFLUENCE.mod.seduction.appeal" },
       ],
     },
     {
-      group: "Character",
+      group: "ACKS-INFLUENCE.group.character",
       mods: [
-        { key: "socialStatus", type: "factor", factor: 1, label: "Higher social status (+1 per noble rank)" },
-        { key: "charisma", type: "signed", label: "CHA modifier", auto: "cha" },
-        { key: "seductionProf", type: "check", label: "Seduction proficiency (+1)", value: 1, auto: "prof:seduction" },
-        { key: "mysticAura", type: "check", label: "Mystic Aura proficiency (+1)", value: 1, auto: "prof:mysticAura" },
-        { key: "performanceArt", type: "check", label: "Also demonstrates Performance or Art (+1)", value: 1, auto: "prof:performanceArt" },
-        { key: "targetWill", type: "factor", factor: -1, label: "Target's WIL modifier (−/＋WIL)", auto: "targetWill" },
+        { key: "socialStatus", type: "factor", factor: 1, label: "ACKS-INFLUENCE.mod.seduction.socialStatus" },
+        { key: "charisma", type: "signed", label: "ACKS-INFLUENCE.mod.charisma", auto: "cha" },
+        { key: "seductionProf", type: "check", label: "ACKS-INFLUENCE.mod.seduction.prof", value: 1, auto: "prof:seduction" },
+        { key: "mysticAura", type: "check", label: "ACKS-INFLUENCE.mod.mysticAura", value: 1, auto: "prof:mysticAura" },
+        { key: "performanceArt", type: "check", label: "ACKS-INFLUENCE.mod.seduction.performanceArt", value: 1, auto: "prof:performanceArt" },
+        { key: "targetWill", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mod.targetWill", auto: "targetWill" },
       ],
     },
     {
-      group: "Target",
+      group: "ACKS-INFLUENCE.group.target",
       mods: [
-        { key: "tookAdvantageFriends", type: "check", label: "Took advantage of target's friends in the past (-1)", value: -1 },
-        { key: "tookAdvantageTarget", type: "check", label: "Took advantage of target in the past (-2)", value: -2 },
-        { key: "personalRisk", type: "signed", label: "Liaison would put target at personal risk (−2 or more)" },
+        { key: "tookAdvantageFriends", type: "check", label: "ACKS-INFLUENCE.mod.seduction.tookAdvantageFriends", value: -1 },
+        { key: "tookAdvantageTarget", type: "check", label: "ACKS-INFLUENCE.mod.seduction.tookAdvantageTarget", value: -2 },
+        { key: "personalRisk", type: "signed", label: "ACKS-INFLUENCE.mod.seduction.personalRisk" },
       ],
     },
-    SITUATIONAL_PROFICIENCIES,
   ],
 });

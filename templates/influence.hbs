@@ -58,29 +58,18 @@
           </select>
         </div>
       </div>
-    </div>
 
-    {{#if isContinuing}}
-      <div class="row">
-        <div class="form-group flex-1">
-          <label class="flex-1" for="{{@root.partId}}-attitude">{{localize 'ACKS-INFLUENCE.field.currentAttitude'}}</label>
-          <div class="form-fields flex-1">
-            <select name="currentAttitude" id="{{@root.partId}}-attitude" data-dtype="Number">
-              {{selectOptions attitudeChoices valueAttr="value" labelAttr="label" selected=system.currentAttitude}}
-            </select>
-          </div>
-        </div>
-
+      {{#if isContinuing}}
         <div class="form-group flex-1">
           <label class="flex-1" for="{{@root.partId}}-attempt">{{localize 'ACKS-INFLUENCE.field.attempt'}}</label>
           <div class="form-fields flex-1">
             <select name="attempt" id="{{@root.partId}}-attempt" data-dtype="Number">
-              {{selectOptions timeChoices valueAttr="value" labelAttr="label" selected=system.attempt}}
+              {{selectOptions timeChoices valueAttr="value" labelAttr="label" selected=system.attempt localize=true}}
             </select>
           </div>
         </div>
-      </div>
-    {{/if}}
+      {{/if}}
+    </div>
   </fieldset>
 
   {{!-- Tone-specific modifiers --}}
@@ -105,6 +94,10 @@
               {{#if this.isAuto}}
                 <i class="fa-solid fa-wand-magic-sparkles influence-auto-badge"
                    data-tooltip="{{localize 'ACKS-INFLUENCE.auto.badge'}}"></i>
+              {{/if}}
+              {{#if this.isEffect}}
+                <i class="fa-solid fa-hand-sparkles influence-effect-badge"
+                   data-tooltip="{{localize 'ACKS-INFLUENCE.effect.badge'}}"></i>
               {{/if}}
             </label>
             <div class="form-fields influence-mod-field">
@@ -131,40 +124,16 @@
     {{/each}}
   </div>
 
-  {{!-- Summary --}}
-  <fieldset class="influence-summary">
-    <div class="row">
-      <div class="form-group flex-1">
-        <label class="flex-2">{{localize 'ACKS-INFLUENCE.field.subtotal'}}</label>
-        <div class="form-fields flex-1">
-          <input type="number" value="{{subtotal}}" data-dtype="Number" disabled class="influence-subtotal"/>
-        </div>
-      </div>
-
-      <div class="form-group flex-1">
-        <label class="flex-2" for="{{@root.partId}}-gm">{{localize 'ACKS-INFLUENCE.field.gmAdjustment'}}</label>
-        <div class="form-fields flex-1">
-          <input type="number" name="gmAdjustment" id="{{@root.partId}}-gm" value="{{gmAdjustment}}" data-dtype="Number"
-                 data-tooltip="{{localize 'ACKS-INFLUENCE.field.gmAdjustmentHint'}}"/>
-        </div>
-      </div>
-
-      <div class="form-group flex-1">
-        <label class="flex-2" for="{{@root.partId}}-total">{{localize 'ACKS-INFLUENCE.field.finalModifier'}}</label>
-        <div class="form-fields flex-1">
-          <input type="number" name="finalTotal" id="{{@root.partId}}-total" value="{{finalModifier}}"
-                 data-dtype="Number" class="influence-final"
-                 data-tooltip="{{localize 'ACKS-INFLUENCE.field.finalModifierHint'}}"/>
-        </div>
-      </div>
-    </div>
+  {{!-- Roll bar: one editable Final Modifier (preselected to the computed total;
+        type over it to override — the difference is banked as a GM adjustment). --}}
+  <footer class="form-footer influence-footer">
     {{#if isContinuing}}
-      <div class="influence-time-note">{{localize 'ACKS-INFLUENCE.field.timeCost'}}: <strong>{{timeLabel}}</strong></div>
+      <span class="influence-time-note">{{localize 'ACKS-INFLUENCE.field.timeCost'}}: <strong>{{timeLabel}}</strong></span>
     {{/if}}
-  </fieldset>
-
-  <footer class="form-footer">
-    <button type="button" data-action="roll">
+    <label class="influence-total-label" for="{{@root.partId}}-total">{{localize 'ACKS-INFLUENCE.field.finalModifier'}}</label>
+    <input type="number" name="finalTotal" id="{{@root.partId}}-total" value="{{finalModifier}}" data-dtype="Number"
+           class="influence-final" data-tooltip="{{localize 'ACKS-INFLUENCE.field.finalModifierHint'}}"/>
+    <button type="button" data-action="roll" class="influence-roll-btn">
       <i class="fa-solid fa-dice"></i> {{localize 'ACKS-INFLUENCE.action.roll'}}
     </button>
   </footer>
