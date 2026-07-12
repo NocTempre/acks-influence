@@ -95,13 +95,18 @@ function proficiencyDoc(p) {
       save: "",
       _schemaVersion: 3,
     },
-    effects: p.effect ? [p.effect] : [],
+    effects: [], // embedded effects are stored as separate pack keys, not inline
     flags: {},
     ownership: { default: 0 },
     sort: 0,
     _stats: { systemId: "acks", createdTime: now, modifiedTime: now },
     _key: `!items!${p.id}`,
   };
+}
+
+/** The separate LevelDB entry for an item's embedded Active Effect. */
+function effectEntry(itemId, effect) {
+  return { ...effect, _key: `!items.effects!${itemId}.${effect._id}` };
 }
 
 /* -------------------------------------------- */
@@ -174,5 +179,11 @@ async function buildPack(packName, docs) {
   console.log(`Built pack "${packName}": ${docs.length} document(s) -> ${dbDir}`);
 }
 
-await buildPack("proficiencies", PROFICIENCIES.map(proficiencyDoc));
+// Emit each proficiency item plus, as a SEPARATE pack entry, its embedded effect.
+const proficiencyEntries = [];
+for (const p of PROFICIENCIES) {
+  proficiencyEntries.push(proficiencyDoc(p));
+  if (p.effect) proficiencyEntries.push(effectEntry(p.id, p.effect));
+}
+await buildPack("proficiencies", proficiencyEntries);
 await buildPack("macros", MACROS.map(macroDoc));

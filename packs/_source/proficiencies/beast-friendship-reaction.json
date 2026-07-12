@@ -1,0 +1,33 @@
+{
+  "_id": "acksInflEffBeast",
+  "name": "Beast Friendship (reaction)",
+  "img": "icons/svg/aura.svg",
+  "changes": [
+    {
+      "key": "flags.acks-influence.reaction",
+      "mode": 2,
+      "value": "2",
+      "priority": 20
+    }
+  ],
+  "disabled": false,
+  "transfer": true,
+  "description": "",
+  "origin": null,
+  "duration": {
+    "startTime": null,
+    "seconds": null,
+    "rounds": null,
+    "turns": null
+  },
+  "tint": "#ffffff",
+  "statuses": [],
+  "flags": {
+    "acks-influence": {
+      "situational": true,
+      "tone": "all",
+      "label": "Beast Friendship — target is a normal animal (+2)"
+    }
+  },
+  "_key": "!items.effects!acksInflBeastFrn.acksInflEffBeast"
+}

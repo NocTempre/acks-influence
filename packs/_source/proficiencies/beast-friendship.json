@@ -16,40 +16,7 @@
     "save": "",
     "_schemaVersion": 3
   },
-  "effects": [
-    {
-      "_id": "acksInflEffBeast",
-      "name": "Beast Friendship (reaction)",
-      "img": "icons/svg/aura.svg",
-      "changes": [
-        {
-          "key": "flags.acks-influence.reaction",
-          "mode": 2,
-          "value": "2",
-          "priority": 20
-        }
-      ],
-      "disabled": false,
-      "transfer": true,
-      "description": "",
-      "origin": null,
-      "duration": {
-        "startTime": null,
-        "seconds": null,
-        "rounds": null,
-        "turns": null
-      },
-      "tint": "#ffffff",
-      "statuses": [],
-      "flags": {
-        "acks-influence": {
-          "situational": true,
-          "tone": "all",
-          "label": "Beast Friendship — target is a normal animal (+2)"
-        }
-      }
-    }
-  ],
+  "effects": [],
   "flags": {},
   "ownership": {
     "default": 0
@@ -57,8 +24,8 @@
   "sort": 0,
   "_stats": {
     "systemId": "acks",
-    "createdTime": 1783818797952,
-    "modifiedTime": 1783818797952
+    "createdTime": 1783822918803,
+    "modifiedTime": 1783822918803
   },
   "_key": "!items!acksInflBeastFrn"
 }

@@ -1,5 +1,3 @@
-2026/07/11-21:13:18.532 b754 Recovering log #3
-2026/07/11-21:13:18.533 b754 Level-0 table #5: started
-2026/07/11-21:13:18.541 b754 Level-0 table #5: 4318 bytes OK
-2026/07/11-21:13:18.562 b754 Delete type=0 #3
-2026/07/11-21:13:18.564 b754 Delete type=3 #2
+2026/07/11-22:22:55.363 dae0 Recovering log #8
+2026/07/11-22:22:55.376 dae0 Delete type=0 #8
+2026/07/11-22:22:55.378 dae0 Delete type=3 #7
