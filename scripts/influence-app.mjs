@@ -26,6 +26,7 @@ import {
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 const ATTITUDE_COUNT = INFLUENCE_RELATIONSHIP_MOD.length; // 5 rungs
+const ATTITUDE_TYPE = `${MODULE_ID}.attitude`;
 
 /**
  * Resolves the three kinds of ACKS II influence rolls (Diplomacy, Intimidation,
@@ -44,6 +45,8 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   #autoKeys = autoKeysByTone();
   /** Actor-specific modifier config: static groups + an effect-granted group. */
   #modConfig = null;
+  /** The stored-attitude Item for the current influencer→target, if any. */
+  #attitudeItem = null;
   /** Sum of relationship + tone modifiers (before the GM adjustment bucket). */
   #subtotal = 0;
   /** Effective modifier applied to the roll (#subtotal + GM adjustment). */
@@ -71,6 +74,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       bribeFeeOverridden: false, // true once the GM edits the bribe fee by hand
     };
 
+    this.#loadAttitude();
     this.#recalculate();
   }
 
@@ -190,6 +194,51 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   #syncBribeFee() {
     if (this.#system.bribeFeeOverridden) return;
     this.#modifiers[INFLUENCE_TONE.DIPLOMACY].bribeFee = this.#computeBribeFee();
+  }
+
+  /* -------------------------------------------- */
+  /*  Stored attitude (persistence)               */
+  /* -------------------------------------------- */
+
+  /** Load the saved attitude/attempts for the current influencer→target, if any. */
+  #loadAttitude() {
+    this.#attitudeItem = null;
+    if (!this.#actor || !this.#targetActor) return;
+    const uuid = this.#targetActor.uuid;
+    const item = this.#actor.items?.find((i) => i.type === ATTITUDE_TYPE && i.system?.targetUuid === uuid);
+    if (!item) return;
+    this.#attitudeItem = item;
+    this.#system.currentAttitude = item.system.attitude ?? this.#system.currentAttitude;
+    this.#system.attempt = item.system.attempts?.[this.#system.tone] ?? this.#system.attempt;
+  }
+
+  /** Persist the new attitude and this tone's attempt count (owner only). */
+  async #saveAttitude(newIndex, nextAttempt) {
+    if (!this.#actor?.isOwner || !this.#targetActor) return;
+    const tone = this.#system.tone;
+    try {
+      if (this.#attitudeItem) {
+        await this.#attitudeItem.update({ "system.attitude": newIndex, [`system.attempts.${tone}`]: nextAttempt });
+      } else {
+        const created = await this.#actor.createEmbeddedDocuments("Item", [
+          {
+            name: game.i18n.format("ACKS-INFLUENCE.attitude.itemName", { name: this.#targetActor.name }),
+            type: ATTITUDE_TYPE,
+            img: this.#targetActor.img || undefined,
+            system: {
+              targetUuid: this.#targetActor.uuid,
+              targetName: this.#targetActor.name,
+              targetImg: this.#targetActor.img || "",
+              attitude: newIndex,
+              attempts: { [tone]: nextAttempt },
+            },
+          },
+        ]);
+        this.#attitudeItem = created?.[0] ?? null;
+      }
+    } catch (err) {
+      console.error(`${MODULE_ID} | failed to save attitude`, err);
+    }
   }
 
   #relationshipModifier() {
@@ -397,6 +446,10 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     if (data.tone) this.#system.tone = data.tone;
     if (data.attempt !== undefined) this.#system.attempt = Number(data.attempt);
     if (data.currentAttitude !== undefined) this.#system.currentAttitude = Number(data.currentAttitude);
+    // Switching tone resumes that tone's stored attempt count.
+    if (data.tone && data.tone !== previousTone && this.#attitudeItem) {
+      this.#system.attempt = this.#attitudeItem.system.attempts?.[data.tone] ?? 0;
+    }
 
     this.#subtotal = this.#computeSubtotal();
     if (totalOverride !== null) this.#system.gmAdjustment = totalOverride - this.#subtotal;
@@ -432,6 +485,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     this.#modifiers[tone] = foundry.utils.deepClone(this.#defaults[tone]);
     this.#system.gmAdjustment = 0; // clear the GM bucket / total override
     this.#system.bribeFeeOverridden = false; // re-detect the bribe fee
+    this.#loadAttitude();
     this.#recalculate();
     this.render();
   }
@@ -491,6 +545,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     }
     this.#defaults = newDefaults;
     this.#system.bribeFeeOverridden = false; // re-detect fee for the new target
+    this.#loadAttitude();
     this.#recalculate();
   }
 
@@ -665,7 +720,10 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     // Advance the tracker to the new attitude and step to the next attempt level
     // (the initial reaction rolls into the 1st attempt to influence).
     this.#system.currentAttitude = newIndex;
-    this.#system.attempt = Math.min(INFLUENCE_TIME_STEPS.length - 1, this.#system.attempt + 1);
+    const nextAttempt = Math.min(INFLUENCE_TIME_STEPS.length - 1, this.#system.attempt + 1);
+    this.#system.attempt = nextAttempt;
+    // Persist the updated relationship (auto save/load).
+    void this.#saveAttitude(newIndex, nextAttempt);
     this.#recalculate();
     this.render();
   }

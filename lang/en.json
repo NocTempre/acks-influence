@@ -8,7 +8,14 @@
 
   "ACKS-INFLUENCE.section.interaction": "Interaction",
 
+  "ACKS-INFLUENCE.field.currentAttitude": "Current attitude",
   "ACKS-INFLUENCE.field.tone": "Tone",
+
+  "ACKS-INFLUENCE.attitude.target": "Target",
+  "ACKS-INFLUENCE.attitude.attempts": "Attempts used (per tone)",
+  "ACKS-INFLUENCE.attitude.notes": "Notes",
+  "ACKS-INFLUENCE.attitude.itemName": "Attitude: {name}",
+  "ACKS-INFLUENCE.attitude.relationships": "Relationships",
   "ACKS-INFLUENCE.field.attempt": "Attempt (time cost)",
   "ACKS-INFLUENCE.field.finalModifier": "Final Modifier",
   "ACKS-INFLUENCE.field.finalModifierHint": "The total applied to the roll. Type over it to override; the difference is stored as a GM adjustment. Use Reset to defaults to clear it.",

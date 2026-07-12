@@ -1,6 +1,10 @@
-/* global Hooks, game, foundry, canvas */
+/* global Hooks, game, foundry, canvas, CONFIG */
 import InfluenceApp from "./influence-app.mjs";
-import { MODULE_ID } from "./constants.mjs";
+import AttitudeData from "./attitude-data.mjs";
+import AttitudeSheet from "./attitude-sheet.mjs";
+import { INFLUENCE_ATTITUDE_LABELS, MODULE_ID } from "./constants.mjs";
+
+const ATTITUDE_TYPE = `${MODULE_ID}.attitude`;
 
 /** Open the influence roller for a given actor (or standalone if none). */
 function openInfluenceApp(actor = null) {
@@ -16,11 +20,25 @@ Hooks.once("init", () => {
   // Also expose globally as a resilient fallback for macros.
   globalThis.acksInfluence = api;
 
+  // Register the stored-attitude Item subtype + its sheet.
+  CONFIG.Item.dataModels ??= {};
+  CONFIG.Item.dataModels[ATTITUDE_TYPE] = AttitudeData;
+  try {
+    foundry.documents.collections.Items.registerSheet(MODULE_ID, AttitudeSheet, {
+      types: [ATTITUDE_TYPE],
+      makeDefault: true,
+      label: "ACKS Influence: Attitude",
+    });
+  } catch (err) {
+    console.warn(`${MODULE_ID} | attitude sheet registration failed`, err);
+  }
+
   // Preload templates so first render and chat cards are instant (best-effort).
   try {
     foundry.applications.handlebars.loadTemplates([
       `modules/${MODULE_ID}/templates/influence.hbs`,
       `modules/${MODULE_ID}/templates/influence-result.hbs`,
+      `modules/${MODULE_ID}/templates/attitude-item.hbs`,
     ]);
   } catch (err) {
     console.warn(`${MODULE_ID} | template preload skipped`, err);
@@ -71,13 +89,61 @@ function injectSheetButton(app, element) {
   }
 }
 
+/**
+ * Inject a compact "Relationships" strip (stored attitudes) after the sheet
+ * header — click a chip to open the record, or drag it to another actor.
+ */
+function injectRelationships(app, element) {
+  try {
+    const actor = app?.actor ?? app?.document ?? null;
+    if (actor?.type !== "character") return;
+    const root = element instanceof HTMLElement ? element : element?.[0];
+    if (!root || root.querySelector(".acks-influence-relationships")) return;
+    const items = actor.items.filter((i) => i.type === ATTITUDE_TYPE);
+    if (!items.length) return;
+    const anchor = root.querySelector(".sheet-header");
+    if (!anchor) return;
+
+    const strip = document.createElement("div");
+    strip.className = "acks-influence-relationships";
+    const label = document.createElement("span");
+    label.className = "ai-rel-label";
+    label.textContent = `${game.i18n.localize("ACKS-INFLUENCE.attitude.relationships")}:`;
+    strip.appendChild(label);
+
+    for (const item of items) {
+      const attKey = INFLUENCE_ATTITUDE_LABELS.diplomacy[item.system.attitude] ?? "";
+      const chip = document.createElement("a");
+      chip.className = "ai-rel-chip";
+      chip.draggable = true;
+      chip.textContent = `${item.system.targetName || item.name} — ${game.i18n.localize(attKey)}`;
+      chip.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        item.sheet.render(true);
+      });
+      chip.addEventListener("dragstart", (ev) => {
+        ev.dataTransfer.setData("text/plain", JSON.stringify(item.toDragData()));
+      });
+      strip.appendChild(chip);
+    }
+    anchor.insertAdjacentElement("afterend", strip);
+  } catch (err) {
+    console.error(`${MODULE_ID} | failed to inject relationships`, err);
+  }
+}
+
+function onRenderCharacterSheet(app, element) {
+  injectSheetButton(app, element);
+  injectRelationships(app, element);
+}
+
 // v13/v14 ApplicationV2 fires render hooks for the whole class inheritance chain.
 // We anchor on the base-class hooks (which fire regardless of the system sheet's
-// possibly-minified class name) plus the system-specific name. injectSheetButton
-// filters to character sheets and dedupes, so multiple firings are harmless.
-Hooks.on("renderApplicationV2", injectSheetButton);
-Hooks.on("renderActorSheetV2", injectSheetButton);
-Hooks.on("renderACKSCharacterSheetV2", injectSheetButton);
+// possibly-minified class name) plus the system-specific name. The handlers
+// filter to character sheets and dedupe, so multiple firings are harmless.
+Hooks.on("renderApplicationV2", onRenderCharacterSheet);
+Hooks.on("renderActorSheetV2", onRenderCharacterSheet);
+Hooks.on("renderACKSCharacterSheetV2", onRenderCharacterSheet);
 
 /**
  * Support the `/influence` chat command. Returning false prevents the message

@@ -50,6 +50,12 @@ chat, and reads actor data through public paths only.
   target's HD via the Henchman Monthly Wage table — scaled by the bribe bonus and
   Bribery proficiency — overridable and resettable. On a roll with a bribe, the
   fee is transferred from the influencer's Gold to the target.
+- **Stored attitudes.** Influencing a target auto-saves a relationship as an
+  `acks-influence.attitude` Item on the character (current attitude + attempts
+  used **per tone**), and the roller auto-loads it next time. A **Relationships**
+  strip on the character sheet lists them (click to open, drag to another actor to
+  transfer a contact). Non-GM players hide target details and get a GM-whispered
+  roll + a public attitude-only reveal.
 - **Launch points:** an Influence button in the character-sheet header, the
   `/influence` (or `/inf`) chat command, a **macro** in the module's *Influence
   Macros* compendium, and a module API:
