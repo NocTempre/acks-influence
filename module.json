@@ -2,7 +2,7 @@
   "id": "acks-influence",
   "title": "ACKS II — Influence & Reactions",
   "description": "Adds a reaction/influence roller for the three ACKS II influence tones (Diplomacy, Intimidation, Seduction). Augments the ACKS system without modifying it: a character-sheet button, an /influence chat command, and a tone-aware 2d6 roller with an attitude tracker, time-to-influence, and auto-populated (and overridable) modifiers.",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "compatibility": {
     "minimum": "13",
     "verified": "14.361"
