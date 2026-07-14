@@ -183,17 +183,29 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
    * +1/+2/+3 = a day / week / month of pay (a week / month / year without the
    * Bribery proficiency), where "a month" is the henchman wage for the target's HD.
    */
-  #computeBribeFee() {
-    const diplo = this.#modifiers[INFLUENCE_TONE.DIPLOMACY];
-    const level = Number(diplo.bribe) || 0;
-    if (level <= 0) return 0;
+  /** The gp cost of each bribe tier (+1/+2/+3) for the current actor/target pair. */
+  #bribeTiers() {
     const monthly = monthlyWageForHD(getActorHD(this.#targetActor));
     const day = Math.round(monthly / 30);
     const week = Math.round(monthly / 4);
     const year = monthly * 12;
     const hasBribery = getProficiencies(this.#actor).bribery;
-    const units = hasBribery ? { 1: day, 2: week, 3: monthly } : { 1: week, 2: monthly, 3: year };
-    return units[level] ?? 0;
+    return hasBribery ? { 1: day, 2: week, 3: monthly } : { 1: week, 2: monthly, 3: year };
+  }
+
+  #computeBribeFee() {
+    const diplo = this.#modifiers[INFLUENCE_TONE.DIPLOMACY];
+    const level = Number(diplo.bribe) || 0;
+    if (level <= 0) return 0;
+    return this.#bribeTiers()[level] ?? 0;
+  }
+
+  /** The bribe bonus (+0..+3) a blind gp offer buys against the real wage tiers. */
+  #bonusForOffer(offer) {
+    const tiers = this.#bribeTiers();
+    let bonus = 0;
+    for (const level of [1, 2, 3]) if (offer >= tiers[level]) bonus = level;
+    return bonus;
   }
 
   /** Refresh the auto bribe fee unless the GM has overridden it. */
@@ -327,14 +339,15 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   }
 
   /** Overlay a player's request onto GM-computed defaults (keeping target autos). */
-  #applyExternalState({ tone, attempt, currentAttitude, gmAdjustment, playerMods }) {
+  #applyExternalState({ tone, attempt, currentAttitude, gmAdjustment, playerMods, bribeOffer }) {
     if (tone) this.#system.tone = tone;
     if (attempt !== undefined) this.#system.attempt = Number(attempt);
     if (currentAttitude !== undefined) this.#system.currentAttitude = Number(currentAttitude);
     this.#system.gmAdjustment = Number(gmAdjustment) || 0;
     const t = this.#system.tone;
-    // Which keys are target-derived (keep the GM's real values for these).
-    const targetKeys = new Set();
+    // Which keys are target-derived (keep the GM's real values for these). The
+    // bribe select is also excluded: the player bids blind via bribeOffer.
+    const targetKeys = new Set(["bribe"]);
     for (const group of this.#modConfig[t]) {
       for (const mod of group.mods) {
         if (TARGET_AUTO_SOURCES.has(mod.auto) || TARGET_KEYS.has(mod.key)) targetKeys.add(mod.key);
@@ -342,6 +355,14 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     }
     for (const [k, v] of Object.entries(playerMods ?? {})) {
       if (!targetKeys.has(k) && k in this.#modifiers[t]) this.#modifiers[t][k] = v;
+    }
+    // Blind bribe: convert the offered gp into whatever bonus it actually buys.
+    const offer = Number(bribeOffer) || 0;
+    if (t === INFLUENCE_TONE.DIPLOMACY && offer > 0) {
+      const diplo = this.#modifiers[INFLUENCE_TONE.DIPLOMACY];
+      diplo.bribe = this.#bonusForOffer(offer);
+      diplo.bribeFee = offer; // the full offer is what changes hands
+      this.#system.bribeFeeOverridden = true;
     }
     this.#recalculate();
   }
@@ -362,6 +383,8 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
         currentAttitude: this.#system.currentAttitude,
         gmAdjustment: this.#system.gmAdjustment,
         playerMods: foundry.utils.deepClone(this.#modifiers[this.#system.tone]),
+        // Blind bribe guess: the gp the player offers without knowing the tiers.
+        bribeOffer: Number(this.#modifiers[INFLUENCE_TONE.DIPLOMACY]?.bribeFee) || 0,
       },
     });
     ui.notifications?.info(game.i18n.localize("ACKS-INFLUENCE.hidden.sentToGm"));
@@ -404,9 +427,6 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     const profs = getProficiencies(this.#actor);
     const actsAs = getActsAsPowers(this.#actor);
     const hidden = this.#targetHidden();
-    // Fields that expose the target's stats — masked when the target is hidden.
-    const TARGET_AUTO = new Set(["targetWill", "alignment", "levelGap", "age"]);
-    const TARGET_KEYS = new Set(["targetMorale", "bribeFee"]);
     const L = (s) => game.i18n.localize(s);
     return this.#modConfig[tone].map((group) => ({
       group: L(group.group),
@@ -418,7 +438,12 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
         // that prof's checkbox with the power's name and borrows its mechanic.
         const profKey = mod.auto?.startsWith("prof:") ? mod.auto.slice(5) : null;
         const isActsAs = Boolean(profKey && actsAs[profKey] && !profs[profKey]);
-        const label = isActsAs ? actsAs[profKey] : L(mod.label);
+        // Hidden bribe: the player can't see the tiers, so the fee field becomes
+        // a blind "offered payment" guess (bonus computed on GM resolve) and the
+        // bribe bonus select is masked instead.
+        const isBribeGuess = hidden && mod.key === "bribeFee";
+        let label = isActsAs ? actsAs[profKey] : L(mod.label);
+        if (isBribeGuess) label = L("ACKS-INFLUENCE.mod.diplomacy.bribeOffer");
         // A value computed from a proficiency the character has (e.g. Bribery
         // scaling the bribe fee) is flagged so it gets the proficiency badge.
         const isProfModified = Boolean(mod.profModifier && profs[mod.profModifier]);
@@ -431,7 +456,10 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
           isNumber: mod.type === "signed" || mod.type === "factor",
           isGold,
           isEffect: Boolean(mod.fromEffect) || isProfModified || isActsAs,
-          masked: hidden && (TARGET_AUTO.has(mod.auto) || TARGET_KEYS.has(mod.key)),
+          masked:
+            hidden &&
+            !isBribeGuess &&
+            (TARGET_AUTO_SOURCES.has(mod.auto) || TARGET_KEYS.has(mod.key) || mod.key === "bribe"),
           value,
           checked: mod.type === "check" ? Boolean(value) : false,
           options:

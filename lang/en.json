@@ -112,6 +112,7 @@
   "ACKS-INFLUENCE.mod.diplomacy.favors": "Owes favors (±1 per unrequited favor)",
   "ACKS-INFLUENCE.mod.diplomacy.bribe": "Offering bribe",
   "ACKS-INFLUENCE.mod.diplomacy.bribeFee": "Bribe fee (gp)",
+  "ACKS-INFLUENCE.mod.diplomacy.bribeOffer": "Offered payment (gp) — bonus resolved by the GM",
   "ACKS-INFLUENCE.mod.diplomacy.prof": "Diplomacy proficiency (+1)",
   "ACKS-INFLUENCE.mod.diplomacy.brandishing": "Brandishing a weapon (-1)",
   "ACKS-INFLUENCE.mod.diplomacy.believesHarmed": "Target thinks character harmed friends (-1)",
