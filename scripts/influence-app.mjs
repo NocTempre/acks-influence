@@ -735,6 +735,29 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     return true;
   }
 
+  /**
+   * RAW consequence notes for the chat card (no attitude auto-shifts): the
+   * temporary/combat aftermath of intimidation and the bribery crime/failed-bribe
+   * rules. Purely informational, straight from the printed rules.
+   */
+  #rawNotes(tone, newIndex, diceResult) {
+    const notes = [];
+    if (tone === INFLUENCE_TONE.INTIMIDATION) {
+      notes.push(game.i18n.localize("ACKS-INFLUENCE.note.intimTemporary"));
+      if (newIndex === 3) notes.push(game.i18n.localize("ACKS-INFLUENCE.note.intimidated"));
+      else if (newIndex === 4) notes.push(game.i18n.localize("ACKS-INFLUENCE.note.overawed"));
+    }
+    if (tone === INFLUENCE_TONE.DIPLOMACY && (Number(this.#modifiers[INFLUENCE_TONE.DIPLOMACY].bribe) || 0) > 0) {
+      const hasBribery = getProficiencies(this.#actor).bribery;
+      if (hasBribery) {
+        if (diceResult === 2) notes.push(game.i18n.localize("ACKS-INFLUENCE.note.bribeCrime"));
+      } else {
+        notes.push(game.i18n.localize("ACKS-INFLUENCE.note.bribeRisk"));
+      }
+    }
+    return { rawNotes: notes };
+  }
+
   async #rollInfluence() {
     // A player can't see the hidden target's data to compute the roll, so hand
     // it to the GM's client (which has it) and resolve there.
@@ -793,6 +816,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       bewitched: bewitchedActive && total >= 12,
       attempt: this.#system.attempt,
       timeLabel: isContinuing && timeStep ? game.i18n.localize(timeStep.label) : null,
+      ...this.#rawNotes(tone, newIndex, diceResult),
     };
 
     const speaker = ChatMessage.getSpeaker({ actor: this.#actor });

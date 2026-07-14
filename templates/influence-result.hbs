@@ -46,6 +46,12 @@
     </div>
   {{/if}}
 
+  {{#if rawNotes.length}}
+    <ul class="influence-chat-notes">
+      {{#each rawNotes}}<li>{{this}}</li>{{/each}}
+    </ul>
+  {{/if}}
+
   {{#if activeModifiers.length}}
     <details class="influence-chat-mods" open>
       <summary>{{localize 'ACKS-INFLUENCE.chat.activeModifiers' count=activeModifiers.length}}</summary>

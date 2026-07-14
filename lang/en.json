@@ -102,6 +102,12 @@
   "ACKS-INFLUENCE.chat.bewitchedLabel": "Mystic Aura",
   "ACKS-INFLUENCE.chat.bewitched": "total is 12+ — the subject acts bewitched while in the character's presence.",
 
+  "ACKS-INFLUENCE.note.intimTemporary": "Intimidation is temporary — make a new reaction roll if the character encounters new allies of the intimidated creature, or the conditions materially change.",
+  "ACKS-INFLUENCE.note.intimidated": "Intimidated: withdraws or escapes at the first opportunity (otherwise acts Indifferent); treated as Neutral for Diplomacy and Seduction; if combat begins, it starts faltering.",
+  "ACKS-INFLUENCE.note.overawed": "Overawed: acts as if Friendly while intimidated; treated as Neutral for Diplomacy and Seduction; if combat begins, it starts frightened.",
+  "ACKS-INFLUENCE.note.bribeCrime": "Unmodified 2 — the bribe was blatant enough that the character can be charged with the crime of bribery.",
+  "ACKS-INFLUENCE.note.bribeRisk": "No Bribery proficiency: a failed bribe shifts the target's attitude 1 step toward Hostile.",
+
   "ACKS-INFLUENCE.mod.charisma": "CHA modifier",
   "ACKS-INFLUENCE.mod.mysticAura": "Mystic Aura proficiency (+1)",
   "ACKS-INFLUENCE.mod.targetWill": "Target's WIL modifier (−/＋WIL)",
