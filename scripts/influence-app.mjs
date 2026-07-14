@@ -1,4 +1,4 @@
-/* global foundry, game, ChatMessage, CONST, Roll, fromUuid, ui */
+/* global foundry, game, ChatMessage, CONST, Roll, fromUuid, ui, Hooks */
 import {
   INFLUENCE_ATTITUDE_LABELS,
   INFLUENCE_BAND_LABELS,
@@ -27,6 +27,10 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 const ATTITUDE_COUNT = INFLUENCE_RELATIONSHIP_MOD.length; // 5 rungs
 const ATTITUDE_TYPE = `${MODULE_ID}.attitude`;
+const SOCKET = `module.${MODULE_ID}`;
+// Modifier keys whose value depends on the (possibly hidden) target's stats.
+const TARGET_AUTO_SOURCES = new Set(["targetWill", "alignment", "levelGap", "age"]);
+const TARGET_KEYS = new Set(["targetMorale", "bribeFee"]);
 
 /**
  * Resolves the three kinds of ACKS II influence rolls (Diplomacy, Intimidation,
@@ -47,6 +51,8 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   #modConfig = null;
   /** The stored-attitude Item for the current influencer→target, if any. */
   #attitudeItem = null;
+  /** Forces the hidden (GM-whisper) posting path when a GM resolves a player's roll. */
+  #forceHidden = false;
   /** Sum of relationship + tone modifiers (before the GM adjustment bucket). */
   #subtotal = 0;
   /** Effective modifier applied to the roll (#subtotal + GM adjustment). */
@@ -292,6 +298,73 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   #targetHidden() {
     if (!this.#targetActor || game.user?.isGM) return false;
     return !this.#targetActor.testUserPermission?.(game.user, "OBSERVER");
+  }
+
+  /**
+   * Register the GM-side socket handler once. When a player rolls against a
+   * target they can't observe, their client emits their chosen (non-target)
+   * modifiers to the GM, whose client re-resolves with the real target data.
+   */
+  static registerSocket() {
+    Hooks.once("ready", () => {
+      game.socket?.on(SOCKET, (data) => {
+        if (data?.action !== "hiddenRoll") return;
+        if (game.user?.id !== game.users?.activeGM?.id) return; // only the active GM resolves
+        void InfluenceApp.resolveExternal(data.payload);
+      });
+    });
+  }
+
+  /** GM-side: rebuild the roll with full target data and post it (hidden path). */
+  static async resolveExternal(payload = {}) {
+    const actor = payload.actorUuid ? await fromUuid(payload.actorUuid) : null;
+    if (!actor) return;
+    const target = payload.targetUuid ? await fromUuid(payload.targetUuid) : null;
+    const app = new InfluenceApp({ actor, targetActor: target });
+    app.#forceHidden = true;
+    app.#applyExternalState(payload);
+    await app.#rollInfluence();
+  }
+
+  /** Overlay a player's request onto GM-computed defaults (keeping target autos). */
+  #applyExternalState({ tone, attempt, currentAttitude, gmAdjustment, playerMods }) {
+    if (tone) this.#system.tone = tone;
+    if (attempt !== undefined) this.#system.attempt = Number(attempt);
+    if (currentAttitude !== undefined) this.#system.currentAttitude = Number(currentAttitude);
+    this.#system.gmAdjustment = Number(gmAdjustment) || 0;
+    const t = this.#system.tone;
+    // Which keys are target-derived (keep the GM's real values for these).
+    const targetKeys = new Set();
+    for (const group of this.#modConfig[t]) {
+      for (const mod of group.mods) {
+        if (TARGET_AUTO_SOURCES.has(mod.auto) || TARGET_KEYS.has(mod.key)) targetKeys.add(mod.key);
+      }
+    }
+    for (const [k, v] of Object.entries(playerMods ?? {})) {
+      if (!targetKeys.has(k) && k in this.#modifiers[t]) this.#modifiers[t][k] = v;
+    }
+    this.#recalculate();
+  }
+
+  /** Player-side: hand the roll to the GM to resolve against a hidden target. */
+  #requestGmRoll() {
+    if (!game.users?.activeGM) {
+      ui.notifications?.warn(game.i18n.localize("ACKS-INFLUENCE.hidden.noGm"));
+      return;
+    }
+    game.socket?.emit(SOCKET, {
+      action: "hiddenRoll",
+      payload: {
+        actorUuid: this.#actor?.uuid,
+        targetUuid: this.#targetActor?.uuid,
+        tone: this.#system.tone,
+        attempt: this.#system.attempt,
+        currentAttitude: this.#system.currentAttitude,
+        gmAdjustment: this.#system.gmAdjustment,
+        playerMods: foundry.utils.deepClone(this.#modifiers[this.#system.tone]),
+      },
+    });
+    ui.notifications?.info(game.i18n.localize("ACKS-INFLUENCE.hidden.sentToGm"));
   }
 
   /**
@@ -635,6 +708,13 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   }
 
   async #rollInfluence() {
+    // A player can't see the hidden target's data to compute the roll, so hand
+    // it to the GM's client (which has it) and resolve there.
+    if (this.#targetHidden()) {
+      this.#requestGmRoll();
+      return;
+    }
+
     this.#recalculate();
 
     // Capture the active modifiers before the roll (state is unchanged by rolling).
@@ -689,7 +769,8 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
 
     const speaker = ChatMessage.getSpeaker({ actor: this.#actor });
     const template = `modules/${MODULE_ID}/templates/influence-result.hbs`;
-    const hidden = this.#targetHidden();
+    // GM resolving a player's request uses the hidden path via #forceHidden.
+    const hidden = this.#targetHidden() || this.#forceHidden;
 
     if (hidden) {
       // Full details to GMs only; a public message reveals just the attitude.
@@ -725,6 +806,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     // Persist the updated relationship (auto save/load).
     void this.#saveAttitude(newIndex, nextAttempt);
     this.#recalculate();
-    this.render();
+    // Re-render only a live window (a GM-resolved player roll is headless).
+    if (this.rendered) this.render();
   }
 }

@@ -11,6 +11,9 @@ function openInfluenceApp(actor = null) {
   return new InfluenceApp({ actor }).render(true);
 }
 
+// GM-side socket handler: resolve a player's roll against a hidden target.
+InfluenceApp.registerSocket();
+
 Hooks.once("init", () => {
   // Public API for macros / other modules. Set this FIRST so nothing below can
   // prevent it from being assigned.
@@ -90,43 +93,77 @@ function injectSheetButton(app, element) {
 }
 
 /**
- * Inject a compact "Relationships" strip (stored attitudes) after the sheet
- * header — click a chip to open the record, or drag it to another actor.
+ * Inject a native-looking "Relationships" section (stored attitudes) into the
+ * Notes tab — click a row to open the record, drag it to another actor to
+ * transfer, or delete it (owner only).
  */
 function injectRelationships(app, element) {
   try {
     const actor = app?.actor ?? app?.document ?? null;
     if (actor?.type !== "character") return;
     const root = element instanceof HTMLElement ? element : element?.[0];
-    if (!root || root.querySelector(".acks-influence-relationships")) return;
+    if (!root) return;
+    const host =
+      root.querySelector('.tab[data-tab="notes"] .content .flexcol') ?? root.querySelector('.tab[data-tab="notes"]');
+    if (!host || host.querySelector(".acks-influence-relationships")) return;
+
     const items = actor.items.filter((i) => i.type === ATTITUDE_TYPE);
-    if (!items.length) return;
-    const anchor = root.querySelector(".sheet-header");
-    if (!anchor) return;
 
-    const strip = document.createElement("div");
-    strip.className = "acks-influence-relationships";
-    const label = document.createElement("span");
-    label.className = "ai-rel-label";
-    label.textContent = `${game.i18n.localize("ACKS-INFLUENCE.attitude.relationships")}:`;
-    strip.appendChild(label);
+    const row = document.createElement("section");
+    row.className = "flexrow col-stretch acks-influence-relationships";
+    const section = document.createElement("section");
+    section.className = "item-list-section";
+    const header = document.createElement("div");
+    header.className = "list-header";
+    header.innerHTML = `<div class="list-header__name">${game.i18n.localize("ACKS-INFLUENCE.attitude.relationships")}</div>`;
+    section.appendChild(header);
 
+    const ul = document.createElement("ul");
+    ul.className = "item-list unlist";
     for (const item of items) {
       const attKey = INFLUENCE_ATTITUDE_LABELS.diplomacy[item.system.attitude] ?? "";
-      const chip = document.createElement("a");
-      chip.className = "ai-rel-chip";
-      chip.draggable = true;
-      chip.textContent = `${item.system.targetName || item.name} — ${game.i18n.localize(attKey)}`;
-      chip.addEventListener("click", (ev) => {
-        ev.preventDefault();
-        item.sheet.render(true);
-      });
-      chip.addEventListener("dragstart", (ev) => {
-        ev.dataTransfer.setData("text/plain", JSON.stringify(item.toDragData()));
-      });
-      strip.appendChild(chip);
+      const li = document.createElement("li");
+      li.className = "item";
+      li.dataset.itemId = item.id;
+      li.draggable = true;
+      li.addEventListener("dragstart", (ev) =>
+        ev.dataTransfer.setData("text/plain", JSON.stringify(item.toDragData())),
+      );
+
+      const row2 = document.createElement("div");
+      row2.className = "item-row";
+      const name = document.createElement("a");
+      name.className = "item__name";
+      name.textContent = `${item.system.targetName || item.name} — ${game.i18n.localize(attKey)}`;
+      name.addEventListener("click", () => item.sheet.render(true));
+      row2.appendChild(name);
+
+      if (actor.isOwner) {
+        const controls = document.createElement("div");
+        controls.className = "list-header__controls";
+        const del = document.createElement("a");
+        del.className = "item-control";
+        del.innerHTML = '<i class="fas fa-trash"></i>';
+        del.dataset.tooltip = game.i18n.localize("ACKS.Delete");
+        del.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          item.delete();
+        });
+        controls.appendChild(del);
+        row2.appendChild(controls);
+      }
+      li.appendChild(row2);
+      ul.appendChild(li);
     }
-    anchor.insertAdjacentElement("afterend", strip);
+    if (!items.length) {
+      const empty = document.createElement("li");
+      empty.className = "item ai-rel-empty";
+      empty.textContent = game.i18n.localize("ACKS-INFLUENCE.attitude.none");
+      ul.appendChild(empty);
+    }
+    section.appendChild(ul);
+    row.appendChild(section);
+    host.insertBefore(row, host.firstChild);
   } catch (err) {
     console.error(`${MODULE_ID} | failed to inject relationships`, err);
   }

@@ -16,6 +16,7 @@
   "ACKS-INFLUENCE.attitude.notes": "Notes",
   "ACKS-INFLUENCE.attitude.itemName": "Attitude: {name}",
   "ACKS-INFLUENCE.attitude.relationships": "Relationships",
+  "ACKS-INFLUENCE.attitude.none": "No stored relationships yet.",
   "ACKS-INFLUENCE.field.attempt": "Attempt (time cost)",
   "ACKS-INFLUENCE.field.finalModifier": "Final Modifier",
   "ACKS-INFLUENCE.field.finalModifierHint": "The total applied to the roll. Type over it to override; the difference is stored as a GM adjustment. Use Reset to defaults to clear it.",
@@ -41,6 +42,8 @@
 
   "ACKS-INFLUENCE.hidden.field": "Hidden — you can't see this target's sheet.",
   "ACKS-INFLUENCE.hidden.total": "Hidden — the total and result are whispered to the GM; you'll see only the resulting attitude.",
+  "ACKS-INFLUENCE.hidden.sentToGm": "Influence roll sent to the GM to resolve against the hidden target.",
+  "ACKS-INFLUENCE.hidden.noGm": "No GM is online to resolve a roll against this hidden target.",
 
   "ACKS-INFLUENCE.group.both": "Both",
   "ACKS-INFLUENCE.group.either": "Either",

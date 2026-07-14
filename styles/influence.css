@@ -213,30 +213,16 @@
   align-items: stretch;
 }
 
-/* Relationships strip on the character sheet */
-.acks-influence-relationships {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem 0.4rem;
-  padding: 0.2rem 0.4rem;
-  font-size: 0.85em;
-}
-.acks-influence-relationships .ai-rel-label {
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  opacity: 0.75;
-}
-.acks-influence-relationships .ai-rel-chip {
-  padding: 0.05rem 0.4rem;
-  border: 1px solid var(--color-border-dark, #7a7971);
-  border-radius: 10px;
+/* Relationships section on the Notes tab (uses the system's item-list styling). */
+.acks-influence-relationships .item__name {
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.06);
 }
-.acks-influence-relationships .ai-rel-chip:hover {
-  border-color: #c9a227;
+.acks-influence-relationships .item__name:hover {
+  text-shadow: 0 0 6px #c9a227;
+}
+.acks-influence-relationships .ai-rel-empty {
+  opacity: 0.6;
+  font-style: italic;
 }
 
 /* Roll bar (merged final modifier + roll) */
