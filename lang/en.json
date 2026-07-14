@@ -44,7 +44,6 @@
   "ACKS-INFLUENCE.hidden.total": "Hidden — the total and result are whispered to the GM; you'll see only the resulting attitude.",
   "ACKS-INFLUENCE.hidden.sentToGm": "Influence roll sent to the GM to resolve against the hidden target.",
   "ACKS-INFLUENCE.hidden.noGm": "No GM is online to resolve a roll against this hidden target.",
-  "ACKS-INFLUENCE.hidden.noSocket": "socketlib isn't ready — the hidden roll can't be relayed to the GM. Ensure the socketlib module is installed and enabled.",
 
   "ACKS-INFLUENCE.group.both": "Both",
   "ACKS-INFLUENCE.group.either": "Either",

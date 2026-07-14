@@ -363,10 +363,6 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       ui.notifications?.warn(game.i18n.localize("ACKS-INFLUENCE.hidden.noGm"));
       return;
     }
-    if (!InfluenceApp.socket) {
-      ui.notifications?.warn(game.i18n.localize("ACKS-INFLUENCE.hidden.noSocket"));
-      return;
-    }
     const payload = {
       actorUuid: this.#actor?.uuid,
       targetUuid: this.#targetActor?.uuid,
