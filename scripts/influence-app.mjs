@@ -27,7 +27,6 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 const ATTITUDE_COUNT = INFLUENCE_RELATIONSHIP_MOD.length; // 5 rungs
 const ATTITUDE_TYPE = `${MODULE_ID}.attitude`;
-const SOCKET = `module.${MODULE_ID}`;
 // Modifier keys whose value depends on the (possibly hidden) target's stats.
 const TARGET_AUTO_SOURCES = new Set(["targetWill", "alignment", "levelGap", "age"]);
 const TARGET_KEYS = new Set(["targetMorale", "bribeFee"]);
@@ -57,6 +56,9 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   #subtotal = 0;
   /** Effective modifier applied to the roll (#subtotal + GM adjustment). */
   #finalModifier = 0;
+
+  /** socketlib module socket, set in module.mjs on `socketlib.ready`. */
+  static socket = null;
 
   constructor(options = {}) {
     super(options);
@@ -312,21 +314,6 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     return !this.#targetActor.testUserPermission?.(game.user, "OBSERVER");
   }
 
-  /**
-   * Register the GM-side socket handler once. When a player rolls against a
-   * target they can't observe, their client emits their chosen (non-target)
-   * modifiers to the GM, whose client re-resolves with the real target data.
-   */
-  static registerSocket() {
-    Hooks.once("ready", () => {
-      game.socket?.on(SOCKET, (data) => {
-        if (data?.action !== "hiddenRoll") return;
-        if (game.user?.id !== game.users?.activeGM?.id) return; // only the active GM resolves
-        void InfluenceApp.resolveExternal(data.payload);
-      });
-    });
-  }
-
   /** GM-side: rebuild the roll with full target data and post it (hidden path). */
   static async resolveExternal(payload = {}) {
     const actor = payload.actorUuid ? await fromUuid(payload.actorUuid) : null;
@@ -367,26 +354,33 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     this.#recalculate();
   }
 
-  /** Player-side: hand the roll to the GM to resolve against a hidden target. */
+  /**
+   * Player-side: hand the roll to a GM (via socketlib) to resolve against a
+   * hidden target, whose data the player's client doesn't have.
+   */
   #requestGmRoll() {
     if (!game.users?.activeGM) {
       ui.notifications?.warn(game.i18n.localize("ACKS-INFLUENCE.hidden.noGm"));
       return;
     }
-    game.socket?.emit(SOCKET, {
-      action: "hiddenRoll",
-      payload: {
-        actorUuid: this.#actor?.uuid,
-        targetUuid: this.#targetActor?.uuid,
-        tone: this.#system.tone,
-        attempt: this.#system.attempt,
-        currentAttitude: this.#system.currentAttitude,
-        gmAdjustment: this.#system.gmAdjustment,
-        playerMods: foundry.utils.deepClone(this.#modifiers[this.#system.tone]),
-        // Blind bribe guess: the gp the player offers without knowing the tiers.
-        bribeOffer: Number(this.#modifiers[INFLUENCE_TONE.DIPLOMACY]?.bribeFee) || 0,
-      },
-    });
+    if (!InfluenceApp.socket) {
+      ui.notifications?.warn(game.i18n.localize("ACKS-INFLUENCE.hidden.noSocket"));
+      return;
+    }
+    const payload = {
+      actorUuid: this.#actor?.uuid,
+      targetUuid: this.#targetActor?.uuid,
+      tone: this.#system.tone,
+      attempt: this.#system.attempt,
+      currentAttitude: this.#system.currentAttitude,
+      gmAdjustment: this.#system.gmAdjustment,
+      playerMods: foundry.utils.deepClone(this.#modifiers[this.#system.tone]),
+      // Blind bribe guess: the gp the player offers without knowing the tiers.
+      bribeOffer: Number(this.#modifiers[INFLUENCE_TONE.DIPLOMACY]?.bribeFee) || 0,
+    };
+    InfluenceApp.socket
+      .executeAsGM("resolveHiddenRoll", payload)
+      .catch((err) => console.error(`${MODULE_ID} | hidden roll relay failed`, err));
     ui.notifications?.info(game.i18n.localize("ACKS-INFLUENCE.hidden.sentToGm"));
   }
 

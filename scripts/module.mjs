@@ -1,4 +1,4 @@
-/* global Hooks, game, foundry, canvas, CONFIG */
+/* global Hooks, game, foundry, canvas, CONFIG, socketlib */
 import InfluenceApp from "./influence-app.mjs";
 import AttitudeData from "./attitude-data.mjs";
 import AttitudeSheet from "./attitude-sheet.mjs";
@@ -11,8 +11,14 @@ function openInfluenceApp(actor = null) {
   return new InfluenceApp({ actor }).render(true);
 }
 
-// GM-side socket handler: resolve a player's roll against a hidden target.
-InfluenceApp.registerSocket();
+// GM-side socket handler (via socketlib): resolve a player's roll against a
+// hidden target. socketlib routes `executeAsGM` to an active GM client, which
+// re-resolves the roll with the real target data the player can't see.
+Hooks.once("socketlib.ready", () => {
+  const socket = socketlib.registerModule(MODULE_ID);
+  socket.register("resolveHiddenRoll", (payload) => InfluenceApp.resolveExternal(payload));
+  InfluenceApp.socket = socket;
+});
 
 Hooks.once("init", () => {
   // Public API for macros / other modules. Set this FIRST so nothing below can
