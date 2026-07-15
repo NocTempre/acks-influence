@@ -5,10 +5,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:packs": "node tools/build-packs.mjs"
+    "build:packs": "node tools/build-packs.mjs",
+    "validate": "node tools/validate.mjs"
   },
   "devDependencies": {
     "@foundryvtt/foundryvtt-cli": "^1.0.0",
-    "classic-level": "^3.0.0"
+    "classic-level": "^3.0.0",
+    "handlebars": "^4.7.9"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
