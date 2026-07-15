@@ -96,7 +96,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   }
 
   static DEFAULT_OPTIONS = {
-    classes: ["acks-influence", "influence-dialog"],
+    classes: ["acks-influence", "acks-influence-dialog"],
     sheetConfig: false,
     window: { resizable: true, title: "ACKS-INFLUENCE.app.title" },
     position: { width: 560, height: "auto" },
@@ -266,7 +266,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
         this.#attitudeItem = created?.[0] ?? null;
       }
       // Consumer-module event: the stored relationship changed.
-      Hooks.callAll(`${MODULE_ID}.attitudeChanged`, {
+      Hooks.callAll("acksInfluenceAttitudeChanged", {
         actor: this.#actor,
         target: this.#targetActor,
         attitude: newIndex,
@@ -869,7 +869,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     this.#recalculate();
 
     // Consumer-module event (acks-henchmen etc.): the full resolved roll.
-    Hooks.callAll(`${MODULE_ID}.rollComplete`, {
+    Hooks.callAll("acksInfluenceRollComplete", {
       actor: this.#actor,
       target: this.#targetActor,
       tone,

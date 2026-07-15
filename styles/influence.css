@@ -1,6 +1,6 @@
 /* ACKS II — Influence & Reactions module styles */
 
-.influence-dialog .influence-body {
+.acks-influence-dialog .influence-body {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -9,12 +9,12 @@
   overflow-y: auto;
 }
 
-.influence-dialog fieldset {
+.acks-influence-dialog fieldset {
   border-radius: 4px;
   padding: 0.3rem 0.4rem;
   margin: 0;
 }
-.influence-dialog fieldset legend {
+.acks-influence-dialog fieldset legend {
   font-weight: bold;
   letter-spacing: 0.5px;
   font-size: 0.85em;
@@ -22,20 +22,20 @@
 }
 
 /* Parties + attitude tracker */
-.influence-dialog .influence-tracker {
+.acks-influence-dialog .influence-tracker {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.6rem;
 }
-.influence-dialog .influence-party {
+.acks-influence-dialog .influence-party {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.05rem;
   flex: 0 0 58px;
 }
-.influence-dialog .influence-portrait {
+.acks-influence-dialog .influence-portrait {
   width: 44px;
   height: 44px;
   object-fit: cover;
@@ -43,11 +43,11 @@
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.15);
 }
-.influence-dialog .influence-portrait.no-target {
+.acks-influence-dialog .influence-portrait.no-target {
   opacity: 0.45;
   filter: grayscale(0.6);
 }
-.influence-dialog .influence-party-name {
+.acks-influence-dialog .influence-party-name {
   font-weight: bold;
   text-align: center;
   font-size: 0.85em;
@@ -56,31 +56,31 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.influence-dialog .influence-party-role {
+.acks-influence-dialog .influence-party-role {
   font-size: 0.7em;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   opacity: 0.7;
 }
-.influence-dialog .influence-party[data-side] {
+.acks-influence-dialog .influence-party[data-side] {
   cursor: copy;
   border: 1px dashed var(--color-border-dark, rgba(122, 121, 113, 0.5));
   border-radius: 6px;
   padding: 2px 4px;
 }
-.influence-dialog .influence-party.drop-hover {
+.acks-influence-dialog .influence-party.drop-hover {
   border-color: #c9a227;
   background: rgba(201, 162, 39, 0.12);
 }
-.influence-dialog .influence-ladder {
+.acks-influence-dialog .influence-ladder {
   flex: 1 1 auto;
 }
-.influence-dialog .influence-ladder-rungs {
+.acks-influence-dialog .influence-ladder-rungs {
   display: flex;
   gap: 2px;
 }
-.influence-dialog .influence-rung {
+.acks-influence-dialog .influence-rung {
   flex: 1 1 0;
   padding: 0.25rem 0.15rem;
   border: 1px solid var(--color-border-dark, #7a7971);
@@ -91,43 +91,43 @@
   cursor: pointer;
   line-height: 1.05;
 }
-.influence-dialog .influence-rung:hover {
+.acks-influence-dialog .influence-rung:hover {
   border-color: #c9a227;
 }
-.influence-dialog .influence-rung.active {
+.acks-influence-dialog .influence-rung.active {
   background: #c9a227;
   color: #1b1b1b;
   font-weight: bold;
   box-shadow: 0 0 6px rgba(201, 162, 39, 0.7);
 }
-.influence-dialog .influence-ladder-hint {
+.acks-influence-dialog .influence-ladder-hint {
   text-align: center;
   margin-top: 2px;
   font-size: 0.85em;
 }
 
 /* Toolbar (reset + legend) */
-.influence-dialog .influence-toolbar {
+.acks-influence-dialog .influence-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
 }
-.influence-dialog .influence-reset {
+.acks-influence-dialog .influence-reset {
   flex: 0 0 auto;
   width: auto;
 }
-.influence-dialog .influence-auto-legend {
+.acks-influence-dialog .influence-auto-legend {
   font-size: 0.85em;
   opacity: 0.8;
 }
-.influence-dialog .influence-auto-badge {
+.acks-influence-dialog .influence-auto-badge {
   margin-left: 0.25rem;
   color: #7a5cff;
   opacity: 0.85;
   font-size: 0.85em;
 }
-.influence-dialog .influence-effect-badge {
+.acks-influence-dialog .influence-effect-badge {
   margin-left: 0.25rem;
   color: #3aa675;
   opacity: 0.9;
@@ -135,15 +135,15 @@
 }
 
 /* Modifier groups — control on the left, label fills the rest. */
-.influence-dialog .influence-groups {
+.acks-influence-dialog .influence-groups {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
   gap: 0.1rem 0.6rem;
 }
-.influence-dialog .influence-group {
+.acks-influence-dialog .influence-group {
   min-width: 0;
 }
-.influence-dialog .influence-mod {
+.acks-influence-dialog .influence-mod {
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -151,38 +151,38 @@
   font-size: 0.75em;
   line-height: 1.15;
 }
-.influence-dialog .influence-mod.overridden {
+.acks-influence-dialog .influence-mod.overridden {
   background: rgba(122, 92, 255, 0.08);
   border-radius: 3px;
 }
-.influence-dialog .influence-mod-field {
+.acks-influence-dialog .influence-mod-field {
   display: flex;
   align-items: center;
   gap: 0.15rem;
   flex: 0 0 4.5rem;
   width: 4.5rem;
 }
-.influence-dialog .influence-mod-field select {
+.acks-influence-dialog .influence-mod-field select {
   width: 100%;
   min-width: 0;
 }
-.influence-dialog .influence-mod-field input[type="number"] {
+.acks-influence-dialog .influence-mod-field input[type="number"] {
   width: 2.6rem;
   min-width: 0;
   text-align: center;
 }
-.influence-dialog .influence-mod-field input[type="checkbox"] {
+.acks-influence-dialog .influence-mod-field input[type="checkbox"] {
   margin: 0 auto 0 0;
 }
-.influence-dialog .influence-mod-label {
+.acks-influence-dialog .influence-mod-label {
   flex: 1 1 auto;
   min-width: 0;
 }
-.influence-dialog .influence-gp-suffix {
+.acks-influence-dialog .influence-gp-suffix {
   font-weight: bold;
   color: #d4af37;
 }
-.influence-dialog .influence-masked {
+.acks-influence-dialog .influence-masked {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -192,23 +192,23 @@
 }
 
 /* Attitude item sheet */
-.attitude-sheet .attitude-header {
+.acks-influence-attitude-sheet .attitude-header {
   display: flex;
   gap: 0.5rem;
   align-items: center;
   margin-bottom: 0.4rem;
 }
-.attitude-sheet .attitude-portrait {
+.acks-influence-attitude-sheet .attitude-portrait {
   width: 56px;
   height: 56px;
   object-fit: cover;
   border: 2px solid var(--color-border-dark, #7a7971);
   border-radius: 6px;
 }
-.attitude-sheet .attitude-header-fields {
+.acks-influence-attitude-sheet .attitude-header-fields {
   flex: 1 1 auto;
 }
-.attitude-sheet .form-group.stacked {
+.acks-influence-attitude-sheet .form-group.stacked {
   flex-direction: column;
   align-items: stretch;
 }
@@ -226,29 +226,29 @@
 }
 
 /* Roll bar (merged final modifier + roll) */
-.influence-dialog .influence-footer {
+.acks-influence-dialog .influence-footer {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: nowrap;
 }
-.influence-dialog .influence-footer .influence-time-note {
+.acks-influence-dialog .influence-footer .influence-time-note {
   margin-right: auto;
   font-size: 0.85em;
   opacity: 0.85;
 }
-.influence-dialog .influence-footer .influence-total-label {
+.acks-influence-dialog .influence-footer .influence-total-label {
   font-weight: bold;
   flex: 0 0 auto;
 }
-.influence-dialog .influence-footer .influence-final {
+.acks-influence-dialog .influence-footer .influence-final {
   font-size: 1.15rem;
   font-weight: bold;
   max-width: 4.5rem;
   flex: 0 0 auto;
   text-align: center;
 }
-.influence-dialog .influence-footer .influence-roll-btn {
+.acks-influence-dialog .influence-footer .influence-roll-btn {
   flex: 0 0 auto;
   width: auto;
 }
@@ -342,6 +342,6 @@
 }
 
 /* Summary row */
-.influence-dialog .influence-summary .influence-subtotal:disabled {
+.acks-influence-dialog .influence-summary .influence-subtotal:disabled {
   opacity: 0.8;
 }

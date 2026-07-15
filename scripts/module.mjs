@@ -56,10 +56,10 @@ Hooks.once("init", () => {
     monthlyWageForHD,
     getProficiencies,
     getEffectReactionMods,
-    // Custom hooks fired: `${MODULE_ID}.rollComplete`, `${MODULE_ID}.attitudeChanged`.
+    // Custom hooks fired (camelCase module namespace — TOOLCHAIN §5b):
     hooks: {
-      rollComplete: `${MODULE_ID}.rollComplete`,
-      attitudeChanged: `${MODULE_ID}.attitudeChanged`,
+      rollComplete: "acksInfluenceRollComplete",
+      attitudeChanged: "acksInfluenceAttitudeChanged",
     },
   };
   const module = game.modules.get(MODULE_ID);
