@@ -52,6 +52,8 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   #attitudeItem = null;
   /** Forces the hidden (GM-whisper) posting path when a GM resolves a player's roll. */
   #forceHidden = false;
+  /** Externally injected modifiers (api.open(actor, {modifiers: [{label, value}]})). */
+  #externalModifiers = [];
   /** Sum of relationship + tone modifiers (before the GM adjustment bucket). */
   #subtotal = 0;
   /** Effective modifier applied to the roll (#subtotal + GM adjustment). */
@@ -65,6 +67,13 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
 
     this.#actor = options.actor ?? null;
     this.#targetActor = options.targetActor ?? getTargetActor();
+    // Other modules (e.g. acks-henchmen: per-settlement slander penalties) can
+    // inject flat modifiers; they apply to every tone and show on the card.
+    this.#externalModifiers = Array.isArray(options.modifiers)
+      ? options.modifiers
+          .map((m) => ({ label: String(m?.label ?? "external"), value: Number(m?.value) || 0 }))
+          .filter((m) => m.value !== 0)
+      : [];
     // Don't auto-fill the target with the influencer themselves (e.g. a
     // self-targeted token) — keep the two sides distinct until set explicitly.
     if (this.#targetActor && this.#targetActor === this.#actor) this.#targetActor = null;
@@ -256,6 +265,14 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
         ]);
         this.#attitudeItem = created?.[0] ?? null;
       }
+      // Consumer-module event: the stored relationship changed.
+      Hooks.callAll(`${MODULE_ID}.attitudeChanged`, {
+        actor: this.#actor,
+        target: this.#targetActor,
+        attitude: newIndex,
+        tone,
+        attempt: nextAttempt,
+      });
     } catch (err) {
       console.error(`${MODULE_ID} | failed to save attitude`, err);
     }
@@ -273,6 +290,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
         total += this.#contribution(mod, values[mod.key]);
       }
     }
+    for (const external of this.#externalModifiers) total += external.value;
     return total;
   }
 
@@ -300,6 +318,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
         if (contribution !== 0) list.push({ label: game.i18n.localize(mod.label), value: contribution });
       }
     }
+    for (const external of this.#externalModifiers) list.push({ label: external.label, value: external.value });
     const gm = Number(this.#system.gmAdjustment) || 0;
     if (gm !== 0) list.push({ label: game.i18n.localize("ACKS-INFLUENCE.summary.gmAdjustment"), value: gm });
     return list;
@@ -848,6 +867,23 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     // Persist the updated relationship (auto save/load).
     void this.#saveAttitude(newIndex, nextAttempt);
     this.#recalculate();
+
+    // Consumer-module event (acks-henchmen etc.): the full resolved roll.
+    Hooks.callAll(`${MODULE_ID}.rollComplete`, {
+      actor: this.#actor,
+      target: this.#targetActor,
+      tone,
+      attempt: result.attempt,
+      natural: diceResult,
+      modifier,
+      total,
+      band: band.key,
+      startAttitude: startIndex,
+      newAttitude: newIndex,
+      bewitched: result.bewitched,
+      hidden,
+    });
+
     // Re-render only a live window (a GM-resolved player roll is headless).
     if (this.rendered) this.render();
   }

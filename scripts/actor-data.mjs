@@ -129,6 +129,9 @@ function buildContext(actor, targetActor) {
   return {
     cha: actor ? abilityMod(actor, "cha") : 0,
     targetWill: targetActor ? abilityMod(targetActor, "wis") : 0,
+    // Intimidation reads the target's morale straight off the sheet (character
+    // -4..+4, monster -6..+4); the field stays editable as a manual override.
+    targetMorale: targetActor ? Number(targetActor.system?.details?.morale ?? 0) : 0,
     alignment: alignmentModifier(actor, targetActor),
     levelGap: levelGapModifier(actor, targetActor),
     age: ageModifier(actor, targetActor),
@@ -200,6 +203,7 @@ function ageModifier(charActor, targetActor) {
 function resolveAutoValue(source, ctx) {
   if (source === "cha") return ctx.cha;
   if (source === "targetWill") return ctx.targetWill;
+  if (source === "targetMorale") return ctx.targetMorale;
   if (source === "alignment") return ctx.alignment;
   if (source === "levelGap") return ctx.levelGap;
   if (source === "age") return ctx.age;

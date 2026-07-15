@@ -2,13 +2,29 @@
 import InfluenceApp from "./influence-app.mjs";
 import AttitudeData from "./attitude-data.mjs";
 import AttitudeSheet from "./attitude-sheet.mjs";
-import { INFLUENCE_ATTITUDE_LABELS, MODULE_ID } from "./constants.mjs";
+import {
+  INFLUENCE_ATTITUDE_LABELS,
+  MODULE_ID,
+  REACTION_CHANGE_KEY,
+  INFLUENCE_TONE,
+  INFLUENCE_BANDS,
+  INFLUENCE_RELATIONSHIP_MOD,
+  INFLUENCE_TIME_STEPS,
+  HENCHMAN_MONTHLY_WAGE,
+} from "./constants.mjs";
+import { getActorHD, monthlyWageForHD, getProficiencies, getEffectReactionMods } from "./actor-data.mjs";
 
 const ATTITUDE_TYPE = `${MODULE_ID}.attitude`;
 
-/** Open the influence roller for a given actor (or standalone if none). */
-function openInfluenceApp(actor = null) {
-  return new InfluenceApp({ actor }).render(true);
+/**
+ * Open the influence roller for a given actor (or standalone if none).
+ * @param {Actor|null} actor
+ * @param {object} [options] - { targetActor, modifiers: [{label, value}] } —
+ *   `modifiers` lets consumer modules inject flat externals (e.g.
+ *   acks-henchmen's per-settlement slander penalty).
+ */
+function openInfluenceApp(actor = null, options = {}) {
+  return new InfluenceApp({ actor, ...options }).render(true);
 }
 
 // GM-side socket handler (via socketlib): resolve a player's roll against a
@@ -23,7 +39,29 @@ Hooks.once("socketlib.ready", () => {
 Hooks.once("init", () => {
   // Public API for macros / other modules. Set this FIRST so nothing below can
   // prevent it from being assigned.
-  const api = { open: openInfluenceApp, InfluenceApp };
+  const api = {
+    apiVersion: 2,
+    open: openInfluenceApp,
+    InfluenceApp,
+    // Rules constants & helpers exported for consumer modules (acks-henchmen).
+    constants: {
+      REACTION_CHANGE_KEY,
+      INFLUENCE_TONE,
+      INFLUENCE_BANDS,
+      INFLUENCE_RELATIONSHIP_MOD,
+      INFLUENCE_TIME_STEPS,
+      HENCHMAN_MONTHLY_WAGE,
+    },
+    getActorHD,
+    monthlyWageForHD,
+    getProficiencies,
+    getEffectReactionMods,
+    // Custom hooks fired: `${MODULE_ID}.rollComplete`, `${MODULE_ID}.attitudeChanged`.
+    hooks: {
+      rollComplete: `${MODULE_ID}.rollComplete`,
+      attitudeChanged: `${MODULE_ID}.attitudeChanged`,
+    },
+  };
   const module = game.modules.get(MODULE_ID);
   if (module) module.api = api;
   // Also expose globally as a resilient fallback for macros.

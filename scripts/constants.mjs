@@ -261,7 +261,7 @@ export const INFLUENCE_MODIFIERS = Object.freeze({
     {
       group: "ACKS-INFLUENCE.group.target",
       mods: [
-        { key: "targetMorale", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mod.intimidation.morale" },
+        { key: "targetMorale", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mod.intimidation.morale", auto: "targetMorale" },
         { key: "targetWill", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mod.targetWill", auto: "targetWill" },
         { key: "sawFriendsHurt", type: "check", label: "ACKS-INFLUENCE.mod.intimidation.sawFriendsHurt", value: 1 },
         { key: "lossOfFace", type: "signed", label: "ACKS-INFLUENCE.mod.intimidation.lossOfFace" },
