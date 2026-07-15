@@ -18,6 +18,7 @@
   "styles": [
     "styles/influence.css"
   ],
+  "socket": true,
   "documentTypes": {
     "Item": {
       "attitude": {}
