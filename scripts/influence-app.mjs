@@ -97,6 +97,15 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     this.#defaults = computeDefaults(this.#actor, this.#targetActor, this.#modConfig, this.#ctx);
     this.#modifiers = foundry.utils.deepClone(this.#defaults);
 
+    // External modes: rebuild the auto-key map from the mode's own groups so
+    // ctx-derived fields get the wand badge and override-highlight exactly
+    // like the core tones' detected values.
+    if (this.#mode) {
+      const keys = new Set();
+      for (const group of this.#mode.groups) for (const mod of group.mods) if (mod.auto) keys.add(mod.key);
+      this.#autoKeys = Object.fromEntries(Object.values(INFLUENCE_TONE).map((tone) => [tone, keys]));
+    }
+
     this.#system = {
       tone: INFLUENCE_TONE.DIPLOMACY,
       // attempt 0 = initial reaction (sets attitude, 0 time); 1+ = influence attempts.
