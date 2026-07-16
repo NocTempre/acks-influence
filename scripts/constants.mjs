@@ -394,7 +394,7 @@ export const EXTERNAL_MODES = Object.freeze({
         group: "ACKS-INFLUENCE.mode.loyalty.scores",
         mods: [
           { key: "effectiveLoyalty", type: "signed", label: "ACKS-INFLUENCE.mode.loyalty.effective", auto: "ctx:effectiveLoyalty" },
-          { key: "apparentLevelDiff", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mode.loyalty.apparentLevel" },
+          { key: "apparentLevelDiff", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mode.loyalty.apparentLevel", auto: "ctx:apparentLevelDiff" },
           { key: "judgeAdj", type: "signed", label: "ACKS-INFLUENCE.mode.loyalty.judgeAdj" },
         ],
       },
