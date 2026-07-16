@@ -184,7 +184,7 @@ and `optionalRule`.
 
 ## Racial & cross-species reactions
 
-See [`docs/ACKS-Reactions-Reference.md`](docs/ACKS-Reactions-Reference.md) §6 for
+See the local rules extract (`acks-rules/acks-influence/ACKS-Reactions-Reference.md`) §6 for
 the RAW: core ACKS II has **no** human/elf/dwarf reaction penalty — what exists
 is **Inhumanity** (PC/JJ; reactions, loyalty, *and* morale), the optional BTA
 dwarven-caste rule, type-scoped powers, and the MM hard hatreds. The module
@@ -213,7 +213,7 @@ implements exactly that, plus a campaign hook:
 
 ## Rules reference
 
-See [`docs/ACKS-Reactions-Reference.md`](docs/ACKS-Reactions-Reference.md) for the
+See the local rules extract (`acks-rules/acks-influence/ACKS-Reactions-Reference.md`) for the
 consolidated, rules-complete reference this tool is built from (player rules
 pp. 84–87 plus the Judges Journal GM screen).
 
@@ -235,5 +235,5 @@ packs/
   proficiencies/                compiled LevelDB test compendium (shipped)
   _source/proficiencies/        human-readable pack source
 tools/build-packs.mjs           regenerates the compendium (dev-only)
-docs/ACKS-Reactions-Reference.md
+acks-rules/acks-influence/ACKS-Reactions-Reference.md
 ```

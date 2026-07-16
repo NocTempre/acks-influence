@@ -5,7 +5,7 @@
  * the Both / Either / Character / Target keys, with "±" rows as selects.
  *
  * All user-facing labels are localization keys resolved via game.i18n; see
- * lang/en.json. See docs/ACKS-Reactions-Reference.md for the rules reference.
+ * lang/en.json. See acks-rules/acks-influence/ACKS-Reactions-Reference.md for the rules reference.
  */
 
 export const MODULE_ID = "acks-influence";
