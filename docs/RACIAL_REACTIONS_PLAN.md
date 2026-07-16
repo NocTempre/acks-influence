@@ -1,9 +1,11 @@
 # Racial & Cross-Species Reactions — Implementation Plan
 
-> ⚠️ **NOT IN EFFECT — PROPOSAL ONLY.** This plan is approved in design but not
-> yet implemented. It must not be built while the external-modes work
-> (hiring/loyalty pages) has uncommitted changes in flight. Delete this banner
-> when implementation lands.
+> ✅ **IMPLEMENTED 2026-07-16** (scripts/racial.mjs + roller integration +
+> compendium items + settings). This document is retained as the design
+> record; see README "Racial & cross-species reactions" for usage. Deltas from
+> the plan: the BTA caste effects ship gated by the `enableBtaCaste` world
+> setting (default on, per user request); the relations row renders as its own
+> "Racial relations" group rather than inside "Both".
 
 Rules basis: `ACKS-Reactions-Reference.md` §6 (racial & cross-species
 reactions). Design decisions confirmed 2026-07-16:

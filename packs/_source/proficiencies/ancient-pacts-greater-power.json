@@ -1,7 +1,7 @@
 {
-  "_id": "acksInflBedazzle",
-  "_key": "!items!acksInflBedazzle",
-  "name": "Bedazzling Glamour (Power)",
+  "_id": "acksInflAncPact2",
+  "_key": "!items!acksInflAncPact2",
+  "name": "Ancient Pacts, Greater (Power)",
   "type": "ability",
   "img": "icons/svg/book.svg",
   "system": {
@@ -13,15 +13,15 @@
     "rollType": "result",
     "rollTarget": 0,
     "blindroll": false,
-    "description": "<p>While active, the character's magical glamour grants a +1 bonus to all reaction rolls and ignores reaction penalties from permanent wounds. Does not stack with Mystic Aura — under the hood it IS Mystic Aura as a power.</p>",
+    "description": "<p>Zaharan darklords and sorcerers command the old pacts with greater authority: a +2 bonus to reaction rolls when encountering intelligent Chaotic monsters (HFH).</p>",
     "save": "",
     "_schemaVersion": 3
   },
   "effects": [
     {
-      "_id": "acksInflEffBdzGl",
-      "_key": "!items.effects!acksInflBedazzle.acksInflEffBdzGl",
-      "name": "Bedazzling Glamour (Mystic Aura)",
+      "_id": "acksInflEffAncP2",
+      "_key": "!items.effects!acksInflAncPact2.acksInflEffAncP2",
+      "name": "Ancient Pacts, Greater (reaction)",
       "type": "base",
       "img": "icons/svg/aura.svg",
       "system": {},
@@ -29,7 +29,7 @@
         {
           "key": "flags.acks-influence.reaction",
           "mode": 2,
-          "value": "1",
+          "value": "2",
           "priority": 20
         }
       ],
@@ -53,8 +53,9 @@
         "acks-influence": {
           "situational": false,
           "tone": "all",
-          "label": "Bedazzling Glamour",
-          "actsAs": "mysticAura"
+          "label": "Ancient Pacts, Greater — vs intelligent Chaotic monsters (+2)",
+          "vs": "monster",
+          "alignmentOnly": "chaos"
         }
       },
       "_stats": {

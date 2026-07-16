@@ -1,0 +1,124 @@
+{
+  "_id": "acksInflCasteHi0",
+  "_key": "!items!acksInflCasteHi0",
+  "name": "Highborn Caste (BTA)",
+  "type": "ability",
+  "img": "icons/svg/book.svg",
+  "system": {
+    "proficiencytype": "general",
+    "favorite": false,
+    "pattern": "white",
+    "requirements": "",
+    "roll": "",
+    "rollType": "result",
+    "rollTarget": 0,
+    "blindroll": false,
+    "description": "<p>By This Axe p.56 (optional rule): highborn dwarves gain a +2 bonus to reaction rolls with dwarves of their clan and +1 with all other dwarves. The +1 applies automatically against dwarves; tick the clan box when the target is of the character's own clan.</p>",
+    "save": "",
+    "_schemaVersion": 3
+  },
+  "effects": [
+    {
+      "_id": "acksInflEfCastH1",
+      "_key": "!items.effects!acksInflCasteHi0.acksInflEfCastH1",
+      "name": "Highborn (other dwarves)",
+      "type": "base",
+      "img": "icons/svg/aura.svg",
+      "system": {},
+      "changes": [
+        {
+          "key": "flags.acks-influence.reaction",
+          "mode": 2,
+          "value": "1",
+          "priority": 20
+        }
+      ],
+      "disabled": false,
+      "transfer": true,
+      "duration": {
+        "startTime": null,
+        "seconds": null,
+        "combat": null,
+        "rounds": null,
+        "turns": null,
+        "startRound": null,
+        "startTurn": null
+      },
+      "description": "",
+      "origin": null,
+      "tint": "#ffffff",
+      "statuses": [],
+      "sort": 0,
+      "flags": {
+        "acks-influence": {
+          "situational": false,
+          "tone": "all",
+          "label": "Highborn — vs dwarves (+1)",
+          "vs": "dwarf",
+          "optionalRule": "btaCaste"
+        }
+      },
+      "_stats": {
+        "systemId": "acks",
+        "createdTime": 1784206144345,
+        "modifiedTime": 1784206144345
+      }
+    },
+    {
+      "_id": "acksInflEfCastH2",
+      "_key": "!items.effects!acksInflCasteHi0.acksInflEfCastH2",
+      "name": "Highborn (own clan)",
+      "type": "base",
+      "img": "icons/svg/aura.svg",
+      "system": {},
+      "changes": [
+        {
+          "key": "flags.acks-influence.reaction",
+          "mode": 2,
+          "value": "1",
+          "priority": 20
+        }
+      ],
+      "disabled": false,
+      "transfer": true,
+      "duration": {
+        "startTime": null,
+        "seconds": null,
+        "combat": null,
+        "rounds": null,
+        "turns": null,
+        "startRound": null,
+        "startTurn": null
+      },
+      "description": "",
+      "origin": null,
+      "tint": "#ffffff",
+      "statuses": [],
+      "sort": 0,
+      "flags": {
+        "acks-influence": {
+          "situational": true,
+          "tone": "all",
+          "label": "Highborn — dwarf of own clan (raises to +2)",
+          "vs": "dwarf",
+          "optionalRule": "btaCaste"
+        }
+      },
+      "_stats": {
+        "systemId": "acks",
+        "createdTime": 1784206144345,
+        "modifiedTime": 1784206144345
+      }
+    }
+  ],
+  "flags": {},
+  "ownership": {
+    "default": 0
+  },
+  "sort": 0,
+  "_stats": {
+    "systemId": "acks",
+    "createdTime": 1784206144345,
+    "modifiedTime": 1784206144345
+  }
+}

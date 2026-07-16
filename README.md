@@ -149,6 +149,20 @@ Then, on the effect's flags (`flags.acks-influence`), you may set:
 - `alignmentSign` (`law` | `chaos` | `neutral`) — the bonus is **+value when the
   target's alignment matches**, **−value otherwise**. E.g. Deathly Visage (+2 vs
   Chaotic, −2 vs non-Chaotic).
+- `alignmentOnly` (`law` | `chaos` | `neutral`) — a **gate**, not a sign flip:
+  the modifier only pre-checks when the target's alignment matches (e.g.
+  Ancient Pacts, +1 vs *Chaotic* monsters — no penalty vs others).
+- `vs` (string) — **target-kind scoping**: a comma-separated list of race/kind
+  tokens (e.g. `animal`, `dwarf`, `human,demi-human`, `beastman`, `monster`,
+  `goblin`). The modifier pre-checks when the current target matches a token
+  (from the roller's auto-detected, overridable **Target kind** field), stays
+  unchecked when the typing is known and doesn't match, and falls back to a
+  plain situational checkbox when the target's kind is unknown. Combine with
+  `situational: true` for bonuses with extra conditions beyond the kind (e.g.
+  Animal Husbandry's "tame AND uncontrolled").
+- `optionalRule` (string) — ties the effect to a world setting; currently
+  `btaCaste` (the *By This Axe* p.56 dwarven caste rule). When the setting is
+  off the effect stops contributing, no need to remove it from actors.
 - `actsAs` (`diplomacy` | `intimidation` | `seduction` | `mysticAura`) — the power
   **is** that core proficiency under the hood (non-stacking). If the character
   lacks the base proficiency, the power **replaces that proficiency's checkbox
@@ -159,12 +173,43 @@ Then, on the effect's flags (`flags.acks-influence`), you may set:
 The roller lists non-`actsAs` effects under a **Proficiencies & Powers** group
 (badged 🖐). The test compendium ships examples: Beast Friendship, Animal
 Husbandry, Folkways (situational, tone-scoped), plus class powers — Command of
-Voice, Bedazzling Glamour, Glamorous Aura, Ancient Pacts, and Deathly Visage —
-demonstrating `bewitched`, `alignmentSign`, and `actsAs`.
+Voice, Bedazzling Glamour, Glamorous Aura, Ancient Pacts (±greater variant),
+Deathly Visage, the four Inhumanity tiers, and the three BTA caste items —
+demonstrating `bewitched`, `alignmentSign`, `alignmentOnly`, `vs`, `actsAs`,
+and `optionalRule`.
 
 > Note: bonuses are read from **effects on the owned item/actor**, so a system or
 > homebrew proficiency only contributes if it carries such an effect — the
 > module's compendium copies do; add the effect to your own items to extend it.
+
+## Racial & cross-species reactions
+
+See [`docs/ACKS-Reactions-Reference.md`](docs/ACKS-Reactions-Reference.md) §6 for
+the RAW: core ACKS II has **no** human/elf/dwarf reaction penalty — what exists
+is **Inhumanity** (PC/JJ; reactions, loyalty, *and* morale), the optional BTA
+dwarven-caste rule, type-scoped powers, and the MM hard hatreds. The module
+implements exactly that, plus a campaign hook:
+
+- **Target kind** — the roller detects the target's race/kind tokens from the
+  class name (characters) or the [acks-monsters](https://github.com/NocTempre/acks-monsters)
+  enhanced sheet typing plus name recognition (monsters), and shows them in an
+  overridable field. `vs`-scoped effects gate on it automatically.
+- **Campaign race relations** — the world setting **Campaign race relations
+  (JSON)** takes directional rows:
+  `[{"from":"dwarf","to":"elf","value":-1,"label":"Grudge of the Vaults"}]`
+  (`from` = influencer race/category, `to` = target; **asymmetric by design** —
+  add a mirror row if you want both directions). The best-matching row (exact
+  race beats category) appears as an auto-populated "Racial relations" modifier
+  on all three tones **and** the hiring/loyalty pages, mirroring Inhumanity's
+  reach. Modules can contribute rows at runtime via
+  `api.registerRaceRelations(rows)`; setting rows win ties.
+- **BTA dwarven caste** — ships as compendium items (Highborn, Oathsworn/
+  Craftborn/Workborn, Houseless) gated by the **By This Axe: dwarven caste
+  reaction modifiers** world setting (default on; it is an optional rule).
+- **Hard hatreds** (dwarf↔goblin, gnome↔kobold) surface as RAW chat notes —
+  never a forced result.
+- API: `kindOf(actor)`, `matchesKind(categories, tokens)`,
+  `relationFor(kindOf(a), kindOf(b))`, `registerRaceRelations(rows)`.
 
 ## Rules reference
 

@@ -4,6 +4,7 @@
  * token's actor, using only public ACKS data paths (no system internals).
  */
 import { HENCHMAN_MONTHLY_WAGE, INFLUENCE_MODIFIERS, MODULE_ID, REACTION_CHANGE_KEY } from "./constants.mjs";
+import { inferRace, optionalRuleEnabled, parseKindList } from "./racial.mjs";
 
 const GENERIC_IMG = "icons/svg/mystery-man.svg";
 
@@ -165,17 +166,6 @@ const AGE_TABLE = Object.freeze({
   zaharan: [13, 18, 36, 56, 76],
 });
 
-/** Infer race from the class name (ACKS has no race field); defaults to human. */
-function inferRace(actor) {
-  const cls = String(actor?.system?.details?.class ?? "").toLowerCase();
-  if (/dwarv|dwarf/.test(cls)) return "dwarf";
-  if (/elv|elf/.test(cls)) return "elf";
-  if (/nobiran/.test(cls)) return "nobiran";
-  if (/zahar/.test(cls)) return "zaharan";
-  if (/beastman|bugbear|gnoll|kobold|orc/.test(cls)) return "beastman";
-  return "human";
-}
-
 /** The age-category index (0 = Youth … 4 = Ancient) for an actor. */
 export function ageCategoryIndex(actor) {
   const bounds = AGE_TABLE[inferRace(actor)] ?? AGE_TABLE.human;
@@ -260,6 +250,11 @@ export function getEffectReactionMods(actor) {
   for (const effect of effects) {
     if (effect.disabled) continue;
     const f = effect.flags?.[MODULE_ID] ?? {};
+    // Effects tied to an optional rule (e.g. BTA dwarven caste) obey its setting.
+    if (f.optionalRule && !optionalRuleEnabled(f.optionalRule)) {
+      idx++;
+      continue;
+    }
     let ci = 0;
     for (const change of effect.changes ?? []) {
       // Effects that stand in for a core proficiency are handled by getActsAsPowers.
@@ -271,6 +266,7 @@ export function getEffectReactionMods(actor) {
           const tones = (Array.isArray(raw) ? raw : String(raw).split(","))
             .map((t) => String(t).trim().toLowerCase())
             .filter(Boolean);
+          const vs = f.vs ? parseKindList(f.vs) : null;
           out.push({
             id: `eff:${effect.id ?? idx}:${ci}`,
             label: f.label || effect.name || "Effect",
@@ -279,6 +275,10 @@ export function getEffectReactionMods(actor) {
             tones: tones.length ? tones : ["all"],
             bewitched: f.bewitched === true,
             alignmentSign: f.alignmentSign ? String(f.alignmentSign).toLowerCase() : null,
+            // Target-kind scoping: active only when the target matches (see kindOf).
+            vs: vs?.length ? vs : null,
+            // Alignment gating (not sign-flipping): active only vs this alignment.
+            alignmentOnly: f.alignmentOnly ? String(f.alignmentOnly).toLowerCase() : null,
           });
         }
       }

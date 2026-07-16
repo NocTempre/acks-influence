@@ -51,15 +51,16 @@
       "sort": 0,
       "flags": {
         "acks-influence": {
-          "situational": true,
+          "situational": false,
           "tone": "diplomacy,intimidation",
-          "label": "Beast Friendship — target is a normal animal (+2)"
+          "label": "Beast Friendship — vs normal animals (+2)",
+          "vs": "animal"
         }
       },
       "_stats": {
         "systemId": "acks",
-        "createdTime": 1783877304694,
-        "modifiedTime": 1783877304694
+        "createdTime": 1784206144345,
+        "modifiedTime": 1784206144345
       }
     }
   ],
@@ -70,7 +71,7 @@
   "sort": 0,
   "_stats": {
     "systemId": "acks",
-    "createdTime": 1783877304694,
-    "modifiedTime": 1783877304694
+    "createdTime": 1784206144345,
+    "modifiedTime": 1784206144345
   }
 }

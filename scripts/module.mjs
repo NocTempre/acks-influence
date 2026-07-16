@@ -13,6 +13,7 @@ import {
   HENCHMAN_MONTHLY_WAGE,
 } from "./constants.mjs";
 import { getActorHD, monthlyWageForHD, getProficiencies, getEffectReactionMods } from "./actor-data.mjs";
+import { kindOf, matchesKind, registerRaceRelations, relationFor } from "./racial.mjs";
 
 const ATTITUDE_TYPE = `${MODULE_ID}.attitude`;
 
@@ -37,12 +38,35 @@ Hooks.once("socketlib.ready", () => {
 });
 
 Hooks.once("init", () => {
+  // World settings for the racial layer (docs/RACIAL_REACTIONS_PLAN.md).
+  game.settings.register(MODULE_ID, "enableBtaCaste", {
+    name: "ACKS-INFLUENCE.settings.btaCaste.name",
+    hint: "ACKS-INFLUENCE.settings.btaCaste.hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true,
+  });
+  game.settings.register(MODULE_ID, "raceRelations", {
+    name: "ACKS-INFLUENCE.settings.raceRelations.name",
+    hint: "ACKS-INFLUENCE.settings.raceRelations.hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: "[]",
+  });
+
   // Public API for macros / other modules. Set this FIRST so nothing below can
   // prevent it from being assigned.
   const api = {
-    apiVersion: 3, // 3: external modes — open(actor, {mode: "hiring"|"loyalty", ctx, context})
+    apiVersion: 4, // 4: racial layer — kindOf/relationFor/registerRaceRelations
     open: openInfluenceApp,
     InfluenceApp,
+    // Racial & cross-species helpers (docs/RACIAL_REACTIONS_PLAN.md):
+    kindOf,
+    matchesKind,
+    relationFor,
+    registerRaceRelations,
     // Rules constants & helpers exported for consumer modules (acks-henchmen).
     constants: {
       REACTION_CHANGE_KEY,

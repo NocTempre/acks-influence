@@ -13,7 +13,7 @@
     "rollType": "result",
     "rollTarget": 0,
     "blindroll": false,
-    "description": "<p>The character gains a +1 bonus to reaction rolls when encountering intelligent Chaotic monsters.</p>",
+    "description": "<p>In elder days the lords of Zahar ensorcelled the dark powers of the world in pacts of service. All Zaharans gain a +1 bonus to reaction rolls when encountering intelligent Chaotic monsters.</p>",
     "save": "",
     "_schemaVersion": 3
   },
@@ -51,15 +51,17 @@
       "sort": 0,
       "flags": {
         "acks-influence": {
-          "situational": true,
+          "situational": false,
           "tone": "all",
-          "label": "Ancient Pacts — vs intelligent Chaotic monsters (+1)"
+          "label": "Ancient Pacts — vs intelligent Chaotic monsters (+1)",
+          "vs": "monster",
+          "alignmentOnly": "chaos"
         }
       },
       "_stats": {
         "systemId": "acks",
-        "createdTime": 1783877304694,
-        "modifiedTime": 1783877304694
+        "createdTime": 1784206144345,
+        "modifiedTime": 1784206144345
       }
     }
   ],
@@ -70,7 +72,7 @@
   "sort": 0,
   "_stats": {
     "systemId": "acks",
-    "createdTime": 1783877304694,
-    "modifiedTime": 1783877304694
+    "createdTime": 1784206144345,
+    "modifiedTime": 1784206144345
   }
 }

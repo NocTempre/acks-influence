@@ -23,6 +23,7 @@ import {
   monthlyWageForHD,
   resolveParties,
 } from "./actor-data.mjs";
+import { hatredNotes, kindOf, matchesKind, parseKindList, relationFor } from "./racial.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -113,6 +114,9 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       currentAttitude: 2, // Neutral
       gmAdjustment: 0, // generic GM catch-all bucket
       bribeFeeOverridden: false, // true once the GM edits the bribe fee by hand
+      // Detected target race/kind tokens (comma list); editable like other autos.
+      targetKind: this.#autoTargetKind(),
+      targetKindOverridden: false,
     };
 
     this.#loadAttitude();
@@ -149,6 +153,33 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   }
 
   /* -------------------------------------------- */
+  /*  Target kind (race/species typing)           */
+  /* -------------------------------------------- */
+
+  /** The detected target kind as a display string ("goblin, beastman, monster"). */
+  #autoTargetKind() {
+    return [...kindOf(this.#targetActor).categories].join(", ");
+  }
+
+  /**
+   * The target's kind tokens for `vs`-gating and race relations: the GM's
+   * override when edited, else the auto-detected categories.
+   * @returns {Set<string>}
+   */
+  #targetCategories() {
+    if (this.#system?.targetKindOverridden) return new Set(parseKindList(this.#system.targetKind));
+    return kindOf(this.#targetActor).categories;
+  }
+
+  /** Kind objects for the relations lookup (override-aware on the target side). */
+  #relation() {
+    const target = this.#system?.targetKindOverridden
+      ? { race: "", categories: this.#targetCategories() }
+      : kindOf(this.#targetActor);
+    return relationFor(kindOf(this.#actor), target);
+  }
+
+  /* -------------------------------------------- */
   /*  Modifier configuration                      */
   /* -------------------------------------------- */
 
@@ -161,7 +192,55 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   #buildModConfig() {
     const effectMods = getEffectReactionMods(this.#actor);
     const targetAlign = classifyAlignment(this.#targetActor?.system?.details?.alignment);
+    const targetCats = this.#targetCategories();
+    const kindKnown = targetCats.size > 0;
     const config = {};
+
+    // Campaign race-relations row (asymmetric registry / world setting) —
+    // applies to every tone and both external modes (RAW Inhumanity wording
+    // covers reactions, loyalty, and morale alike).
+    const relation = this.#relation();
+    const relationGroup = relation
+      ? {
+          group: "ACKS-INFLUENCE.group.racial",
+          mods: [
+            {
+              key: "raceRelation",
+              type: "signed",
+              label: relation.label || "ACKS-INFLUENCE.mod.raceRelation",
+              default: relation.value,
+              fromEffect: true,
+            },
+          ],
+        }
+      : null;
+
+    /**
+     * An effect-granted checkbox row. `vs` (target kind) and `alignmentOnly`
+     * gate the default check state: on a known match the box pre-checks
+     * (unless the effect is also situational); on a known mismatch or unknown
+     * typing it stays off — always GM-toggleable either way.
+     */
+    const effectModRow = (m) => {
+      // Alignment-signed effects flip sign by the target's alignment.
+      const value = m.alignmentSign
+        ? (targetAlign === m.alignmentSign ? 1 : -1) * Math.abs(m.value)
+        : m.value;
+      let def = !m.situational;
+      if (m.vs) def = def && kindKnown && matchesKind(targetCats, m.vs);
+      if (m.alignmentOnly) def = def && targetAlign === m.alignmentOnly;
+      return {
+        key: m.id,
+        type: "check",
+        label: m.label,
+        value,
+        default: def,
+        fromEffect: true,
+        bewitched: m.bewitched === true,
+        // Target-scoped: the GM's real target data decides on hidden resolves.
+        vsGated: Boolean(m.vs || m.alignmentOnly),
+      };
+    };
 
     // External mode: one modifier layout for every tone key (the tone
     // selector is hidden). `ctxOptions` selects materialize from the ctx bag.
@@ -173,16 +252,9 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
         ),
       }));
       if (this.#mode.includeEffectMods && effectMods.length) {
-        groups.push({
-          group: "ACKS-INFLUENCE.group.powers",
-          mods: effectMods.map((m) => {
-            const value = m.alignmentSign
-              ? (targetAlign === m.alignmentSign ? 1 : -1) * Math.abs(m.value)
-              : m.value;
-            return { key: m.id, type: "check", label: m.label, value, default: !m.situational, fromEffect: true };
-          }),
-        });
+        groups.push({ group: "ACKS-INFLUENCE.group.powers", mods: effectMods.map(effectModRow) });
       }
+      if (relationGroup) groups.push(relationGroup);
       for (const tone of Object.values(INFLUENCE_TONE)) config[tone] = groups;
       return config;
     }
@@ -190,25 +262,9 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       const groups = INFLUENCE_MODIFIERS[tone].map((g) => ({ group: g.group, mods: g.mods }));
       const forTone = effectMods.filter((m) => m.tones.includes("all") || m.tones.includes(tone));
       if (forTone.length) {
-        groups.push({
-          group: "ACKS-INFLUENCE.group.powers",
-          mods: forTone.map((m) => {
-            // Alignment-signed effects flip sign by the target's alignment.
-            const value = m.alignmentSign
-              ? (targetAlign === m.alignmentSign ? 1 : -1) * Math.abs(m.value)
-              : m.value;
-            return {
-              key: m.id,
-              type: "check",
-              label: m.label,
-              value,
-              default: !m.situational,
-              fromEffect: true,
-              bewitched: m.bewitched === true,
-            };
-          }),
-        });
+        groups.push({ group: "ACKS-INFLUENCE.group.powers", mods: forTone.map(effectModRow) });
       }
+      if (relationGroup) groups.push(relationGroup);
       config[tone] = groups;
     }
     return config;
@@ -402,10 +458,12 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     const t = this.#system.tone;
     // Which keys are target-derived (keep the GM's real values for these). The
     // bribe select is also excluded: the player bids blind via bribeOffer.
-    const targetKeys = new Set(["bribe"]);
+    // Race relations and kind/alignment-gated effects also resolve GM-side —
+    // the player can't judge a hidden target's race or alignment.
+    const targetKeys = new Set(["bribe", "raceRelation"]);
     for (const group of this.#modConfig[t]) {
       for (const mod of group.mods) {
-        if (TARGET_AUTO_SOURCES.has(mod.auto) || TARGET_KEYS.has(mod.key)) targetKeys.add(mod.key);
+        if (TARGET_AUTO_SOURCES.has(mod.auto) || TARGET_KEYS.has(mod.key) || mod.vsGated) targetKeys.add(mod.key);
       }
     }
     for (const [k, v] of Object.entries(playerMods ?? {})) {
@@ -517,7 +575,10 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
           masked:
             hidden &&
             !isBribeGuess &&
-            (TARGET_AUTO_SOURCES.has(mod.auto) || TARGET_KEYS.has(mod.key) || mod.key === "bribe"),
+            (TARGET_AUTO_SOURCES.has(mod.auto) ||
+              TARGET_KEYS.has(mod.key) ||
+              mod.key === "bribe" ||
+              mod.key === "raceRelation"),
           value,
           checked: mod.type === "check" ? Boolean(value) : false,
           options:
@@ -554,6 +615,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     context.relationshipModifier = this.#relationshipModifier();
     context.finalModifier = this.#finalModifier;
     context.targetHidden = this.#targetHidden();
+    context.targetKindOverridden = this.#system.targetKindOverridden;
 
     const timeStep = INFLUENCE_TIME_STEPS.find((step) => step.value === this.#system.attempt);
     context.timeLabel = timeStep ? game.i18n.localize(timeStep.label) : "";
@@ -607,6 +669,13 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       this.#system.bribeFeeOverridden = true;
     }
 
+    // An edited target kind re-gates `vs`-scoped effects and the relations row.
+    if (data.targetKind !== undefined && String(data.targetKind) !== this.#system.targetKind) {
+      this.#system.targetKind = String(data.targetKind);
+      this.#system.targetKindOverridden = String(data.targetKind).trim() !== this.#autoTargetKind();
+      this.#regateForKind();
+    }
+
     // Persist the currently-displayed tone's modifier values before switching tone.
     const previousTone = this.#system.tone;
     if (data.mod) {
@@ -651,8 +720,10 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   static #onResetDefaults() {
     // Re-read the current target so a newly-selected token is picked up.
     this.#targetActor = getTargetActor() ?? this.#targetActor;
+    this.#system.targetKindOverridden = false;
+    this.#system.targetKind = this.#autoTargetKind();
     this.#modConfig = this.#buildModConfig();
-    this.#defaults = computeDefaults(this.#actor, this.#targetActor, this.#modConfig);
+    this.#defaults = computeDefaults(this.#actor, this.#targetActor, this.#modConfig, this.#ctx);
     const tone = this.#system.tone;
     this.#modifiers[tone] = foundry.utils.deepClone(this.#defaults[tone]);
     this.#system.gmAdjustment = 0; // clear the GM bucket / total override
@@ -701,8 +772,11 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
 
   /** Rebuild config + re-apply auto/effect values for the current actors, keeping manual edits. */
   #refreshFromActors() {
+    // A new target invalidates any manual kind override.
+    this.#system.targetKindOverridden = false;
+    this.#system.targetKind = this.#autoTargetKind();
     this.#modConfig = this.#buildModConfig();
-    const newDefaults = computeDefaults(this.#actor, this.#targetActor, this.#modConfig);
+    const newDefaults = computeDefaults(this.#actor, this.#targetActor, this.#modConfig, this.#ctx);
     for (const tone of Object.keys(newDefaults)) {
       const merged = { ...this.#modifiers[tone] };
       for (const group of this.#modConfig[tone]) {
@@ -718,6 +792,29 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     this.#defaults = newDefaults;
     this.#system.bribeFeeOverridden = false; // re-detect fee for the new target
     this.#loadAttitude();
+    this.#recalculate();
+  }
+
+  /**
+   * Rebuild the modifier config after a target-kind edit and re-apply only the
+   * kind-sensitive defaults (`vs`-gated effects and the relations row), keeping
+   * every other manual edit intact.
+   */
+  #regateForKind() {
+    this.#modConfig = this.#buildModConfig();
+    const newDefaults = computeDefaults(this.#actor, this.#targetActor, this.#modConfig, this.#ctx);
+    for (const tone of Object.keys(newDefaults)) {
+      const merged = { ...this.#modifiers[tone] };
+      for (const group of this.#modConfig[tone]) {
+        for (const mod of group.mods) {
+          if (mod.vsGated || mod.key === "raceRelation" || !(mod.key in merged)) {
+            merged[mod.key] = newDefaults[tone][mod.key];
+          }
+        }
+      }
+      this.#modifiers[tone] = merged;
+    }
+    this.#defaults = newDefaults;
     this.#recalculate();
   }
 
@@ -825,6 +922,11 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       } else {
         notes.push(game.i18n.localize("ACKS-INFLUENCE.note.bribeRisk"));
       }
+    }
+    // RAW hard hatreds (MM): automatic-reaction pairs like dwarf↔goblin are
+    // surfaced as notes only — the Judge decides, no forced result.
+    for (const key of hatredNotes(kindOf(this.#actor).categories, this.#targetCategories())) {
+      notes.push(game.i18n.localize(key));
     }
     return { rawNotes: notes };
   }
