@@ -208,6 +208,11 @@ function resolveAutoValue(source, ctx) {
   if (source === "levelGap") return ctx.levelGap;
   if (source === "age") return ctx.age;
   if (source.startsWith("prof:")) return Boolean(ctx.profs[source.slice(5)]);
+  // Caller-supplied values (external modes): api.open(actor, {mode, ctx}).
+  if (source.startsWith("ctx:")) {
+    const value = ctx.external?.[source.slice(4)];
+    return value === undefined ? 0 : Number(value) || 0;
+  }
   return undefined;
 }
 
@@ -220,8 +225,9 @@ function resolveAutoValue(source, ctx) {
  * @param {Record<string, Array>} modConfig  per-tone groups (static + effects)
  * @returns {{[tone:string]: {[key:string]: (number|boolean)}}}
  */
-export function computeDefaults(actor, targetActor, modConfig = INFLUENCE_MODIFIERS) {
+export function computeDefaults(actor, targetActor, modConfig = INFLUENCE_MODIFIERS, external = null) {
   const ctx = buildContext(actor, targetActor);
+  ctx.external = external ?? {};
   const defaults = {};
   for (const [tone, groups] of Object.entries(modConfig)) {
     defaults[tone] = {};

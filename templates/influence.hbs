@@ -10,6 +10,11 @@
       <span class="influence-party-name">{{parties.influencer.name}}</span>
     </div>
 
+    {{#if externalMode}}
+    <div class="influence-ladder influence-mode-title">
+      <strong>{{modeLabel}}</strong>
+    </div>
+    {{else}}
     <div class="influence-ladder">
       <div class="influence-ladder-rungs">
         {{#each ladder}}
@@ -25,6 +30,7 @@
         <strong>{{numberFormat relationshipModifier sign=true}}</strong>
       </div>
     </div>
+    {{/if}}
 
     <div class="influence-party" data-side="target"
          data-tooltip="{{localize 'ACKS-INFLUENCE.party.dropHint'}}">
@@ -36,7 +42,8 @@
 
   </div>
 
-  {{!-- Encounter setup --}}
+  {{!-- Encounter setup (hidden for external modes — no tone or attempt) --}}
+  {{#unless externalMode}}
   <fieldset>
     <legend>{{localize 'ACKS-INFLUENCE.section.interaction'}}</legend>
 
@@ -60,6 +67,7 @@
       </div>
     </div>
   </fieldset>
+  {{/unless}}
 
   {{!-- Tone-specific modifiers --}}
   <div class="influence-toolbar">

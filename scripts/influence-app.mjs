@@ -9,6 +9,7 @@ import {
   INFLUENCE_TONE,
   INFLUENCE_TONE_CHOICES,
   MODULE_ID,
+  EXTERNAL_MODES,
 } from "./constants.mjs";
 import {
   autoKeysByTone,
@@ -54,6 +55,13 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   #forceHidden = false;
   /** Externally injected modifiers (api.open(actor, {modifiers: [{label, value}]})). */
   #externalModifiers = [];
+  /** External mode (hiring / loyalty page hosted for consumer modules). */
+  #modeId = "";
+  #mode = null;
+  /** Caller-supplied auto values and select options for the external mode. */
+  #ctx = {};
+  /** Opaque correlation payload echoed back in the rollComplete hook. */
+  #extContext = null;
   /** Sum of relationship + tone modifiers (before the GM adjustment bucket). */
   #subtotal = 0;
   /** Effective modifier applied to the roll (#subtotal + GM adjustment). */
@@ -78,8 +86,15 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     // self-targeted token) — keep the two sides distinct until set explicitly.
     if (this.#targetActor && this.#targetActor === this.#actor) this.#targetActor = null;
 
+    // External mode: a consumer-module page (hiring / loyalty) replaces the
+    // three core tones; tone selector and attitude tracker hide.
+    this.#modeId = options.mode ?? "";
+    this.#mode = EXTERNAL_MODES[this.#modeId] ?? null;
+    this.#ctx = options.ctx ?? {};
+    this.#extContext = options.context ?? null;
+
     this.#modConfig = this.#buildModConfig();
-    this.#defaults = computeDefaults(this.#actor, this.#targetActor, this.#modConfig);
+    this.#defaults = computeDefaults(this.#actor, this.#targetActor, this.#modConfig, this.#ctx);
     this.#modifiers = foundry.utils.deepClone(this.#defaults);
 
     this.#system = {
@@ -120,7 +135,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
 
   /** @override */
   get title() {
-    const base = game.i18n.localize("ACKS-INFLUENCE.app.title");
+    const base = game.i18n.localize(this.#mode ? this.#mode.label : "ACKS-INFLUENCE.app.title");
     return this.#actor ? `${this.#actor.name}: ${base}` : base;
   }
 
@@ -138,6 +153,30 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     const effectMods = getEffectReactionMods(this.#actor);
     const targetAlign = classifyAlignment(this.#targetActor?.system?.details?.alignment);
     const config = {};
+
+    // External mode: one modifier layout for every tone key (the tone
+    // selector is hidden). `ctxOptions` selects materialize from the ctx bag.
+    if (this.#mode) {
+      const groups = this.#mode.groups.map((g) => ({
+        group: g.group,
+        mods: g.mods.map((m) =>
+          m.ctxOptions ? { ...m, options: this.#ctx[m.ctxOptions] ?? [{ label: "ACKS-INFLUENCE.opt.dash", value: 0 }] } : m
+        ),
+      }));
+      if (this.#mode.includeEffectMods && effectMods.length) {
+        groups.push({
+          group: "ACKS-INFLUENCE.group.powers",
+          mods: effectMods.map((m) => {
+            const value = m.alignmentSign
+              ? (targetAlign === m.alignmentSign ? 1 : -1) * Math.abs(m.value)
+              : m.value;
+            return { key: m.id, type: "check", label: m.label, value, default: !m.situational, fromEffect: true };
+          }),
+        });
+      }
+      for (const tone of Object.values(INFLUENCE_TONE)) config[tone] = groups;
+      return config;
+    }
     for (const tone of Object.values(INFLUENCE_TONE)) {
       const groups = INFLUENCE_MODIFIERS[tone].map((g) => ({ group: g.group, mods: g.mods }));
       const forTone = effectMods.filter((m) => m.tones.includes("all") || m.tones.includes(tone));
@@ -279,6 +318,7 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
   }
 
   #relationshipModifier() {
+    if (this.#mode) return 0; // external modes carry no attitude ladder
     return INFLUENCE_RELATIONSHIP_MOD[this.#system.currentAttitude] ?? 0;
   }
 
@@ -508,6 +548,19 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
 
     const timeStep = INFLUENCE_TIME_STEPS.find((step) => step.value === this.#system.attempt);
     context.timeLabel = timeStep ? game.i18n.localize(timeStep.label) : "";
+
+    // External mode: hide the tone selector, attitude ladder, and attempt
+    // tracker; the page shows only the mode's own modifier groups.
+    context.externalMode = !!this.#mode;
+    context.modeLabel = this.#mode ? game.i18n.localize(this.#mode.label) : "";
+    if (this.#mode) {
+      context.isContinuing = false;
+      context.parties = resolveParties(this.#actor, this.#targetActor);
+      if (!this.#targetActor && this.#ctx.targetName) {
+        context.parties.target = { name: this.#ctx.targetName, img: this.#ctx.targetImg ?? "icons/svg/mystery-man.svg" };
+        context.hasTarget = true;
+      }
+    }
 
     return context;
   }
@@ -767,7 +820,87 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     return { rawNotes: notes };
   }
 
+  /** External-mode resolution: bands + natural clamps, no attitude shift. */
+  async #rollExternalMode() {
+    this.#recalculate();
+    const activeModifiers = this.#activeModifiers();
+    const modifier = this.#finalModifier;
+    const roll = new Roll(`2d6 + (${modifier})`);
+    await roll.evaluate();
+    const diceResult = roll.dice[0]?.total ?? roll.total - modifier;
+    const total = roll.total;
+
+    const bands = this.#mode.bands;
+    const indexFor = (value) =>
+      Math.max(
+        0,
+        bands.findIndex((b) => (b.min === undefined || value >= b.min) && (b.max === undefined || value <= b.max))
+      );
+    let idx = indexFor(total);
+    const clamps = this.#mode.naturalClamps;
+    if (clamps) {
+      if (diceResult === 2 && clamps.natural2) {
+        const cap = bands.findIndex((b) => b.key === clamps.natural2);
+        if (cap >= 0 && idx > cap) idx = cap;
+      }
+      if (diceResult === 12 && clamps.natural12) {
+        const floor = bands.findIndex((b) => b.key === clamps.natural12);
+        if (floor >= 0 && idx < floor) idx = floor;
+      }
+    }
+    const outcome = bands[idx]?.key ?? bands[0].key;
+
+    const result = {
+      modeLabel: game.i18n.localize(this.#mode.label),
+      influencerName: this.#actor?.name ?? "",
+      targetName: this.#targetActor?.name ?? this.#ctx.targetName ?? "",
+      rollFormula: `2d6 + (${modifier})`,
+      diceResult,
+      modifier,
+      total,
+      activeModifiers,
+      outcome,
+      outcomeLabel: game.i18n.localize(this.#mode.bandLabels[outcome] ?? outcome),
+      secret: !!this.#mode.secret,
+    };
+
+    const speaker = ChatMessage.getSpeaker({ actor: this.#actor });
+    const content = await foundry.applications.handlebars.renderTemplate(
+      `modules/${MODULE_ID}/templates/mode-result.hbs`,
+      result
+    );
+    ChatMessage.create({
+      user: game.user.id,
+      speaker,
+      content,
+      style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+      rolls: [roll],
+      whisper: this.#mode.secret ? ChatMessage.getWhisperRecipients("GM").map((u) => u.id) : [],
+      flags: { [MODULE_ID]: { mode: this.#modeId, outcome, rollResult: result } },
+    });
+
+    Hooks.callAll("acksInfluenceRollComplete", {
+      actor: this.#actor,
+      target: this.#targetActor,
+      mode: this.#modeId,
+      outcome,
+      natural: diceResult,
+      modifier,
+      total,
+      parts: activeModifiers,
+      context: this.#extContext,
+      hidden: !!this.#mode.secret,
+    });
+    if (this.rendered) this.render();
+  }
+
   async #rollInfluence() {
+    // External modes (hiring / loyalty) resolve on their own band tables.
+    if (this.#mode) {
+      await this.#rollExternalMode();
+      return;
+    }
+
     // A player can't see the hidden target's data to compute the roll, so hand
     // it to the GM's client (which has it) and resolve there.
     if (this.#targetHidden()) {

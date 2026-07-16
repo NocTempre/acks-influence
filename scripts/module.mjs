@@ -40,7 +40,7 @@ Hooks.once("init", () => {
   // Public API for macros / other modules. Set this FIRST so nothing below can
   // prevent it from being assigned.
   const api = {
-    apiVersion: 2,
+    apiVersion: 3, // 3: external modes — open(actor, {mode: "hiring"|"loyalty", ctx, context})
     open: openInfluenceApp,
     InfluenceApp,
     // Rules constants & helpers exported for consumer modules (acks-henchmen).
@@ -85,6 +85,7 @@ Hooks.once("init", () => {
     foundry.applications.handlebars.loadTemplates([
       `modules/${MODULE_ID}/templates/influence.hbs`,
       `modules/${MODULE_ID}/templates/influence-result.hbs`,
+      `modules/${MODULE_ID}/templates/mode-result.hbs`,
       `modules/${MODULE_ID}/templates/attitude-item.hbs`,
     ]);
   } catch (err) {

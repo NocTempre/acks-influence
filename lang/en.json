@@ -1,16 +1,12 @@
 {
   "ACKS-INFLUENCE.app.title": "Influence",
   "ACKS-INFLUENCE.button.tooltip": "Roll Influence",
-
   "ACKS-INFLUENCE.tone.diplomacy": "Diplomacy",
   "ACKS-INFLUENCE.tone.intimidation": "Intimidation",
   "ACKS-INFLUENCE.tone.seduction": "Seduction",
-
   "ACKS-INFLUENCE.section.interaction": "Interaction",
-
   "ACKS-INFLUENCE.field.currentAttitude": "Current attitude",
   "ACKS-INFLUENCE.field.tone": "Tone",
-
   "ACKS-INFLUENCE.attitude.target": "Target",
   "ACKS-INFLUENCE.attitude.attempts": "Attempts used (per tone)",
   "ACKS-INFLUENCE.attitude.notes": "Notes",
@@ -21,36 +17,28 @@
   "ACKS-INFLUENCE.field.finalModifier": "Final Modifier",
   "ACKS-INFLUENCE.field.finalModifierHint": "The total applied to the roll. Type over it to override; the difference is stored as a GM adjustment. Use Reset to defaults to clear it.",
   "ACKS-INFLUENCE.field.timeCost": "Time cost",
-
   "ACKS-INFLUENCE.tracker.relationship": "Relationship modifier",
-
   "ACKS-INFLUENCE.action.roll": "Roll 2d6",
   "ACKS-INFLUENCE.action.reset": "Reset to defaults",
   "ACKS-INFLUENCE.action.resetHint": "Re-detect Charisma, Will, alignment, proficiencies and effect-granted bonuses from the character and current target, discarding manual overrides for this tone.",
-
   "ACKS-INFLUENCE.auto.legend": "Auto-populated from character/target",
   "ACKS-INFLUENCE.auto.badge": "Auto-populated — you can override this value.",
   "ACKS-INFLUENCE.effect.badge": "Granted by a proficiency or active effect on the character.",
-
   "ACKS-INFLUENCE.party.influencer": "Influencer",
   "ACKS-INFLUENCE.party.target": "Target",
   "ACKS-INFLUENCE.party.characterRole": "Character",
   "ACKS-INFLUENCE.party.targetRole": "Target",
   "ACKS-INFLUENCE.party.dropHint": "Drag an actor or token here to set this side.",
-
   "ACKS-INFLUENCE.bribe.noGold": "{name} has no Gold to pay the bribe.",
-
   "ACKS-INFLUENCE.hidden.field": "Hidden — you can't see this target's sheet.",
   "ACKS-INFLUENCE.hidden.total": "Hidden — the total and result are whispered to the GM; you'll see only the resulting attitude.",
   "ACKS-INFLUENCE.hidden.sentToGm": "Influence roll sent to the GM to resolve against the hidden target.",
   "ACKS-INFLUENCE.hidden.noGm": "No GM is online to resolve a roll against this hidden target.",
-
   "ACKS-INFLUENCE.group.both": "Both",
   "ACKS-INFLUENCE.group.either": "Either",
   "ACKS-INFLUENCE.group.character": "Character",
   "ACKS-INFLUENCE.group.target": "Target",
   "ACKS-INFLUENCE.group.powers": "Proficiencies & Powers",
-
   "ACKS-INFLUENCE.attitude.hostile": "Hostile",
   "ACKS-INFLUENCE.attitude.unfriendly": "Unfriendly",
   "ACKS-INFLUENCE.attitude.neutral": "Neutral",
@@ -58,7 +46,6 @@
   "ACKS-INFLUENCE.attitude.friendly": "Friendly",
   "ACKS-INFLUENCE.attitude.intimidated": "Intimidated",
   "ACKS-INFLUENCE.attitude.overawed": "Overawed",
-
   "ACKS-INFLUENCE.band.diplomacy.2": "Hostile, attacks",
   "ACKS-INFLUENCE.band.diplomacy.35": "Unfriendly, may attack",
   "ACKS-INFLUENCE.band.diplomacy.68": "Neutral, uncertain",
@@ -74,23 +61,19 @@
   "ACKS-INFLUENCE.band.seduction.68": "Neutral, remains open",
   "ACKS-INFLUENCE.band.seduction.911": "Indifferent, but secretly interested",
   "ACKS-INFLUENCE.band.seduction.12": "Friendly, helpful",
-
   "ACKS-INFLUENCE.time.0": "Initial reaction (instant)",
   "ACKS-INFLUENCE.time.1": "1st attempt — 1 round (1 minute)",
   "ACKS-INFLUENCE.time.2": "2nd attempt — 1 turn (10 minutes)",
   "ACKS-INFLUENCE.time.3": "3rd attempt — 6 turns (1 hour)",
   "ACKS-INFLUENCE.time.4": "4th attempt — 8 hours (1 day)",
   "ACKS-INFLUENCE.time.5": "5th attempt — 5 days (1 week)",
-
   "ACKS-INFLUENCE.shift.hostile2": "Shift 2 attitudes toward Hostile",
   "ACKS-INFLUENCE.shift.hostile1": "Shift 1 attitude toward Hostile",
   "ACKS-INFLUENCE.shift.neutral1": "Shift 1 attitude toward Neutral",
   "ACKS-INFLUENCE.shift.top1": "Shift 1 attitude toward {label}",
   "ACKS-INFLUENCE.shift.top2": "Shift 2 attitudes toward {label}",
-
   "ACKS-INFLUENCE.summary.relationship": "Current attitude ({attitude})",
   "ACKS-INFLUENCE.summary.gmAdjustment": "GM adjustment",
-
   "ACKS-INFLUENCE.chat.reaction": "Reaction",
   "ACKS-INFLUENCE.chat.attitude": "Attitude",
   "ACKS-INFLUENCE.chat.initialAttitude": "Initial attitude",
@@ -101,17 +84,14 @@
   "ACKS-INFLUENCE.chat.bribe": "Bribe",
   "ACKS-INFLUENCE.chat.bewitchedLabel": "Mystic Aura",
   "ACKS-INFLUENCE.chat.bewitched": "total is 12+ — the subject acts bewitched while in the character's presence.",
-
   "ACKS-INFLUENCE.note.intimTemporary": "Intimidation is temporary — make a new reaction roll if the character encounters new allies of the intimidated creature, or the conditions materially change.",
   "ACKS-INFLUENCE.note.intimidated": "Intimidated: withdraws or escapes at the first opportunity (otherwise acts Indifferent); treated as Neutral for Diplomacy and Seduction; if combat begins, it starts faltering.",
   "ACKS-INFLUENCE.note.overawed": "Overawed: acts as if Friendly while intimidated; treated as Neutral for Diplomacy and Seduction; if combat begins, it starts frightened.",
   "ACKS-INFLUENCE.note.bribeCrime": "Unmodified 2 — the bribe was blatant enough that the character can be charged with the crime of bribery.",
   "ACKS-INFLUENCE.note.bribeRisk": "No Bribery proficiency: a failed bribe shifts the target's attitude 1 step toward Hostile.",
-
   "ACKS-INFLUENCE.mod.charisma": "CHA modifier",
   "ACKS-INFLUENCE.mod.mysticAura": "Mystic Aura proficiency (+1)",
   "ACKS-INFLUENCE.mod.targetWill": "Target's WIL modifier (−/＋WIL)",
-
   "ACKS-INFLUENCE.mod.diplomacy.alignment": "Alignment match / mismatch",
   "ACKS-INFLUENCE.mod.diplomacy.lair": "In own lair",
   "ACKS-INFLUENCE.mod.diplomacy.authority": "Has authority over the other (±1 or more)",
@@ -124,7 +104,6 @@
   "ACKS-INFLUENCE.mod.diplomacy.believesHarmed": "Target thinks character harmed friends (-1)",
   "ACKS-INFLUENCE.mod.diplomacy.evidenceHarmed": "Target knows character harmed friends (-2)",
   "ACKS-INFLUENCE.mod.diplomacy.personallyHarmed": "Harmed by character (-5)",
-
   "ACKS-INFLUENCE.mod.intimidation.outnumber": "Outnumbering",
   "ACKS-INFLUENCE.mod.intimidation.lair": "In own lair",
   "ACKS-INFLUENCE.mod.intimidation.weapons": "Weapons",
@@ -137,7 +116,6 @@
   "ACKS-INFLUENCE.mod.intimidation.sawFriendsHurt": "Target saw character kill/torture associates (+1)",
   "ACKS-INFLUENCE.mod.intimidation.lossOfFace": "Target fears loss of face if it submits (−1 or more)",
   "ACKS-INFLUENCE.mod.intimidation.fearsBoss": "Target fears its master more (−5 or more)",
-
   "ACKS-INFLUENCE.mod.seduction.alone": "Alone together (+1)",
   "ACKS-INFLUENCE.mod.seduction.friendsPresent": "In front of the target's friends (-1)",
   "ACKS-INFLUENCE.mod.seduction.levelGap": "3+ levels higher / lower",
@@ -149,7 +127,6 @@
   "ACKS-INFLUENCE.mod.seduction.tookAdvantageFriends": "Took advantage of target's friends in the past (-1)",
   "ACKS-INFLUENCE.mod.seduction.tookAdvantageTarget": "Took advantage of target in the past (-2)",
   "ACKS-INFLUENCE.mod.seduction.personalRisk": "Liaison would put target at personal risk (−2 or more)",
-
   "ACKS-INFLUENCE.opt.dash": "—",
   "ACKS-INFLUENCE.opt.plus1": "+1",
   "ACKS-INFLUENCE.opt.plus2": "+2",
@@ -169,5 +146,25 @@
   "ACKS-INFLUENCE.opt.magicChar": "Character has magic items (+1)",
   "ACKS-INFLUENCE.opt.magicTarget": "Target has magic items (-1)",
   "ACKS-INFLUENCE.opt.charHigher": "Character higher (+1)",
-  "ACKS-INFLUENCE.opt.charLower": "Character lower (-1)"
+  "ACKS-INFLUENCE.opt.charLower": "Character lower (-1)",
+  "ACKS-INFLUENCE.mode.hiring.title": "Reaction to Hiring Offer",
+  "ACKS-INFLUENCE.mode.hiring.terms": "Terms of the offer",
+  "ACKS-INFLUENCE.mode.hiring.signingBonus": "Signing bonus",
+  "ACKS-INFLUENCE.mode.hiring.previousRefusals": "Previous refusals by this party (−1 each)",
+  "ACKS-INFLUENCE.mode.hiring.slander": "Slander against the party here (−1 each)",
+  "ACKS-INFLUENCE.mode.hiring.refuseSlander": "Refuse and slander — the party takes −1 on further reaction rolls in this town; this NPC is off-limits",
+  "ACKS-INFLUENCE.mode.hiring.refuse": "Refuse",
+  "ACKS-INFLUENCE.mode.hiring.tryAgain": "Try again — sweeten the deal for another roll, else it counts as a refusal",
+  "ACKS-INFLUENCE.mode.hiring.accept": "Accept",
+  "ACKS-INFLUENCE.mode.hiring.acceptElan": "Accept with élan (+1 loyalty)",
+  "ACKS-INFLUENCE.mode.loyalty.title": "Hireling Loyalty",
+  "ACKS-INFLUENCE.mode.loyalty.scores": "Loyalty",
+  "ACKS-INFLUENCE.mode.loyalty.effective": "Effective loyalty score",
+  "ACKS-INFLUENCE.mode.loyalty.apparentLevel": "Apparent level difference (−1 per level)",
+  "ACKS-INFLUENCE.mode.loyalty.judgeAdj": "Judge's adjustment (±2)",
+  "ACKS-INFLUENCE.mode.loyalty.hostility": "Hostility — leaves service, becomes an enemy, never returns",
+  "ACKS-INFLUENCE.mode.loyalty.resignation": "Resignation — leaves service without ill will",
+  "ACKS-INFLUENCE.mode.loyalty.grudging": "Grudging Loyalty — loyalty score −1",
+  "ACKS-INFLUENCE.mode.loyalty.loyal": "Loyalty — continues with enthusiasm",
+  "ACKS-INFLUENCE.mode.loyalty.fanatic": "Fanatic Loyalty — loyalty score +1"
 }

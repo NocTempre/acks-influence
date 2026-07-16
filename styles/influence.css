@@ -345,3 +345,38 @@
 .acks-influence-dialog .influence-summary .influence-subtotal:disabled {
   opacity: 0.8;
 }
+
+/* External modes (hiring / loyalty pages hosted for consumer modules) */
+.acks-influence .influence-mode-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1em;
+}
+
+.acks-influence-mode-result .acks-influence-roll-line {
+  display: flex;
+  justify-content: space-between;
+}
+
+.acks-influence-mode-result .acks-influence-mod-parts {
+  margin: 0.25rem 0;
+  padding-left: 1rem;
+  font-size: 0.9em;
+}
+
+.acks-influence-mode-result .acks-influence-mod-parts li {
+  display: flex;
+  justify-content: space-between;
+}
+
+.acks-influence-mode-result .acks-influence-outcome {
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.4rem;
+  border-left: 3px solid var(--color-border-highlight, #ff6400);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.acks-influence-mode-result.secret {
+  border-style: dashed;
+}

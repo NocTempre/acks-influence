@@ -318,3 +318,86 @@ export const INFLUENCE_MODIFIERS = Object.freeze({
     },
   ],
 });
+
+/**
+ * EXTERNAL MODES — additional roller pages hosted by the influence app for
+ * consumer modules (acks-henchmen): the Reaction to Hiring Offer (RR 162)
+ * and the secret Hireling Loyalty roll (RR 166). An external mode replaces
+ * the three core tones (the tone selector, attitude ladder, and attempt
+ * tracker hide); modifiers reuse the same engine — `auto` sources support
+ * "cha", "prof:<name>", and "ctx:<name>" (a value supplied by the caller via
+ * api.open(actor, { mode, ctx })). `ctxOptions` selects get their options
+ * from the ctx bag. Bands resolve worst→best; naturalClamps pin natural
+ * 2 / 12 to a band key (never better / never worse).
+ */
+export const EXTERNAL_MODES = Object.freeze({
+  hiring: {
+    label: "ACKS-INFLUENCE.mode.hiring.title",
+    secret: false,
+    includeEffectMods: true,
+    bands: [
+      { max: 2, key: "refuseSlander" },
+      { min: 3, max: 5, key: "refuse" },
+      { min: 6, max: 8, key: "tryAgain" },
+      { min: 9, max: 11, key: "accept" },
+      { min: 12, key: "acceptElan" },
+    ],
+    bandLabels: {
+      refuseSlander: "ACKS-INFLUENCE.mode.hiring.refuseSlander",
+      refuse: "ACKS-INFLUENCE.mode.hiring.refuse",
+      tryAgain: "ACKS-INFLUENCE.mode.hiring.tryAgain",
+      accept: "ACKS-INFLUENCE.mode.hiring.accept",
+      acceptElan: "ACKS-INFLUENCE.mode.hiring.acceptElan",
+    },
+    groups: [
+      {
+        group: "ACKS-INFLUENCE.group.character",
+        mods: [
+          { key: "charisma", type: "signed", label: "ACKS-INFLUENCE.mod.charisma", auto: "cha" },
+          { key: "diplomacyProf", type: "check", label: "ACKS-INFLUENCE.mod.diplomacy.prof", value: 1, auto: "prof:diplomacy" },
+          { key: "intimidationProf", type: "check", label: "ACKS-INFLUENCE.mod.intimidation.prof", value: 1, auto: "prof:intimidation" },
+          { key: "seductionProf", type: "check", label: "ACKS-INFLUENCE.mod.seduction.prof", value: 1, auto: "prof:seduction" },
+          { key: "mysticAura", type: "check", label: "ACKS-INFLUENCE.mod.mysticAura", value: 1, auto: "prof:mysticAura" },
+        ],
+      },
+      {
+        group: "ACKS-INFLUENCE.mode.hiring.terms",
+        mods: [
+          { key: "signingBonus", type: "select", label: "ACKS-INFLUENCE.mode.hiring.signingBonus", ctxOptions: "signingBonusOptions", default: 0 },
+          { key: "previousRefusals", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mode.hiring.previousRefusals", auto: "ctx:previousRefusals" },
+          { key: "slander", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mode.hiring.slander", auto: "ctx:slanderCount" },
+        ],
+      },
+    ],
+  },
+  loyalty: {
+    label: "ACKS-INFLUENCE.mode.loyalty.title",
+    secret: true,
+    includeEffectMods: false,
+    bands: [
+      { max: 2, key: "hostility" },
+      { min: 3, max: 5, key: "resignation" },
+      { min: 6, max: 8, key: "grudging" },
+      { min: 9, max: 11, key: "loyal" },
+      { min: 12, key: "fanatic" },
+    ],
+    naturalClamps: { natural2: "resignation", natural12: "loyal" },
+    bandLabels: {
+      hostility: "ACKS-INFLUENCE.mode.loyalty.hostility",
+      resignation: "ACKS-INFLUENCE.mode.loyalty.resignation",
+      grudging: "ACKS-INFLUENCE.mode.loyalty.grudging",
+      loyal: "ACKS-INFLUENCE.mode.loyalty.loyal",
+      fanatic: "ACKS-INFLUENCE.mode.loyalty.fanatic",
+    },
+    groups: [
+      {
+        group: "ACKS-INFLUENCE.mode.loyalty.scores",
+        mods: [
+          { key: "effectiveLoyalty", type: "signed", label: "ACKS-INFLUENCE.mode.loyalty.effective", auto: "ctx:effectiveLoyalty" },
+          { key: "apparentLevelDiff", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mode.loyalty.apparentLevel" },
+          { key: "judgeAdj", type: "signed", label: "ACKS-INFLUENCE.mode.loyalty.judgeAdj" },
+        ],
+      },
+    ],
+  },
+});
