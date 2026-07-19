@@ -8,14 +8,13 @@
 > actually produces against what this module needs. No remaining phase runs
 > without an explicit go-ahead.
 >
-> **Progress (see §7 for the full table):**
-> - ✅ **Phase 0 — RR 307 rules extract done.** Combat morale is no longer
->   blocked on missing rules; see §5.
-> - ✅ **Compendium unshipped.** The 23 example items were removed from the
->   manifest, the repo, and `module.zip` — superseded by the lib/abilities/
->   content path, not unsafe (see §6.1). This is *not* phase 6: the roller's
->   dependency on effect-carrying items is unchanged and still gates on phase 4.
-> - ⬜ Phases 1–5 not started.
+> **Status 2026-07-19: phases 0-5 complete, phase 6 partial (8 of 23
+> abilities audited).** §7 has the full table. The findings in §1-§4 are
+> preserved as written so the reasoning behind each change stays legible;
+> where a finding has since been fixed, the phase table says so.
+>
+> Shipped across four repos: acks-lib 0.6.0, acks-influence 0.12.0,
+> acks-henchmen 0.10.0, acks-content (register + specs).
 
 Versions measured: influence 0.9.1, lib 0.5.0, abilities 0.5.0, content 0.15.0,
 henchmen 0.9.3, monsters 0.5.3, core system @ `d55c60a`.
@@ -319,26 +318,45 @@ exposure, and there is no reason to retract the published `v0.9.1` asset.
 Ordered by dependency, not by appeal. Phases 1 and 6 are independently
 shippable; the rest are gated.
 
-| # | Phase | Status | Gated on | Notes |
+| # | Phase | Status | Landed in | Notes |
 |---|---|:---:|---|---|
-| 0 | **RR 307 rules extract** | ✅ done | — | Extract §8. Also fixed a scope error: unit-morale modifiers do **not** apply here. |
-| — | **Stop shipping the compendium** | ✅ done | — | IP removal (§6.1). Independent of phase 6. |
-| 1 | **Fix §2.1 + §2.2** | ⬜ | — | Two small, self-contained corrections. Ship first. |
-| 2 | **Register fix in content** (§4.2) | ⬜ | — | One-line-ish; wrong data is worse than none. |
-| 3 | **Extend acks-lib** with tone / vs / alignment / bewitched / optionalRule | ⬜ | — | The shared vocabulary the rest needs. |
-| 4 | **Influence reads the abilities model** | ⬜ | 3 | Dual-source: AE path stays as the GM escape hatch. Surface `unaudited`, and leave unaudited modifiers **unchecked** by default. |
-| 5 | **Generalize the mode engine**: add `obedience` + `morale` modes; move henchmen's two dialogs onto influence | ⬜ | 1 | Obedience and the Irrefusable Offer need no new rules (both already extracted); morale is now unblocked too. |
-| 6 | **Retire the effect-carrying-item dependency** | ⬜ | 4, **and** content audit burn-down covering the same 23 abilities | Last, not first. |
+| 0 | **RR 307 rules extract** | ✅ | rules extract §8 | Also corrected a scope error: unit-morale modifiers do **not** apply here. |
+| — | **Stop shipping the compendium** | ✅ | influence 0.10.0 | Superseded, not unsafe (§6.1). |
+| 1 | **Fix §2.1 + §2.2** | ✅ | influence 0.10.x, apiVersion 5 | `exclusive` mod sets; roll families via change key. |
+| 2 | **Register fix** (§4.2) | ✅ | acks-content | Plus `reactions`, and every family's roll/score forms. |
+| 3 | **Extend acks-lib** | ✅ | **acks-lib 0.6.0**, apiVersion 2 | `scopeApplies` + `vsKinds`/`vsAlignment`/`tones`/`optionalRule`/`kickerAt`. |
+| 4 | **Influence reads the abilities model** | ✅ | influence 0.11.0, apiVersion 6 | Dual-source, one gating path. `unaudited` badged and never pre-ticked. |
+| 5 | **Morale-family pages** | ✅ | influence 0.12.0 (apiVersion 7) + henchmen 0.10.0 | `morale`, `obedience`, `irrefusableOffer`; henchmen's dialogs adopted. |
+| 6 | **Content audit burn-down** | ◑ partial | acks-content | **8 of 23** reference abilities audited. See below. |
 
-**The headline is unchanged, but sharpened.** Unshipping the compendium closed
-an IP exposure; it did **not** close the functional gap. The roller still reads
-its modifiers from ActiveEffects on whatever items a world holds, and
-acks-content still supplies none. Until phase 4 lands, a world with no
-hand-authored effect items gets a roller with an empty Proficiencies & Powers
-group — which is now the default for a fresh install.
+### Phase 6 status
 
-That makes phases 3–4 more urgent than the original ordering implied: the
-module previously shipped its own answer to that problem and no longer does.
-At 17 of 460 content entries audited — zero of 327 powers — the burn-down is
-still the long pole, and the preserved reference items are the specification
-the content specs should be written against in the meantime.
+Audited and specced (RR 107-117, read per entry): **Diplomacy, Intimidation,
+Seduction, Mystic Aura, Beast Friendship, Folkways, Bargaining, Bribery.**
+
+Still unaudited — the remaining 15:
+
+- **RR proficiencies:** Animal Husbandry, Performance.
+- **JJ class powers:** Command of Voice, Bedazzling Glamour, Glamorous Aura,
+  Ancient Pacts (+ Greater), Deathly Visage, Inhumanity 1-4. Inhumanity needs
+  paired effects of opposite sign across all three roll families.
+- **BTA caste:** Highborn, Oathsworn/Craftborn/Workborn, Houseless — each needs
+  `optionalRule: "btaCaste"` and `vsKinds: ["dwarf"]`.
+
+Until those are done they import as machine drafts: badged unverified in the
+roller and never pre-ticked, which is the correct degradation but not the
+finished state.
+
+**What changed about the headline.** The functional gap the compendium removal
+opened is closed — imported abilities now drive the roller, with their scoping
+intact and their audit state visible. What remains is not architecture but
+reading: 21 of 460 content entries are chef-audited, and zero of the 327
+powers. That burn-down is the long pole it always was, and the preserved
+reference items remain the specification to write against.
+
+One method note for whoever continues it: verify every `from` locator against
+the real page text before stamping `audited`. Doing so on this pass caught a
+live defect — Bribery's existing spec was missing its first tier, because the
+day-pay bonus is phrased differently on the page than the week and month ones
+and the old locator silently missed it. A spec that looks right and matches
+nothing is indistinguishable from an ability with no mechanics.
