@@ -440,4 +440,191 @@ export const EXTERNAL_MODES = Object.freeze({
       },
     ],
   },
+
+  /**
+   * Combat morale — the Monster Morale table (RR 307). The Judge's roll for
+   * whether monsters and NPCs fight on, at the end of a round in which a third
+   * of a group has fallen (and each casualty after), when a solitary creature
+   * has lost a third of its hp (and each wound after), or on the first round
+   * the party flees.
+   *
+   * NOT the Unit Morale table (RR 468) — that is the mass-combat scale, it has
+   * different outcomes, and it is the one a commander's morale modifier
+   * (RR 436: CHA + Command + battlefield prowess) applies to. None of that
+   * belongs here; adding it would inflate every encounter morale roll.
+   *
+   * `subject: "target"` because the creature checking morale is the target of
+   * the app, not its actor. PCs never roll this — they always choose.
+   */
+  morale: {
+    label: "ACKS-INFLUENCE.mode.morale.title",
+    secret: false,
+    family: ROLL_FAMILY.MORALE,
+    subject: "target",
+    bands: [
+      { max: 2, key: "frightenedRetreat" },
+      { min: 3, max: 5, key: "faltering" },
+      { min: 6, max: 8, key: "fightOn" },
+      { min: 9, max: 11, key: "advancePursue" },
+      { min: 12, key: "victoryOrDeath" },
+    ],
+    // RR 307 states no natural-2/12 clamp for this roll, unlike Hireling
+    // Loyalty (RR 166). Deliberately absent rather than forgotten.
+    bandLabels: {
+      frightenedRetreat: "ACKS-INFLUENCE.mode.morale.frightenedRetreat",
+      faltering: "ACKS-INFLUENCE.mode.morale.faltering",
+      fightOn: "ACKS-INFLUENCE.mode.morale.fightOn",
+      advancePursue: "ACKS-INFLUENCE.mode.morale.advancePursue",
+      victoryOrDeath: "ACKS-INFLUENCE.mode.morale.victoryOrDeath",
+    },
+    groups: [
+      {
+        group: "ACKS-INFLUENCE.mode.morale.score",
+        mods: [
+          { key: "moraleScore", type: "factor", factor: 1, label: "ACKS-INFLUENCE.mode.morale.rating", auto: "targetMorale" },
+        ],
+      },
+      {
+        // The book calls these "suggested" modifiers, and each pair is a
+        // LADDER, not a sum: two-thirds supersedes one-half, 2:1 supersedes
+        // plain outnumbering. Selects rather than checkboxes so they cannot
+        // both be ticked.
+        group: "ACKS-INFLUENCE.mode.morale.circumstances",
+        mods: [
+          {
+            key: "creatureHp",
+            type: "select",
+            label: "ACKS-INFLUENCE.mode.morale.creatureHp",
+            options: [
+              { label: "ACKS-INFLUENCE.opt.dash", value: 0 },
+              { label: "ACKS-INFLUENCE.mode.morale.lostHalf", value: -2 },
+              { label: "ACKS-INFLUENCE.mode.morale.lostTwoThirds", value: -5 },
+            ],
+          },
+          {
+            key: "outnumber",
+            type: "select",
+            label: "ACKS-INFLUENCE.mode.morale.outnumber",
+            options: [
+              { label: "ACKS-INFLUENCE.opt.dash", value: 0 },
+              { label: "ACKS-INFLUENCE.mode.morale.outnumbers", value: 2 },
+              { label: "ACKS-INFLUENCE.mode.morale.outnumbersTwoToOne", value: 5 },
+            ],
+          },
+          {
+            key: "groupLosses",
+            type: "select",
+            label: "ACKS-INFLUENCE.mode.morale.groupLosses",
+            options: [
+              { label: "ACKS-INFLUENCE.opt.dash", value: 0 },
+              { label: "ACKS-INFLUENCE.mode.morale.lostHalf", value: -2 },
+              { label: "ACKS-INFLUENCE.mode.morale.lostTwoThirds", value: -5 },
+            ],
+          },
+          { key: "cornered", type: "check", label: "ACKS-INFLUENCE.mode.morale.cornered", value: 5 },
+          { key: "judgeAdj", type: "signed", label: "ACKS-INFLUENCE.mode.morale.judgeAdj" },
+        ],
+      },
+    ],
+  },
+
+  /**
+   * Hireling Obedience (RR 167) — the secret 2d6 + morale check when a hireling
+   * is ordered into unexplored wilderness, a new dungeon, notable danger, or
+   * overtime. Three bands only, and explicitly NO auto-failure on a natural 2.
+   */
+  obedience: {
+    label: "ACKS-INFLUENCE.mode.obedience.title",
+    secret: true,
+    family: ROLL_FAMILY.MORALE,
+    subject: "target",
+    bands: [
+      { max: 2, key: "refuses" },
+      { min: 3, max: 5, key: "begrudging" },
+      { min: 6, key: "compliant" },
+    ],
+    bandLabels: {
+      refuses: "ACKS-INFLUENCE.mode.obedience.refuses",
+      begrudging: "ACKS-INFLUENCE.mode.obedience.begrudging",
+      compliant: "ACKS-INFLUENCE.mode.obedience.compliant",
+    },
+    groups: [
+      {
+        group: "ACKS-INFLUENCE.mode.obedience.score",
+        mods: [
+          // Supplied by the consumer when it tracks a fuller morale record
+          // (acks-henchmen's base + permanents); falls back to the sheet.
+          { key: "moraleScore", type: "signed", label: "ACKS-INFLUENCE.mode.obedience.morale", auto: "ctx:effectiveMorale" },
+        ],
+      },
+      {
+        group: "ACKS-INFLUENCE.mode.obedience.circumstances",
+        mods: [
+          {
+            key: "company",
+            type: "select",
+            label: "ACKS-INFLUENCE.mode.obedience.company",
+            options: [
+              { label: "ACKS-INFLUENCE.opt.dash", value: 0 },
+              { label: "ACKS-INFLUENCE.mode.obedience.withEmployer", value: 2 },
+              { label: "ACKS-INFLUENCE.mode.obedience.withAdventurer", value: 1 },
+              { label: "ACKS-INFLUENCE.mode.obedience.alone", value: -1 },
+            ],
+          },
+          { key: "customary", type: "check", label: "ACKS-INFLUENCE.mode.obedience.customary", value: 2 },
+          { key: "casualties", type: "check", label: "ACKS-INFLUENCE.mode.obedience.casualties", value: -1 },
+          {
+            key: "excessRisk",
+            type: "select",
+            label: "ACKS-INFLUENCE.mode.obedience.excessRisk",
+            options: [
+              { label: "ACKS-INFLUENCE.opt.dash", value: 0 },
+              { label: "ACKS-INFLUENCE.mode.obedience.risk1", value: -1 },
+              { label: "ACKS-INFLUENCE.mode.obedience.risk2", value: -2 },
+              { label: "ACKS-INFLUENCE.mode.obedience.risk3", value: -5 },
+            ],
+          },
+          { key: "mercenaryAdventure", type: "check", label: "ACKS-INFLUENCE.mode.obedience.mercenaryAdventure", value: -5 },
+          { key: "judgeAdj", type: "signed", label: "ACKS-INFLUENCE.mode.obedience.judgeAdj" },
+        ],
+      },
+    ],
+  },
+
+  /**
+   * The Irrefusable Offer (MM 351-352) — recruiting a monster that has been
+   * defeated and captured. A reaction-family roll made by the would-be
+   * employer, so the subject is the actor.
+   */
+  irrefusableOffer: {
+    label: "ACKS-INFLUENCE.mode.irrefusable.title",
+    secret: false,
+    family: ROLL_FAMILY.REACTION,
+    subject: "actor",
+    bands: [
+      { max: 2, key: "betrayal" },
+      { min: 3, max: 5, key: "escape" },
+      { min: 6, max: 8, key: "hesitate" },
+      { min: 9, max: 11, key: "accept" },
+      { min: 12, key: "elan" },
+    ],
+    bandLabels: {
+      betrayal: "ACKS-INFLUENCE.mode.irrefusable.betrayal",
+      escape: "ACKS-INFLUENCE.mode.irrefusable.escape",
+      hesitate: "ACKS-INFLUENCE.mode.irrefusable.hesitate",
+      accept: "ACKS-INFLUENCE.mode.irrefusable.accept",
+      elan: "ACKS-INFLUENCE.mode.irrefusable.elan",
+    },
+    groups: [
+      {
+        group: "ACKS-INFLUENCE.group.character",
+        mods: [
+          { key: "charisma", type: "signed", label: "ACKS-INFLUENCE.mod.charisma", auto: "cha" },
+          { key: "oppositeAlignment", type: "check", label: "ACKS-INFLUENCE.mode.irrefusable.oppositeAlignment", value: -2 },
+          // The monster's own morale mod works AGAINST the offer.
+          { key: "monsterMorale", type: "factor", factor: -1, label: "ACKS-INFLUENCE.mode.irrefusable.monsterMorale", auto: "targetMorale" },
+        ],
+      },
+    ],
+  },
 });

@@ -200,11 +200,15 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
    * checkboxes — default on when non-situational, off when the GM must confirm.
    */
   #buildModConfig() {
+    // WHOSE effects feed this page. Usually the actor working the roll — but a
+    // morale or obedience check is the creature's own, and reading the roller's
+    // effects there would apply an employer's powers to his hireling's nerve.
+    const subject = this.#mode?.subject === "target" ? this.#targetActor : this.#actor;
     // Two sources, one shape. Active Effects first — an item that carries one
     // has overridden whatever its abilities model says, so it claims that item.
-    const aeMods = getEffectReactionMods(this.#actor);
-    const claimed = itemsWithReactionEffects(this.#actor);
-    const effectMods = [...aeMods, ...getAbilityReactionMods(this.#actor, claimed)];
+    const aeMods = getEffectReactionMods(subject);
+    const claimed = itemsWithReactionEffects(subject);
+    const effectMods = [...aeMods, ...getAbilityReactionMods(subject, claimed)];
     const targetAlign = toLibAlignment(classifyAlignment(this.#targetActor?.system?.details?.alignment));
     const targetCats = this.#targetCategories();
     const config = {};
