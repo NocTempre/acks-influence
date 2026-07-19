@@ -12,13 +12,37 @@ export const MODULE_ID = "acks-influence";
 
 /**
  * Active Effect convention: an effect on any item/actor with a change keyed
- * `flags.acks-influence.reaction` contributes a reaction-roll modifier equal to
- * the change value. Effect flags under `flags.acks-influence` tune it:
+ * `flags.acks-influence.<family>` contributes a modifier equal to the change
+ * value to that family of 2d6 social roll. Effect flags under
+ * `flags.acks-influence` tune it:
  *   - situational {boolean} default true  → shown as a GM-toggled checkbox
  *   - tone {"all"|"diplomacy"|"intimidation"|"seduction"} default "all"
  *   - label {string} optional display label (else the effect's name)
+ *
+ * ONE effect may carry several changes, which is how a rule that spans roll
+ * families is expressed. Inhumanity is the reason this exists: RAW it modifies
+ * "reactions, loyalty, and morale", so it ships as three changes on one effect
+ * rather than three items a GM has to keep in sync. Before this, every effect
+ * was implicitly a reaction effect and the loyalty page had to include all of
+ * them or none — so a Diplomacy bonus leaked onto loyalty rolls, or Inhumanity
+ * silently didn't. Mirrors acks-lib `MODIFIER_TARGETS`.
  */
+export const ROLL_FAMILY = Object.freeze({
+  REACTION: "reaction",
+  LOYALTY: "loyalty",
+  MORALE: "morale",
+});
+
 export const REACTION_CHANGE_KEY = `flags.${MODULE_ID}.reaction`;
+export const LOYALTY_CHANGE_KEY = `flags.${MODULE_ID}.loyalty`;
+export const MORALE_CHANGE_KEY = `flags.${MODULE_ID}.morale`;
+
+/** Change key → the roll family it feeds. */
+export const CHANGE_KEY_FAMILY = Object.freeze({
+  [REACTION_CHANGE_KEY]: ROLL_FAMILY.REACTION,
+  [LOYALTY_CHANGE_KEY]: ROLL_FAMILY.LOYALTY,
+  [MORALE_CHANGE_KEY]: ROLL_FAMILY.MORALE,
+});
 
 /** The three tones a spokesperson can adopt when attempting to influence. */
 export const INFLUENCE_TONE = Object.freeze({
@@ -136,6 +160,15 @@ export const HENCHMAN_MONTHLY_WAGE = Object.freeze([
  * `auto` pre-fills a field from the actor/target. Sources resolved in
  * actor-data.mjs: "cha", "targetWill", "alignment", "prof:<name>", "bribeFee".
  * All `label`/`group`/option `label` values are localization keys.
+ *
+ * `exclusive: "<name>"` marks a set of `check` mods of which at most ONE may be
+ * active. The three tone proficiencies are mutually exclusive in RAW (each
+ * stacks with Mystic Aura and with nothing else), which on the per-tone pages
+ * falls out of the layout — each tone renders only its own. A page that
+ * flattens the tones, like the hiring offer, has no such protection, so the
+ * rule is modelled here rather than implied by which rows happen to be on
+ * screen. Enforced in computeDefaults (auto-population) and in the form
+ * handler (manual ticking).
  */
 
 const LAIR_OPTIONS = [
@@ -334,7 +367,8 @@ export const EXTERNAL_MODES = Object.freeze({
   hiring: {
     label: "ACKS-INFLUENCE.mode.hiring.title",
     secret: false,
-    includeEffectMods: true,
+    // RR 162's hiring offer IS a reaction roll, so reaction-family effects apply.
+    family: ROLL_FAMILY.REACTION,
     bands: [
       { max: 2, key: "refuseSlander" },
       { min: 3, max: 5, key: "refuse" },
@@ -354,9 +388,12 @@ export const EXTERNAL_MODES = Object.freeze({
         group: "ACKS-INFLUENCE.group.character",
         mods: [
           { key: "charisma", type: "signed", label: "ACKS-INFLUENCE.mod.charisma", auto: "cha" },
-          { key: "diplomacyProf", type: "check", label: "ACKS-INFLUENCE.mod.diplomacy.prof", value: 1, auto: "prof:diplomacy" },
-          { key: "intimidationProf", type: "check", label: "ACKS-INFLUENCE.mod.intimidation.prof", value: 1, auto: "prof:intimidation" },
-          { key: "seductionProf", type: "check", label: "ACKS-INFLUENCE.mod.seduction.prof", value: 1, auto: "prof:seduction" },
+          // The three tone proficiencies are mutually exclusive (RR): at most
+          // one applies, and it stacks only with Mystic Aura. `exclusive` keeps
+          // a character who holds all three from opening this page at +4.
+          { key: "diplomacyProf", type: "check", label: "ACKS-INFLUENCE.mod.diplomacy.prof", value: 1, auto: "prof:diplomacy", exclusive: "toneProf" },
+          { key: "intimidationProf", type: "check", label: "ACKS-INFLUENCE.mod.intimidation.prof", value: 1, auto: "prof:intimidation", exclusive: "toneProf" },
+          { key: "seductionProf", type: "check", label: "ACKS-INFLUENCE.mod.seduction.prof", value: 1, auto: "prof:seduction", exclusive: "toneProf" },
           { key: "mysticAura", type: "check", label: "ACKS-INFLUENCE.mod.mysticAura", value: 1, auto: "prof:mysticAura" },
         ],
       },
@@ -373,7 +410,10 @@ export const EXTERNAL_MODES = Object.freeze({
   loyalty: {
     label: "ACKS-INFLUENCE.mode.loyalty.title",
     secret: true,
-    includeEffectMods: false,
+    // Loyalty-family effects only. A Diplomacy bonus is not a loyalty modifier;
+    // Inhumanity is (RAW: "reactions, loyalty, and morale") and reaches this
+    // page through its own loyalty change.
+    family: ROLL_FAMILY.LOYALTY,
     bands: [
       { max: 2, key: "hostility" },
       { min: 3, max: 5, key: "resignation" },

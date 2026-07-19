@@ -6,6 +6,9 @@ import {
   INFLUENCE_ATTITUDE_LABELS,
   MODULE_ID,
   REACTION_CHANGE_KEY,
+  LOYALTY_CHANGE_KEY,
+  MORALE_CHANGE_KEY,
+  ROLL_FAMILY,
   INFLUENCE_TONE,
   INFLUENCE_BANDS,
   INFLUENCE_RELATIONSHIP_MOD,
@@ -59,7 +62,7 @@ Hooks.once("init", () => {
   // Public API for macros / other modules. Set this FIRST so nothing below can
   // prevent it from being assigned.
   const api = {
-    apiVersion: 4, // 4: racial layer — kindOf/relationFor/registerRaceRelations
+    apiVersion: 5, // 5: roll families (reaction/loyalty/morale) + exclusive mod sets
     open: openInfluenceApp,
     InfluenceApp,
     // Racial & cross-species helpers (docs/RACIAL_REACTIONS_PLAN.md):
@@ -70,6 +73,9 @@ Hooks.once("init", () => {
     // Rules constants & helpers exported for consumer modules (acks-henchmen).
     constants: {
       REACTION_CHANGE_KEY,
+      LOYALTY_CHANGE_KEY,
+      MORALE_CHANGE_KEY,
+      ROLL_FAMILY,
       INFLUENCE_TONE,
       INFLUENCE_BANDS,
       INFLUENCE_RELATIONSHIP_MOD,

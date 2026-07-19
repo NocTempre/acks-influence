@@ -3,7 +3,7 @@
  * Reads auto-populatable values from the influencing actor and the targeted
  * token's actor, using only public ACKS data paths (no system internals).
  */
-import { HENCHMAN_MONTHLY_WAGE, INFLUENCE_MODIFIERS, MODULE_ID, REACTION_CHANGE_KEY } from "./constants.mjs";
+import { CHANGE_KEY_FAMILY, HENCHMAN_MONTHLY_WAGE, INFLUENCE_MODIFIERS, MODULE_ID } from "./constants.mjs";
 import { inferRace, optionalRuleEnabled, parseKindList } from "./racial.mjs";
 
 const GENERIC_IMG = "icons/svg/mystery-man.svg";
@@ -221,6 +221,10 @@ export function computeDefaults(actor, targetActor, modConfig = INFLUENCE_MODIFI
   const defaults = {};
   for (const [tone, groups] of Object.entries(modConfig)) {
     defaults[tone] = {};
+    // Exclusive sets: the FIRST auto-detected member wins, the rest stay off.
+    // Without this a character holding all three tone proficiencies would
+    // auto-populate every one of them on a page that shows them together.
+    const claimed = new Set();
     for (const group of groups) {
       for (const mod of group.mods) {
         let value = mod.type === "check" ? false : 0;
@@ -230,6 +234,10 @@ export function computeDefaults(actor, targetActor, modConfig = INFLUENCE_MODIFI
         } else if (Object.hasOwn(mod, "default")) {
           value = mod.default;
         }
+        if (mod.exclusive && value) {
+          if (claimed.has(mod.exclusive)) value = false;
+          else claimed.add(mod.exclusive);
+        }
         defaults[tone][mod.key] = value;
       }
     }
@@ -238,9 +246,23 @@ export function computeDefaults(actor, targetActor, modConfig = INFLUENCE_MODIFI
 }
 
 /**
- * Scan an actor's active effects for reaction-roll modifiers (see
- * REACTION_CHANGE_KEY). Returns a flat list; the app groups them per tone.
- * @returns {Array<{id:string,label:string,value:number,situational:boolean,tone:string}>}
+ * The other members of `key`'s exclusive set, so ticking one can clear them.
+ * @param {Array} groups  the rendered groups for the active tone/page
+ * @param {string} key    the modifier key just switched on
+ * @returns {string[]}
+ */
+export function exclusivePeers(groups, key) {
+  const all = (groups ?? []).flatMap((g) => g.mods ?? []);
+  const set = all.find((m) => m.key === key)?.exclusive;
+  if (!set) return [];
+  return all.filter((m) => m.exclusive === set && m.key !== key).map((m) => m.key);
+}
+
+/**
+ * Scan an actor's active effects for social-roll modifiers (see
+ * CHANGE_KEY_FAMILY). Returns a flat list carrying each change's roll family;
+ * the app groups them per tone and filters them per page.
+ * @returns {Array<{id:string,label:string,value:number,family:string,situational:boolean,tones:string[]}>}
  */
 export function getEffectReactionMods(actor) {
   if (!actor) return [];
@@ -257,8 +279,12 @@ export function getEffectReactionMods(actor) {
     }
     let ci = 0;
     for (const change of effect.changes ?? []) {
+      // Which family of 2d6 social roll this change feeds (reaction/loyalty/
+      // morale). One effect may carry several — that is how Inhumanity spans
+      // all three without becoming three items to keep in sync.
+      const family = CHANGE_KEY_FAMILY[change.key];
       // Effects that stand in for a core proficiency are handled by getActsAsPowers.
-      if (change.key === REACTION_CHANGE_KEY && !f.actsAs) {
+      if (family && !f.actsAs) {
         const value = Number(change.value) || 0;
         if (value) {
           // `tone` may be "all", a single tone, an array, or a comma-separated list.
@@ -271,6 +297,7 @@ export function getEffectReactionMods(actor) {
             id: `eff:${effect.id ?? idx}:${ci}`,
             label: f.label || effect.name || "Effect",
             value,
+            family,
             situational: f.situational !== false,
             tones: tones.length ? tones : ["all"],
             bewitched: f.bewitched === true,

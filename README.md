@@ -138,6 +138,21 @@ Any proficiency, class power, item, or actor can feed the influence roller with 
 | Change Mode | Add |
 | Effect Value | the modifier, e.g. `2` or `-1` |
 
+**Roll families.** The key's last segment names which family of 2d6 social roll
+the modifier feeds:
+
+| Attribute Key | Applies to |
+|---|---|
+| `flags.acks-influence.reaction` | the three influence tones, and the Reaction to Hiring Offer |
+| `flags.acks-influence.loyalty` | Hireling Loyalty |
+| `flags.acks-influence.morale` | morale rolls |
+
+One effect may carry **several changes** — that is how a rule spanning families
+is expressed. Inhumanity modifies "reactions, loyalty, and morale" in RAW, so it
+is one effect with three changes rather than three items to keep in sync. A
+Diplomacy bonus, by contrast, is reaction-only and will not appear on a loyalty
+roll.
+
 Then, on the effect's flags (`flags.acks-influence`), you may set:
 
 - `situational` (boolean, default `true`) — `true` shows it as an unticked

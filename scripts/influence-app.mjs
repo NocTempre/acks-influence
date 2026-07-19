@@ -10,11 +10,13 @@ import {
   INFLUENCE_TONE_CHOICES,
   MODULE_ID,
   EXTERNAL_MODES,
+  ROLL_FAMILY,
 } from "./constants.mjs";
 import {
   autoKeysByTone,
   classifyAlignment,
   computeDefaults,
+  exclusivePeers,
   getActorHD,
   getActsAsPowers,
   getEffectReactionMods,
@@ -251,8 +253,13 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
           m.ctxOptions ? { ...m, options: this.#ctx[m.ctxOptions] ?? [{ label: "ACKS-INFLUENCE.opt.dash", value: 0 }] } : m
         ),
       }));
-      if (this.#mode.includeEffectMods && effectMods.length) {
-        groups.push({ group: "ACKS-INFLUENCE.group.powers", mods: effectMods.map(effectModRow) });
+      // Only effects feeding THIS page's roll family. A hiring offer is a
+      // reaction roll; a loyalty roll is not, so a Diplomacy bonus must not
+      // reach it while Inhumanity's loyalty change must.
+      const family = this.#mode.family ?? ROLL_FAMILY.REACTION;
+      const forFamily = effectMods.filter((m) => m.family === family);
+      if (forFamily.length) {
+        groups.push({ group: "ACKS-INFLUENCE.group.powers", mods: forFamily.map(effectModRow) });
       }
       if (relationGroup) groups.push(relationGroup);
       for (const tone of Object.values(INFLUENCE_TONE)) config[tone] = groups;
@@ -260,7 +267,9 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     }
     for (const tone of Object.values(INFLUENCE_TONE)) {
       const groups = INFLUENCE_MODIFIERS[tone].map((g) => ({ group: g.group, mods: g.mods }));
-      const forTone = effectMods.filter((m) => m.tones.includes("all") || m.tones.includes(tone));
+      const forTone = effectMods.filter(
+        (m) => m.family === ROLL_FAMILY.REACTION && (m.tones.includes("all") || m.tones.includes(tone)),
+      );
       if (forTone.length) {
         groups.push({ group: "ACKS-INFLUENCE.group.powers", mods: forTone.map(effectModRow) });
       }
@@ -679,6 +688,14 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     // Persist the currently-displayed tone's modifier values before switching tone.
     const previousTone = this.#system.tone;
     if (data.mod) {
+      // Ticking a member of an exclusive set clears its peers, so the mutual
+      // exclusivity that computeDefaults applies to auto-population also holds
+      // when the GM ticks a box by hand.
+      const groups = this.#modConfig[previousTone] ?? [];
+      for (const [key, value] of Object.entries(data.mod)) {
+        if (value !== true || this.#modifiers[previousTone][key] === true) continue;
+        for (const peer of exclusivePeers(groups, key)) data.mod[peer] = false;
+      }
       this.#modifiers[previousTone] = foundry.utils.mergeObject(this.#modifiers[previousTone], data.mod, {
         inplace: false,
       });
