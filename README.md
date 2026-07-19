@@ -104,12 +104,14 @@ The module ships an **Influence Macros** compendium with an *Influence Roller*
 macro that opens the tool for the selected token (or your assigned character)
 from anywhere — drag it to your hotbar.
 
-> **The example proficiency compendium was removed in 0.10.0.** It shipped 23
-> ACKS `ability` items whose descriptions reproduced book text, which does not
-> belong in a distributed module. Nothing in the roller depended on it: the
-> effect convention below is read from whatever items your world actually has,
-> and proficiency auto-detection works against the ACKS system's own compendium
-> and any imported content just as it did before.
+> **The example proficiency compendium was removed in 0.10.0.** Its 23 items
+> are superseded by the acks-lib / acks-abilities / acks-content path, which
+> imports abilities from your own books with audit provenance attached —
+> shipping placeholder copies alongside that would only give you duplicates.
+> Nothing in the roller depended on it: the effect convention below is read
+> from whatever items your world actually has, and proficiency auto-detection
+> works against the ACKS system's own compendium and any imported content just
+> as it did before.
 >
 > If you were using those items as examples, the same structures are documented
 > in [Reaction-granting effects](#reaction-granting-effects) — add the effect to

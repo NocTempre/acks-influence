@@ -6,11 +6,11 @@
  * official Foundry CLI.
  *
  * Only the macro pack is built. The former "Influence Proficiencies (Test)"
- * compendium was removed on 2026-07-19: its 23 items carried near-verbatim
- * ACKS II proficiency and class-power text in `system.description`, authored
- * inline in this file, and the compiled pack shipped inside every module.zip.
- * Licensed book text belongs in the LOCAL-ONLY rules area, never in a repo —
- * see acks-rules/acks-influence/compendium-reference/.
+ * compendium stopped shipping on 2026-07-19: acks-lib + acks-abilities +
+ * acks-content now own ability import, and a placeholder compendium alongside
+ * that path just gives GMs duplicate copies of abilities content will import
+ * properly. Reference copies of the effect structures live at
+ * acks-rules/acks-influence/compendium-reference/.
  *
  * The effect convention those items demonstrated is unchanged and still
  * documented in the README ("Reaction-granting effects"); the roller reads it

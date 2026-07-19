@@ -12,9 +12,9 @@
 > - ✅ **Phase 0 — RR 307 rules extract done.** Combat morale is no longer
 >   blocked on missing rules; see §5.
 > - ✅ **Compendium unshipped.** The 23 example items were removed from the
->   manifest, the repo, and `module.zip` — they carried book text (see §6.1).
->   This is *not* phase 6: the roller's dependency on effect-carrying items is
->   unchanged and still gates on phase 4.
+>   manifest, the repo, and `module.zip` — superseded by the lib/abilities/
+>   content path, not unsafe (see §6.1). This is *not* phase 6: the roller's
+>   dependency on effect-carrying items is unchanged and still gates on phase 4.
 > - ⬜ Phases 1–5 not started.
 
 Versions measured: influence 0.9.1, lib 0.5.0, abilities 0.5.0, content 0.15.0,
@@ -267,32 +267,38 @@ Three implementation notes the rules force:
 
 ## 6. Housekeeping
 
-### 6.1 The example compendium was shipping book text — ✅ removed
+### 6.1 The example compendium is no longer shipped — ✅ removed
 
-All 23 items in `packs/proficiencies` carried near-verbatim ACKS II proficiency
-and class-power prose in `system.description` (109–326 chars each). Two exposure
-paths, both now closed:
+The 23 items in `packs/proficiencies` are **superseded, not unsafe.** They are
+ACKS II proficiency and class-power content used in-app under the **ACKS II App
+License** §2, which covers ACKS II names, text, tables and data incorporated
+into a registered app. That use was vetted and remains legitimate. This is a
+different category from the bulk book extracts in `acks-rules/`, which are
+LOCAL-ONLY for their own reasons and stay that way.
 
-1. `tools/build-packs.mjs` authored the descriptions **inline** — the real leak,
-   sitting in committed source, not just a build artifact.
-2. The template's zip step excludes `packs/_source/**` but is otherwise
-   ship-by-default, so the **compiled** LevelDB went into every `module.zip`.
-
-**The family IP gate did not catch this.** `tools/ip-scan.mjs` flags prose
-leaves over `PROSE_CHARS = 1500`; the longest description here is 326. The
-scanner is a synced, template-owned file — the threshold question belongs to
-acks-module-template, not to a per-module edit. Worth raising there: a
-paragraph of book text is a leak at 300 chars as surely as at 1500, and pack
-sources are exactly where wholesale copying lands.
+They were removed because the module is handing this job to acks-lib +
+acks-abilities + acks-content, and a module should not ship a placeholder
+compendium that its own successor is meant to replace — it invites GMs to
+install duplicate copies of abilities that content will import properly.
 
 Removed from the manifest, the repo, and the release artifact on 2026-07-19.
-Reference copies preserved LOCAL-ONLY at
-`acks-rules/acks-influence/compendium-reference/` — the effect *structures*
-remain the specification acks-content's authored specs should reproduce (§4.3);
-the descriptions are the licensed part and must not be copied anywhere.
+The macro pack (authored JS) is unaffected. Reference copies are preserved at
+`acks-rules/acks-influence/compendium-reference/` because the effect
+*structures* remain the specification acks-content's authored specs should
+reproduce (§4.3) — kept out of the repo to avoid a second copy drifting from
+whatever content eventually produces, not because the content is restricted.
 
-**Git history purge is still outstanding** — the text remains in every prior
-commit. Scheduled for after the migration work lands.
+**Git history purge is a hygiene pass, not remediation** — deferred until a
+replacement is fully in place. Nothing about the current history is an
+exposure, and there is no reason to retract the published `v0.9.1` asset.
+
+> **Correction (2026-07-19):** an earlier revision of this section framed the
+> removal as IP remediation and flagged `tools/ip-scan.mjs` for missing a leak
+> at its 1500-char prose threshold. That was wrong on the premise. App-licensed
+> mechanical text belongs in packs; tightening the scanner to fire on
+> 300-char item descriptions would raise false positives on permitted content
+> and erode a gate that is correctly aimed at bulk extract dumps and
+> attribution boilerplate. No scanner change is warranted.
 
 ### 6.2 Other
 
