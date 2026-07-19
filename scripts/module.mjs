@@ -62,7 +62,7 @@ Hooks.once("init", () => {
   // Public API for macros / other modules. Set this FIRST so nothing below can
   // prevent it from being assigned.
   const api = {
-    apiVersion: 5, // 5: roll families (reaction/loyalty/morale) + exclusive mod sets
+    apiVersion: 6, // 6: reads the acks-abilities effect model via acks-lib scopeApplies
     open: openInfluenceApp,
     InfluenceApp,
     // Racial & cross-species helpers (docs/RACIAL_REACTIONS_PLAN.md):

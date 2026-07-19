@@ -26,6 +26,7 @@
   "ACKS-INFLUENCE.auto.legend": "Auto-populated from character/target",
   "ACKS-INFLUENCE.auto.badge": "Auto-populated — you can override this value.",
   "ACKS-INFLUENCE.effect.badge": "Granted by a proficiency or active effect on the character.",
+  "ACKS-INFLUENCE.unaudited.badge": "Unverified: these mechanics were classified automatically from the book text, not checked against the page. The sign or the conditions may be wrong — it is offered unticked, and the printed text governs.",
   "ACKS-INFLUENCE.party.influencer": "Influencer",
   "ACKS-INFLUENCE.party.target": "Target",
   "ACKS-INFLUENCE.party.characterRole": "Character",

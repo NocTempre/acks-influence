@@ -24,8 +24,16 @@ import {
   getTargetActor,
   monthlyWageForHD,
   resolveParties,
+  toLibAlignment,
 } from "./actor-data.mjs";
-import { hatredNotes, kindOf, matchesKind, parseKindList, relationFor } from "./racial.mjs";
+import { getAbilityReactionMods, itemsWithReactionEffects } from "./ability-effects.mjs";
+import { hatredNotes, kindOf, optionalRuleEnabled, parseKindList, relationFor } from "./racial.mjs";
+// Sibling-relative, the family's established pattern (acks-abilities does the
+// same): resolves under /modules/ at runtime. acks-lib is a hard requirement —
+// scopeApplies gates every effect modifier, including this module's own Active
+// Effect convention, so a fallback copy would be a second place for gating to
+// be wrong rather than a safety net.
+import { scopeApplies } from "../../acks-lib/scripts/vocab.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -192,10 +200,13 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
    * checkboxes — default on when non-situational, off when the GM must confirm.
    */
   #buildModConfig() {
-    const effectMods = getEffectReactionMods(this.#actor);
-    const targetAlign = classifyAlignment(this.#targetActor?.system?.details?.alignment);
+    // Two sources, one shape. Active Effects first — an item that carries one
+    // has overridden whatever its abilities model says, so it claims that item.
+    const aeMods = getEffectReactionMods(this.#actor);
+    const claimed = itemsWithReactionEffects(this.#actor);
+    const effectMods = [...aeMods, ...getAbilityReactionMods(this.#actor, claimed)];
+    const targetAlign = toLibAlignment(classifyAlignment(this.#targetActor?.system?.details?.alignment));
     const targetCats = this.#targetCategories();
-    const kindKnown = targetCats.size > 0;
     const config = {};
 
     // Campaign race-relations row (asymmetric registry / world setting) —
@@ -218,19 +229,30 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       : null;
 
     /**
-     * An effect-granted checkbox row. `vs` (target kind) and `alignmentOnly`
-     * gate the default check state: on a known match the box pre-checks
-     * (unless the effect is also situational); on a known mismatch or unknown
-     * typing it stays off — always GM-toggleable either way.
+     * An effect-granted checkbox row, gated by acks-lib's `scopeApplies`.
+     *
+     * Three outcomes, and the middle one is the point:
+     *   applies       pre-checked, unless the effect is also situational
+     *   fails         unchecked — a known mismatch
+     *   undetermined  unchecked, but offered — the scope could not be settled
+     *                 (untyped target, no tone yet), which is not the same as
+     *                 failing. Every row stays GM-toggleable regardless.
+     *
+     * An UNAUDITED row never pre-checks whatever the scope says. Its sign and
+     * conditions came from a generic scan, not from a chef reading the page, so
+     * it is offered rather than asserted (recipes-not-rules doctrine).
      */
-    const effectModRow = (m) => {
-      // Alignment-signed effects flip sign by the target's alignment.
-      const value = m.alignmentSign
-        ? (targetAlign === m.alignmentSign ? 1 : -1) * Math.abs(m.value)
-        : m.value;
-      let def = !m.situational;
-      if (m.vs) def = def && kindKnown && matchesKind(targetCats, m.vs);
-      if (m.alignmentOnly) def = def && targetAlign === m.alignmentOnly;
+    const effectModRow = (m, tone) => {
+      const scope = scopeApplies(m, {
+        kinds: targetCats,
+        alignment: targetAlign,
+        tone: tone ?? null,
+        optionalRules: this.#optionalRules(),
+      });
+      // In `sign` mode the stored value is the matching case, so a mismatch
+      // negates it: Deathly Visage's +2 vs Chaotic becomes -2 vs everyone else.
+      const value = scope.sign * m.value;
+      const def = scope.applies && !m.situational && !m.unaudited;
       return {
         key: m.id,
         type: "check",
@@ -238,9 +260,11 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
         value,
         default: def,
         fromEffect: true,
-        bewitched: m.bewitched === true,
+        unaudited: Boolean(m.unaudited),
+        bewitched: Number.isFinite(m.kickerAt),
+        kickerAt: m.kickerAt ?? null,
         // Target-scoped: the GM's real target data decides on hidden resolves.
-        vsGated: Boolean(m.vs || m.alignmentOnly),
+        vsGated: Boolean(m.vsKinds?.length || m.vsAlignment),
       };
     };
 
@@ -257,9 +281,11 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
       // reaction roll; a loyalty roll is not, so a Diplomacy bonus must not
       // reach it while Inhumanity's loyalty change must.
       const family = this.#mode.family ?? ROLL_FAMILY.REACTION;
-      const forFamily = effectMods.filter((m) => m.family === family);
+      // An external page has no tone, so a tone-scoped effect is undetermined
+      // here rather than excluded — it is offered, not asserted.
+      const forFamily = effectMods.filter((m) => m.family === family && m.appliesTo === "self");
       if (forFamily.length) {
-        groups.push({ group: "ACKS-INFLUENCE.group.powers", mods: forFamily.map(effectModRow) });
+        groups.push({ group: "ACKS-INFLUENCE.group.powers", mods: forFamily.map((m) => effectModRow(m, null)) });
       }
       if (relationGroup) groups.push(relationGroup);
       for (const tone of Object.values(INFLUENCE_TONE)) config[tone] = groups;
@@ -267,16 +293,31 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
     }
     for (const tone of Object.values(INFLUENCE_TONE)) {
       const groups = INFLUENCE_MODIFIERS[tone].map((g) => ({ group: g.group, mods: g.mods }));
+      // Tone scoping is applied by scopeApplies, not by filtering the list:
+      // a mismatched tone must not silently vanish from a page the GM is
+      // looking at when they may still rule that it applies.
       const forTone = effectMods.filter(
-        (m) => m.family === ROLL_FAMILY.REACTION && (m.tones.includes("all") || m.tones.includes(tone)),
+        (m) =>
+          m.family === ROLL_FAMILY.REACTION &&
+          m.appliesTo === "self" &&
+          (!m.tones.length || m.tones.includes(tone)),
       );
       if (forTone.length) {
-        groups.push({ group: "ACKS-INFLUENCE.group.powers", mods: forTone.map(effectModRow) });
+        groups.push({ group: "ACKS-INFLUENCE.group.powers", mods: forTone.map((m) => effectModRow(m, tone)) });
       }
       if (relationGroup) groups.push(relationGroup);
       config[tone] = groups;
     }
     return config;
+  }
+
+  /**
+   * World settings that gate `optionalRule` effects, in the shape
+   * `scopeApplies` expects. A rule with no registered setting is absent from
+   * the map, which lib reads as enabled.
+   */
+  #optionalRules() {
+    return { btaCaste: optionalRuleEnabled("btaCaste") };
   }
 
   /* -------------------------------------------- */
@@ -581,6 +622,9 @@ export default class InfluenceApp extends HandlebarsApplicationMixin(Application
           isNumber: mod.type === "signed" || mod.type === "factor",
           isGold,
           isEffect: Boolean(mod.fromEffect) || isProfModified || isActsAs,
+          // A machine-classified mechanic, badged so the sheet never presents a
+          // scan's guess as the book's ruling.
+          unaudited: Boolean(mod.unaudited),
           masked:
             hidden &&
             !isBribeGuess &&

@@ -22,6 +22,27 @@ export function classifyAlignment(value) {
   return ALIGNMENT.OTHER;
 }
 
+/**
+ * This module's alignment tokens → acks-lib's (`lawful`/`neutral`/`chaotic`,
+ * which is what acks-monsters and acks-content already use). Kept as a
+ * boundary translation rather than a rename: `law`/`chaos` are baked into
+ * published effect flags, and breaking those to tidy a spelling is not worth
+ * it. Unknown/"other" maps to null — an alignment nobody established cannot
+ * gate anything, and `scopeApplies` treats a null as undetermined.
+ */
+const LIB_ALIGNMENT = Object.freeze({
+  [ALIGNMENT.LAW]: "lawful",
+  law: "lawful",
+  lawful: "lawful",
+  [ALIGNMENT.CHAOS]: "chaotic",
+  chaos: "chaotic",
+  chaotic: "chaotic",
+  [ALIGNMENT.NEUTRAL]: "neutral",
+  neutral: "neutral",
+});
+
+export const toLibAlignment = (value) => LIB_ALIGNMENT[String(value ?? "").toLowerCase()] ?? null;
+
 function abilityMod(actor, key) {
   const mod = actor?.system?.scores?.[key]?.mod;
   return Number.isFinite(mod) ? mod : 0;
@@ -292,20 +313,31 @@ export function getEffectReactionMods(actor) {
           const tones = (Array.isArray(raw) ? raw : String(raw).split(","))
             .map((t) => String(t).trim().toLowerCase())
             .filter(Boolean);
+          // Translate this module's own flag vocabulary into acks-lib's, so
+          // both effect sources reach scopeApplies() in one shape and gating
+          // lives in exactly one place. `alignmentSign` and `alignmentOnly`
+          // are the same axis with different modes — lib says so explicitly.
           const vs = f.vs ? parseKindList(f.vs) : null;
+          const signed = f.alignmentSign ? String(f.alignmentSign).toLowerCase() : null;
+          const gated = f.alignmentOnly ? String(f.alignmentOnly).toLowerCase() : null;
           out.push({
             id: `eff:${effect.id ?? idx}:${ci}`,
             label: f.label || effect.name || "Effect",
             value,
             family,
+            appliesTo: "self",
             situational: f.situational !== false,
-            tones: tones.length ? tones : ["all"],
-            bewitched: f.bewitched === true,
-            alignmentSign: f.alignmentSign ? String(f.alignmentSign).toLowerCase() : null,
-            // Target-kind scoping: active only when the target matches (see kindOf).
-            vs: vs?.length ? vs : null,
-            // Alignment gating (not sign-flipping): active only vs this alignment.
-            alignmentOnly: f.alignmentOnly ? String(f.alignmentOnly).toLowerCase() : null,
+            vsKinds: vs?.length ? vs : [],
+            vsAlignment: toLibAlignment(signed ?? gated),
+            vsAlignmentMode: signed ? "sign" : "gate",
+            // "all" is the absence of a tone restriction, which lib spells as
+            // an empty list rather than a magic token.
+            tones: tones.length && !tones.includes("all") ? tones : [],
+            optionalRule: f.optionalRule ? String(f.optionalRule) : null,
+            kickerAt: f.bewitched === true ? 12 : null,
+            kickerNote: "",
+            unaudited: false,
+            source: "activeEffect",
           });
         }
       }

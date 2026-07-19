@@ -133,6 +133,15 @@
   opacity: 0.9;
   font-size: 0.85em;
 }
+/* An unverified machine draft. Amber rather than red: the mechanic is probably
+   right and is genuinely offered — it just has not been read against the page,
+   so it must not look like a settled ruling. */
+.acks-influence-dialog .influence-unaudited-badge {
+  margin-left: 0.25rem;
+  color: #c8871b;
+  opacity: 0.9;
+  font-size: 0.85em;
+}
 
 /* Modifier groups — control on the left, label fills the rest. */
 .acks-influence-dialog .influence-groups {

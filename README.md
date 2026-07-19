@@ -202,6 +202,29 @@ items (`optionalRule`).
 > or homebrew proficiency only contributes if it carries such an effect. Add the
 > effect to your own items — or to imported content — to extend the roller.
 
+### Imported abilities (acks-abilities / acks-content)
+
+The roller also reads the **structured effect model** at
+`flags["acks-abilities"].extras.effects[]`, so abilities imported from your own
+books by [acks-content](https://github.com/NocTempre/acks-content) drive it with
+no hand-authored Active Effect. A `{ type: "modifier", target: "reaction" |
+"loyalty" | "morale" }` effect becomes a modifier row, with its acks-lib scoping
+(`vsKinds`, `vsAlignment`, `tones`, `optionalRule`) honoured and level-scaling
+values resolved at the character's level.
+
+Two rules govern how the two sources interact:
+
+- **An Active Effect wins.** If an item carries both, the hand-authored effect
+  is used and the imported model is skipped for that item — a GM who added one
+  to an imported ability meant to override what the import classified. Only
+  social-roll effects claim an item; an unrelated effect on the same item
+  changes nothing.
+- **Unaudited mechanics are offered, never asserted.** Most imported abilities
+  are classified by an automatic scan rather than read against the page, so they
+  are flagged `unaudited`. Those rows appear with a ⚠ badge and are **never
+  pre-ticked**, whatever their scope says — the printed text governs until a
+  chef has signed the entry off.
+
 ## Racial & cross-species reactions
 
 See the local rules extract (`acks-rules/acks-influence/ACKS-Reactions-Reference.md`) §6 for

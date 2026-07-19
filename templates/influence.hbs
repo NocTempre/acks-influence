@@ -136,6 +136,10 @@
                 <i class="fa-solid fa-hand-sparkles influence-effect-badge"
                    data-tooltip="{{localize 'ACKS-INFLUENCE.effect.badge'}}"></i>
               {{/if}}
+              {{#if this.unaudited}}
+                <i class="fa-solid fa-triangle-exclamation influence-unaudited-badge"
+                   data-tooltip="{{localize 'ACKS-INFLUENCE.unaudited.badge'}}"></i>
+              {{/if}}
             </label>
           </div>
         {{/each}}
