@@ -1,12 +1,21 @@
 # Influence Module — Scope & Integration Audit
 
-> ⚠️ **NOT IN EFFECT — PROPOSAL / FINDINGS ONLY (2026-07-19).**
-> Nothing in this document has been implemented. It records the state of
-> `acks-influence` v0.9.1 measured against three asks: (1) own the automation
-> and UI for every 2d6 social roll — three influence stances, NPC loyalty, and
-> combat morale; (2) retire the module's own example compendium in favour of
-> acks-lib + acks-abilities; (3) audit what acks-content actually produces
-> against what this module needs. No phase runs without an explicit go-ahead.
+> ⚠️ **FINDINGS DOCUMENT — most phases NOT IN EFFECT (2026-07-19).**
+> Records the state of `acks-influence` v0.9.1 measured against three asks:
+> (1) own the automation and UI for every 2d6 social roll — three influence
+> stances, NPC loyalty, and combat morale; (2) retire the module's own example
+> compendium in favour of acks-lib + acks-abilities; (3) audit what acks-content
+> actually produces against what this module needs. No remaining phase runs
+> without an explicit go-ahead.
+>
+> **Progress (see §7 for the full table):**
+> - ✅ **Phase 0 — RR 307 rules extract done.** Combat morale is no longer
+>   blocked on missing rules; see §5.
+> - ✅ **Compendium unshipped.** The 23 example items were removed from the
+>   manifest, the repo, and `module.zip` — they carried book text (see §6.1).
+>   This is *not* phase 6: the roller's dependency on effect-carrying items is
+>   unchanged and still gates on phase 4.
+> - ⬜ Phases 1–5 not started.
 
 Versions measured: influence 0.9.1, lib 0.5.0, abilities 0.5.0, content 0.15.0,
 henchmen 0.9.3, monsters 0.5.3, core system @ `d55c60a`.
@@ -210,35 +219,83 @@ to reproduce.
 
 ---
 
-## 5. Combat morale — blocked on rules, not code
+## 5. Combat morale — ✅ unblocked (extract done 2026-07-19)
 
 Core's `rollMorale()` (`src/module/documents/actor.mjs:487`) is `2d6 +
 system.details.morale` with a flavor line: no band table, no modifier UI, no
 outcome. Compare `rollLoyalty()` immediately below it, which *does* carry a
 result table.
 
-The blocker is not implementation. It is that **RR 307's battle-morale outcome
-tables are absent from every local rules extract** — stated explicitly at
-`acks-rules/acks-henchmen/RULES.md:211`: *"Battle-morale outcome tables (RR 307)
-are outside this extract's sources and are not automated here."*
+The blocker was that RR 307's tables were absent from every local extract. They
+have now been extracted to **`acks-rules/acks-influence/ACKS-Reactions-Reference.md`
+§8** (LOCAL-ONLY, as always). What that pass established:
 
-Under the standing strict-RAW policy there is nothing to implement against, and
-inventing a band table would be exactly the class of invention the policy
-exists to prevent. **A rules-extract pass for RR 307 into
-`acks-rules/acks-influence/` is a hard prerequisite** for this part of the ask.
+**Three distinct morale subsystems, previously conflated.** This matters more
+than the table itself, because building the wrong one is the easy mistake:
 
-What *is* already available and can be assembled once the tables exist: morale
-score ranges (monster −6…+4, MM 12; character −4…+4), Command +2 (extract
-§5.3), Leadership, the employer morale-modifier stack (henchmen RULES §5), and
-the henchmen module's existing `effectiveMoraleFor()`.
+| Subsystem | Cite | Scale | Owner |
+|---|---|---|---|
+| **Monster Morale** | RR 307 | encounter / combat | **influence** — this is the ask |
+| Unit Morale | RR 468 | mass combat (Rout/Flee/Waver/Stand Firm/Rally) | acks-formation / DaW |
+| Domain Morale | JJ | campaign | out of scope |
+
+RR 436 is explicit that a commander's **morale modifier** (CHA + Command +2 +
+battlefield prowess) applies to the **Unit** table — and parenthetically that
+it does *not* affect Unit Loyalty. It must **not** be added to an RR 307 roll.
+The audit's own §5 previously listed that modifier stack as an input for combat
+morale; that was wrong, and the extract corrects it.
+
+**What RR 307 gives us:** 2d6 + morale rating (−6…+4) against a five-band table
+(Frightened Retreat / Morale Faltering / Fight On / Advance and Pursue /
+Victory or Death), seven suggested modifiers, and defined trigger conditions
+(group: 1/3 felled, then each further casualty; solitary: 1/3 HP, then each
+further wound; either: first round the party flees).
+
+Three implementation notes the rules force:
+
+- The modifier list is explicitly **"suggested"**, and its pairs are **tiers,
+  not cumulative** — 2/3 HP lost supersedes 1/2; 2:1 outnumbering supersedes
+  plain outnumbering. Summing them would be wrong.
+- **No natural-2/12 clamp** is stated (unlike Hireling Loyalty, RR 166). Do not
+  invent one.
+- The three outcome states — **frightened, faltering, cowering** — are already
+  in acks-lib's `CONDITION_KEYS`. Apply them as conditions, not bespoke flags.
+- **PCs are exempt.** Morale is Judge-side for monsters and NPCs; a roller must
+  never force a PC's action.
 
 ---
 
 ## 6. Housekeeping
 
-- **Uncommitted pack churn** in the working tree — `packs/_source` is clean, so
-  this is pure LevelDB timestamp noise. Discard per procedure:
-  `git restore packs/ && git clean -fd packs/`.
+### 6.1 The example compendium was shipping book text — ✅ removed
+
+All 23 items in `packs/proficiencies` carried near-verbatim ACKS II proficiency
+and class-power prose in `system.description` (109–326 chars each). Two exposure
+paths, both now closed:
+
+1. `tools/build-packs.mjs` authored the descriptions **inline** — the real leak,
+   sitting in committed source, not just a build artifact.
+2. The template's zip step excludes `packs/_source/**` but is otherwise
+   ship-by-default, so the **compiled** LevelDB went into every `module.zip`.
+
+**The family IP gate did not catch this.** `tools/ip-scan.mjs` flags prose
+leaves over `PROSE_CHARS = 1500`; the longest description here is 326. The
+scanner is a synced, template-owned file — the threshold question belongs to
+acks-module-template, not to a per-module edit. Worth raising there: a
+paragraph of book text is a leak at 300 chars as surely as at 1500, and pack
+sources are exactly where wholesale copying lands.
+
+Removed from the manifest, the repo, and the release artifact on 2026-07-19.
+Reference copies preserved LOCAL-ONLY at
+`acks-rules/acks-influence/compendium-reference/` — the effect *structures*
+remain the specification acks-content's authored specs should reproduce (§4.3);
+the descriptions are the licensed part and must not be copied anywhere.
+
+**Git history purge is still outstanding** — the text remains in every prior
+commit. Scheduled for after the migration work lands.
+
+### 6.2 Other
+
 - **Stale version prose in henchmen.** `integrations/influence.mjs` and
   `engine/events.mjs` say "acks-influence v1.3+" — that line was purged in the
   0.9.0 renumber. The `hostsModes()` gate itself is correct (`apiVersion >= 3`,
@@ -256,18 +313,26 @@ the henchmen module's existing `effectiveMoraleFor()`.
 Ordered by dependency, not by appeal. Phases 1 and 6 are independently
 shippable; the rest are gated.
 
-| # | Phase | Gated on | Notes |
-|---|---|---|---|
-| 0 | **RR 307 rules extract** | — | Prerequisite for any morale work. No code. |
-| 1 | **Fix §2.1 + §2.2** | — | Two small, self-contained corrections. Ship first. |
-| 2 | **Register fix in content** (§4.2) | — | One-line-ish; wrong data is worse than none. |
-| 3 | **Extend acks-lib** with tone / vs / alignment / bewitched / optionalRule | — | The shared vocabulary the rest needs. |
-| 4 | **Influence reads the abilities model** | 3 | Dual-source: AE path stays as the GM escape hatch. Surface `unaudited`, and leave unaudited modifiers **unchecked** by default. |
-| 5 | **Generalize the mode engine**: add `obedience` + `morale` modes; move henchmen's two dialogs onto influence | 0, 1 | Obedience needs no new rules; morale needs phase 0. |
-| 6 | **Retire the example compendium** | 4, **and** content audit burn-down covering its 23 items | Last, not first. |
+| # | Phase | Status | Gated on | Notes |
+|---|---|:---:|---|---|
+| 0 | **RR 307 rules extract** | ✅ done | — | Extract §8. Also fixed a scope error: unit-morale modifiers do **not** apply here. |
+| — | **Stop shipping the compendium** | ✅ done | — | IP removal (§6.1). Independent of phase 6. |
+| 1 | **Fix §2.1 + §2.2** | ⬜ | — | Two small, self-contained corrections. Ship first. |
+| 2 | **Register fix in content** (§4.2) | ⬜ | — | One-line-ish; wrong data is worse than none. |
+| 3 | **Extend acks-lib** with tone / vs / alignment / bewitched / optionalRule | ⬜ | — | The shared vocabulary the rest needs. |
+| 4 | **Influence reads the abilities model** | ⬜ | 3 | Dual-source: AE path stays as the GM escape hatch. Surface `unaudited`, and leave unaudited modifiers **unchecked** by default. |
+| 5 | **Generalize the mode engine**: add `obedience` + `morale` modes; move henchmen's two dialogs onto influence | ⬜ | 1 | Obedience and the Irrefusable Offer need no new rules (both already extracted); morale is now unblocked too. |
+| 6 | **Retire the effect-carrying-item dependency** | ⬜ | 4, **and** content audit burn-down covering the same 23 abilities | Last, not first. |
 
-**The headline:** the compendium cannot be dropped until phase 4 exists *and*
-content's audited set covers what the compendium currently proves. At 17 of 460
-entries audited — with zero of the 327 powers signed off — that burn-down is
-the long pole, and the 23 hand-built items are the specification the content
-specs should be written against in the meantime.
+**The headline is unchanged, but sharpened.** Unshipping the compendium closed
+an IP exposure; it did **not** close the functional gap. The roller still reads
+its modifiers from ActiveEffects on whatever items a world holds, and
+acks-content still supplies none. Until phase 4 lands, a world with no
+hand-authored effect items gets a roller with an empty Proficiencies & Powers
+group — which is now the default for a fresh install.
+
+That makes phases 3–4 more urgent than the original ordering implied: the
+module previously shipped its own answer to that problem and no longer does.
+At 17 of 460 content entries audited — zero of 327 powers — the burn-down is
+still the long pole, and the preserved reference items are the specification
+the content specs should be written against in the meantime.

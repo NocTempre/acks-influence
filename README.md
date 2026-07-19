@@ -98,28 +98,31 @@ Copy or symlink this folder into your Foundry data `Data/modules/` directory as
 ln -s C:/Proj/acks-influence Data/modules/acks-influence   # (or copy the folder)
 ```
 
-## Test compendium
+## Compendium
 
-The module ships an **Influence Proficiencies (Test)** Item compendium
-(`packs/proficiencies`) containing the reaction-relevant proficiencies as ACKS
-`ability` items — Diplomacy, Intimidate, Seduction, Mystic Aura, Beast
-Friendship, Animal Husbandry, Folkways, Performance, Bargaining, Bribery. Drag any
-onto a character to verify auto-detection and the situational toggles wire up
-correctly. Names match the ACKS system items, so detection behaves identically
-with the system's own compendium.
+The module ships an **Influence Macros** compendium with an *Influence Roller*
+macro that opens the tool for the selected token (or your assigned character)
+from anywhere — drag it to your hotbar.
 
-The module also ships an **Influence Macros** compendium with an *Influence
-Roller* macro that opens the tool for the selected token (or your assigned
-character) from anywhere — drag it to your hotbar.
+> **The example proficiency compendium was removed in 0.10.0.** It shipped 23
+> ACKS `ability` items whose descriptions reproduced book text, which does not
+> belong in a distributed module. Nothing in the roller depended on it: the
+> effect convention below is read from whatever items your world actually has,
+> and proficiency auto-detection works against the ACKS system's own compendium
+> and any imported content just as it did before.
+>
+> If you were using those items as examples, the same structures are documented
+> in [Reaction-granting effects](#reaction-granting-effects) — add the effect to
+> your own items to get identical behaviour.
 
-To regenerate the packs after editing `tools/build-packs.mjs`:
+To regenerate the macro pack after editing `tools/build-packs.mjs`:
 
 ```
 npm install      # dev-only: pulls classic-level
 npm run build:packs
 ```
 
-The compiled LevelDB under `packs/proficiencies/` is committed and shipped;
+The compiled LevelDB under `packs/macros/` is committed and shipped;
 `node_modules/` and `package.json` are dev-only and not loaded by Foundry.
 
 ## Reaction-granting effects
@@ -171,16 +174,16 @@ Then, on the effect's flags (`flags.acks-influence`), you may set:
   redundant and doesn't double up. E.g. Glamorous Aura, Bedazzling Glamour.
 
 The roller lists non-`actsAs` effects under a **Proficiencies & Powers** group
-(badged 🖐). The test compendium ships examples: Beast Friendship, Animal
-Husbandry, Folkways (situational, tone-scoped), plus class powers — Command of
-Voice, Bedazzling Glamour, Glamorous Aura, Ancient Pacts (±greater variant),
-Deathly Visage, the four Inhumanity tiers, and the three BTA caste items —
-demonstrating `bewitched`, `alignmentSign`, `alignmentOnly`, `vs`, `actsAs`,
-and `optionalRule`.
+(badged 🖐). Abilities that exercise each flag: Beast Friendship, Animal
+Husbandry and Folkways (situational, tone-scoped, `vs`-scoped); Command of
+Voice and Glamorous Aura (`bewitched`); Deathly Visage (`alignmentSign`);
+Ancient Pacts (`alignmentOnly` + `vs`); Bedazzling Glamour (`actsAs`);
+Inhumanity (paired `vs` changes of opposite sign on one effect); the BTA caste
+items (`optionalRule`).
 
-> Note: bonuses are read from **effects on the owned item/actor**, so a system or
-> homebrew proficiency only contributes if it carries such an effect — the
-> module's compendium copies do; add the effect to your own items to extend it.
+> Note: bonuses are read from **effects on the owned item/actor**, so a system
+> or homebrew proficiency only contributes if it carries such an effect. Add the
+> effect to your own items — or to imported content — to extend the roller.
 
 ## Racial & cross-species reactions
 
@@ -203,9 +206,10 @@ implements exactly that, plus a campaign hook:
   on all three tones **and** the hiring/loyalty pages, mirroring Inhumanity's
   reach. Modules can contribute rows at runtime via
   `api.registerRaceRelations(rows)`; setting rows win ties.
-- **BTA dwarven caste** — ships as compendium items (Highborn, Oathsworn/
-  Craftborn/Workborn, Houseless) gated by the **By This Axe: dwarven caste
-  reaction modifiers** world setting (default on; it is an optional rule).
+- **BTA dwarven caste** — caste items carrying `optionalRule: "btaCaste"` are
+  gated by the **By This Axe: dwarven caste reaction modifiers** world setting
+  (default on; it is an optional rule). Turning the setting off stops the
+  effects contributing without removing them from actors.
 - **Hard hatreds** (dwarf↔goblin, gnome↔kobold) surface as RAW chat notes —
   never a forced result.
 - API: `kindOf(actor)`, `matchesKind(categories, tokens)`,
@@ -226,15 +230,17 @@ scripts/
   influence-app.mjs             the ApplicationV2 roller
   constants.mjs                 tones, bands, time steps, modifier definitions
   actor-data.mjs                auto-population from actor/target (public paths)
+  racial.mjs                    race/kind typing + campaign relations registry
 templates/
   influence.hbs                 roller form
   influence-result.hbs          chat card
 styles/influence.css
 lang/en.json
 packs/
-  proficiencies/                compiled LevelDB test compendium (shipped)
-  _source/proficiencies/        human-readable pack source
-tools/build-packs.mjs           regenerates the compendium (dev-only)
+  macros/                       compiled LevelDB macro pack (shipped)
+  _source/macros/               human-readable pack source
+tools/build-packs.mjs           regenerates the macro pack (dev-only)
+docs/SOCIAL_ROLLS_AUDIT.md      scope & integration audit (findings)
 acks-rules/acks-influence/ACKS-Reactions-Reference.md
 ```
 

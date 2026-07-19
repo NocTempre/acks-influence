@@ -80,6 +80,12 @@ Two entry points, one store:
 
 ## D. Compendium additions (all RAW, via the effect convention)
 
+> **Superseded 2026-07-19.** These items shipped as designed, then were removed
+> in 0.10.0 — their descriptions carried book text (see
+> `SOCIAL_ROLLS_AUDIT.md` §6.1). The **effect structures** below are still the
+> canonical design; only the shipped items are gone. Reference copies are kept
+> LOCAL-ONLY at `acks-rules/acks-influence/compendium-reference/`.
+
 | Item | Changes | Notes |
 |---|---|---|
 | Inhumanity 1..4 (four items) | `−N vs human,demi-human` + `+N vs <kin>` | kin defaults to `lizardman` (Thrassian exemplar); GMs duplicate + retoken for other races. Loyalty/morale applicability noted in description. |

@@ -1,5 +1,0 @@
-2026/07/16-08:49:04.432 4534 Delete type=3 #1
-2026/07/16-08:49:04.445 1250 Level-0 table #5: started
-2026/07/16-08:49:04.448 1250 Level-0 table #5: 9824 bytes OK
-2026/07/16-08:49:04.448 1250 Delete type=0 #3
-2026/07/16-08:49:04.448 1250 Manual compaction at level-0 from '!items!acksInflAncPact2' @ 72057594037927935 : 1 .. '!items.effects!acksInflInhuman4.acksInflEfInhuB4' @ 0 : 0; will stop at (end)
