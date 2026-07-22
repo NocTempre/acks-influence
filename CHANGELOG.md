@@ -3,6 +3,14 @@
 Releases before 0.13.0 predate this file; see the git history and GitHub
 releases for earlier changes.
 
+## 0.13.1
+
+- Relationships section: more resilient Notes-tab host lookup on the character
+  sheet (two additional fallback selectors), and a warn-once console message
+  when no host exists instead of silently not rendering — stored attitudes are
+  never lost, but their absence from the sheet is now visible.
+- Manifest: socketlib requires entry now carries its `reason` (TOOLCHAIN §3).
+
 ## 0.13.0
 
 - acks-lib is now consumed through its public API (`globalThis.acksLib`)

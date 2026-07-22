@@ -187,8 +187,21 @@ function injectRelationships(app, element) {
     const root = element instanceof HTMLElement ? element : element?.[0];
     if (!root) return;
     const host =
-      root.querySelector('.tab[data-tab="notes"] .content .flexcol') ?? root.querySelector('.tab[data-tab="notes"]');
-    if (!host || host.querySelector(".acks-influence-relationships")) return;
+      root.querySelector('.tab[data-tab="notes"] .content .flexcol') ??
+      root.querySelector('.tab[data-tab="notes"] .flexcol') ??
+      root.querySelector('.tab[data-tab="notes"] .content') ??
+      root.querySelector('.tab[data-tab="notes"]');
+    if (!host) {
+      // The core sheet's Notes-tab DOM changed shape: the attitude Items are
+      // still stored on the actor, just with nowhere to render. Warn once so
+      // the loss is visible without spamming every render.
+      if (!injectRelationships.warnedNoHost) {
+        injectRelationships.warnedNoHost = true;
+        console.warn(`${MODULE_ID} | relationships: no Notes-tab host found on the character sheet; section not rendered`);
+      }
+      return;
+    }
+    if (host.querySelector(".acks-influence-relationships")) return;
 
     const items = actor.items.filter((i) => i.type === ATTITUDE_TYPE);
 
