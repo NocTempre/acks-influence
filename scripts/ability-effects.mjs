@@ -16,7 +16,6 @@
  * the sheet. acks-lib IS required, for the level-value and scope semantics.
  */
 import { CHANGE_KEY_FAMILY, ROLL_FAMILY } from "./constants.mjs";
-import { resolveLevelValue } from "../../acks-lib/scripts/vocab.mjs";
 
 const ABILITIES_FLAG = "acks-abilities";
 
@@ -43,6 +42,13 @@ function actorLevel(actor) {
  */
 export function getAbilityReactionMods(actor, skipItemIds = new Set()) {
   if (!actor?.items) return [];
+  // acks-lib's ladder authority, reached through the public global (as abilities
+  // does for the same resolveLevelValue) rather than a static deep import, so a
+  // missing or late-loading lib degrades to "no ability-sourced mods" instead of
+  // throwing at module load. acks-lib is a hard requirement, so in a correctly
+  // configured world this is always present.
+  const resolveLevelValue = globalThis.acksLib?.resolveLevelValue;
+  if (!resolveLevelValue) return [];
   const level = actorLevel(actor);
   const out = [];
 

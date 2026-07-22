@@ -61,7 +61,11 @@
       },
       {
         "id": "acks-lib",
-        "type": "module"
+        "type": "module",
+        "reason": "Effect vocabulary and level-value semantics: scopeApplies gates every social-roll modifier and resolveLevelValue resolves level ladders, both consumed through the acks-lib public API.",
+        "compatibility": {
+          "minimum": "0.8.0"
+        }
       }
     ],
     "recommends": [
