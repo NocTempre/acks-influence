@@ -58,6 +58,7 @@
       {
         "id": "socketlib",
         "type": "module",
+        "reason": "GM-routed writes: players' influence rolls persist attitude results through a GM socket handler.",
         "compatibility": {
           "minimum": "1.1.0"
         }
