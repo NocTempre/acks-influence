@@ -5,6 +5,10 @@
  */
 import { CHANGE_KEY_FAMILY, HENCHMAN_MONTHLY_WAGE, INFLUENCE_MODIFIERS, MODULE_ID } from "./constants.mjs";
 import { inferRace, optionalRuleEnabled, parseKindList } from "./racial.mjs";
+// Ability mod + level-or-HD read once from acks-lib (acks-henchmen read the same
+// schema). hitDiceOrLevel also anchors the HD parse, fixing the old "d8" → 8
+// mis-read where a die size was taken for a rating.
+import { abilityMod, hitDiceOrLevel } from "../../acks-lib/scripts/actor-read.mjs";
 
 const GENERIC_IMG = "icons/svg/mystery-man.svg";
 
@@ -43,10 +47,6 @@ const LIB_ALIGNMENT = Object.freeze({
 
 export const toLibAlignment = (value) => LIB_ALIGNMENT[String(value ?? "").toLowerCase()] ?? null;
 
-function abilityMod(actor, key) {
-  const mod = actor?.system?.scores?.[key]?.mod;
-  return Number.isFinite(mod) ? mod : 0;
-}
 
 /**
  * Diplomacy alignment modifier: +1 when the two alignments match (same L/N/C),
@@ -100,15 +100,7 @@ export function getProficiencies(actor) {
  * The actor's HD (monsters) or class level (characters), used for the bribe fee.
  * Parses monster `system.hp.hd` strings like "3d8", "1/2", "2+1".
  */
-export function getActorHD(actor) {
-  if (!actor) return 0;
-  if (actor.type === "character") return Number(actor.system?.details?.level) || 0;
-  const hd = String(actor.system?.hp?.hd ?? "").trim();
-  const frac = hd.match(/^(\d+)\s*\/\s*(\d+)/);
-  if (frac) return Number(frac[1]) / Number(frac[2]);
-  const m = hd.match(/(\d+)/);
-  return m ? Number(m[1]) : 0;
-}
+export const getActorHD = hitDiceOrLevel;
 
 /** Henchman monthly wage (gp) for a given HD/level, clamped to the table. */
 export function monthlyWageForHD(hd) {

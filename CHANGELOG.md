@@ -3,6 +3,14 @@
 Releases before 0.13.0 predate this file; see the git history and GitHub
 releases for earlier changes.
 
+## 0.13.2
+
+- **Actor reads consumed from acks-lib.** `abilityMod` and `getActorHD` now come
+  from acks-lib's shared `actor-read.mjs` (acks-henchmen read the same schema).
+  `getActorHD` gains the anchored HD parse, fixing a latent bug where a bare
+  `"d8"` was read as 8 hit dice (the die size), not 0 — a monster whose `hp.hd`
+  had no leading rating would have inflated the level/HD gap modifier.
+
 ## 0.13.1
 
 - Relationships section: more resilient Notes-tab host lookup on the character
